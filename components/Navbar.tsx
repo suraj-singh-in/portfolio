@@ -6,6 +6,7 @@ const navItems = {
     home: { label: 'home', pathname: "/" },
     experience: { label: 'experience', pathname: "/experience" },
     projects: { label: 'projects', pathname: "/projects" },
+    blogs: { label: 'blogs', pathname: "/blogs" },
     manhattanProject: { label: 'manhattan project', pathname: "/manhattan-project" },
 };
 
