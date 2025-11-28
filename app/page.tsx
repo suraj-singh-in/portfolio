@@ -1,3 +1,4 @@
+import Footer from '@/components/Footer';
 import { Github, Linkedin, Mail, MapPin } from 'lucide-react';
 
 export default function Home() {
@@ -52,6 +53,8 @@ export default function Home() {
           <MapPin size={14} className="mr-1" /> Delhi, India
         </p>
       </div>
+      <Footer />
+
     </section>
   );
 }
