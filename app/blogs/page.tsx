@@ -3,6 +3,15 @@ import Link from "next/link";
 const blogsData = {
     sections: [
         {
+            title: "Computer Science",
+            items: [
+                {
+                    title: "Web Workers vs Service Workers — When to Use What?",
+                    url: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+                },
+            ],
+        },
+        {
             title: "Philosophy",
             items: [
                 {
@@ -21,15 +30,6 @@ const blogsData = {
                 {
                     title: "400 Days by Chetan Bhagat: 5 Point Book Review",
                     url: "https://medium.com/@singh.suraj/400-days-by-chetan-bhagat-5-point-book-review-5c4a05df47f0",
-                },
-            ],
-        },
-        {
-            title: "Computer Science",
-            items: [
-                {
-                    title: "Web Workers vs Service Workers — When to Use What?",
-                    url: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
                 },
             ],
         },

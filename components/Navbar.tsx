@@ -22,7 +22,7 @@ const Navbar = () => {
                             <button
                                 key={key}
                                 onClick={() => router.push(pathname)}
-                                className={`transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1 ${currentPage === pathname
+                                className={`transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2 m-1 ${currentPage === pathname || (pathname.length > 1 && currentPage.startsWith(pathname))
                                     ? 'font-medium text-neutral-900 dark:text-neutral-100'
                                     : 'text-neutral-500 dark:text-neutral-400'
                                     }`}

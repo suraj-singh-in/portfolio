@@ -116,8 +116,8 @@ worker.onmessage = (e) => console.log(e.data);`}
 
             <hr className="my-6 border-neutral-200 dark:border-neutral-800" />
             <p className="text-sm">
-                Web Workers improve computation performance.
-                Service Workers improve application resilience.
+                Web Workers improve computation performance. <br />
+                Service Workers improve application resilience. <br />
                 Scalable systems often use both.
             </p>
 
