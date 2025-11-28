@@ -17,10 +17,10 @@ const WebWorkersVsServiceWorkers = () => (
             <meta property="og:description" content="An engineering perspective on how and when to use Web Workers and Service Workers effectively in production-ready web systems." />
             <meta property="og:type" content="article" />
             <meta property="og:site_name" content="Suraj Singh" />
-            <meta property="twitter:card" content="summary_large_image" />
+            {/* <meta property="twitter:card" content="summary_large_image" /> */}
             <meta property="twitter:title" content="Web Workers vs Service Workers — When to Use What?" />
-            <meta property="twitter:creator" content="@surajsingh" />
-            <link rel="canonical" href="https://your-domain.com/blog/web-workers-vs-service-workers" />
+            <meta property="twitter:creator" content="@__SurajSingh__" />
+            <link rel="canonical" href="https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what" />
         </Head>
 
         {/* Structured Data for SEO */}
@@ -34,8 +34,8 @@ const WebWorkersVsServiceWorkers = () => (
                     author: { "@type": "Person", name: "Suraj Singh" },
                     description:
                         "Short technical explanation of the core differences and use cases between Web Workers and Service Workers with production examples.",
-                    datePublished: "2025-02-10",
-                    mainEntityOfPage: "https://your-domain.com/blog/web-workers-vs-service-workers",
+                    datePublished: "2025-11-28",
+                    mainEntityOfPage: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
                 }),
             }}
         />
