@@ -1,3 +1,13 @@
+const manhattanProjectData = {
+    currentlyLearningData: [
+        {
+            title: "MIT OCW 18.06 Linear Algebra",
+            subtitle: "This is a basic subject on matrix theory and linear algebra. Emphasis is given to topics that will be useful in other disciplines, including systems of equations, vector spaces, determinants, eigenvalues, similarity, and positive definite matrices.",
+            url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/",
+        },
+    ],
+};
+
 const ManhattanProject = () => (
     <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">Manhattan Project</h1>
@@ -16,7 +26,28 @@ const ManhattanProject = () => (
                 It’s ambitious, it’s bold, and it will take years. <br />
                 But that’s exactly why I’m doing it.
             </p>
+
+            <div className="flex flex-col">
+                <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-medium">Currently Learning</p>
+                <ul className="list-disc pl-5 space-y-2 text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
+                    {manhattanProjectData.currentlyLearningData.map((item) => (
+                        <li key={item.title}>
+                            <a
+                                href={item.url}
+                                className="underline"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {item.title}
+                            </a>
+                            <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-small">{item.subtitle}</p>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
         </div>
+
     </section>
 );
 
