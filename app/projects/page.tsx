@@ -6,6 +6,34 @@ const ProjectsPage = () => (
 
         <div className="grid grid-cols-1 gap-6">
 
+            {/* Project 3  */}
+            <a
+                href="https://github.com/suraj-singh-in/vaultrag/"
+                target="_blank" rel="noopener noreferrer"
+                className="group block border border-neutral-200 dark:border-neutral-800 rounded-lg p-6 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all"
+            >
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="font-medium text-lg text-neutral-900 dark:text-neutral-100 flex items-center">
+                        VaultRAG
+                        <ArrowUpRight size={16} className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-500" />
+                    </h2>
+                </div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-4 leading-relaxed">
+                    Retrieval-Augmented Generation for your Obsidian vault. Chat with your notes using multi-provider AI — OpenAI, Anthropic Claude, or a fully local Ollama setup.
+                </p>
+                <div className="text-xs text-neutral-500 dark:text-neutral-500 flex flex-col gap-2">
+                    <span className="flex items-start">
+                        • Retrieval-Augmented Generation — answers grounded in your actual notes, not hallucinated.
+                    </span>
+                    <span className="flex items-start">
+                        • Multi-provider AI — OpenAI, Anthropic Claude, or Ollama (fully local, no API key needed).
+                    </span>
+                    <span className="flex items-start">
+                        • Built custom RAG pipeline with delta indexing, vector search, and streaming markdown responses.
+                    </span>
+                </div>
+            </a>
+
             {/* Project 1 */}
             <a
                 href="https://github.com/suraj-singh-in/Actor"
