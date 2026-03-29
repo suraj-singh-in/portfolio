@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { Github, Linkedin, Mail, MapPin } from 'lucide-react'
 import Footer from '@/components/Footer'
 
@@ -16,11 +16,11 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } }
 }
 
-const linkHover = {
+const linkHover: Variants = {
   hover: { x: 2, transition: { duration: 0.15, ease: "easeOut" } }
 }
 
-const iconHover = {
+const iconHover: Variants = {
   hover: { x: 1, transition: { duration: 0.15 } }
 }
 
