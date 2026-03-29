@@ -8,8 +8,10 @@ const manhattanProjectData = {
     ],
 };
 
+import PageShell from "@/components/PageShell"
+
 const ManhattanProject = () => (
-    <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <PageShell>
         <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">Manhattan Project</h1>
 
         <div className="flex flex-col gap-10">
@@ -48,7 +50,7 @@ const ManhattanProject = () => (
 
         </div>
 
-    </section>
+    </PageShell>
 );
 
 export default ManhattanProject;

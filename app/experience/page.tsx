@@ -1,5 +1,7 @@
+import PageShell from "@/components/PageShell"
+
 const ExperiencePage = () => (
-    <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <PageShell>
         <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">Experience</h1>
 
         <div className="flex flex-col gap-10">
@@ -79,7 +81,7 @@ const ExperiencePage = () => (
                 </span>
             ))}
         </div>
-    </section>
+    </PageShell>
 );
 
 export default ExperiencePage;

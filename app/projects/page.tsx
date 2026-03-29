@@ -1,7 +1,8 @@
 import { ArrowUpRight } from 'lucide-react';
+import PageShell from "@/components/PageShell"
 
 const ProjectsPage = () => (
-    <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <PageShell>
         <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">Projects</h1>
 
         <div className="grid grid-cols-1 gap-6">
@@ -80,7 +81,7 @@ const ProjectsPage = () => (
             </a>
 
         </div>
-    </section>
+    </PageShell>
 );
 
 export default ProjectsPage;

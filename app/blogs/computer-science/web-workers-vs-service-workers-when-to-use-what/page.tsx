@@ -1,8 +1,9 @@
 // app/blog/  (or wherever your route lives)
 import Head from "next/head";
+import PageShell from "@/components/PageShell"
 
 const WebWorkersVsServiceWorkers = () => (
-    <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <PageShell>
 
         {/* SEO HEAD */}
         <Head>
@@ -122,7 +123,7 @@ worker.onmessage = (e) => console.log(e.data);`}
             </p>
 
         </div>
-    </section>
+    </PageShell>
 );
 
 export default WebWorkersVsServiceWorkers;

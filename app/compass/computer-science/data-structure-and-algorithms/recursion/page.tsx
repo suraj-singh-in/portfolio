@@ -1,5 +1,6 @@
 import List from "@/components/List";
 import CodeBlock from "@/components/SyntaxHighlighter";
+import PageShell from "@/components/PageShell"
 
 const constants = {
   basicRecursion: `type fun(params) {
@@ -183,7 +184,7 @@ int calculate_nCr_recursion(int n, int r)
 
 const Recursion = () => {
   return (
-    <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <PageShell>
       <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">Recursion</h1>
       <div className="flex flex-col gap-6 text-neutral-700 dark:text-neutral-300 leading-relaxed">
         Recursion is a technique where a function calls itself to solve a problem. It breaks a big problem into smaller subproblems, until reaching a
@@ -273,7 +274,7 @@ const Recursion = () => {
       {constants.practiceQuestions.map((question, index) => (
         <CodeBlock language="cpp" value={question} key={index}/>
       ))}
-    </section>
+    </PageShell>
   );
 };
 

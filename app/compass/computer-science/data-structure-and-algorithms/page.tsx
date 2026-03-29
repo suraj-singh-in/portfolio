@@ -1,5 +1,6 @@
 import Listing from "@/components/ListingComponent";
 import Link from "next/link";
+import PageShell from "@/components/PageShell"
 
 const indexData = {
   sections: [
@@ -16,14 +17,14 @@ const indexData = {
 };
 
 const Index = () => (
-  <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+  <PageShell>
     <header className="mb-8">
       <h1 className="font-semibold text-2xl tracking-tighter text-neutral-900 dark:text-neutral-100">Data Structures and Algorithms</h1>
     </header>
     <div className="flex flex-col gap-10">
       <Listing list={indexData} />
     </div>
-  </section>
+  </PageShell>
 );
 
 export default Index;
