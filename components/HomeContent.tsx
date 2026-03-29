@@ -9,9 +9,11 @@ const container = {
   visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } }
 }
 
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
 const item = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } }
 }
 
 const linkHover = {

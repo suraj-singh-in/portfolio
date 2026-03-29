@@ -4,6 +4,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
 const navItems = {
   home: { label: "home", pathname: "/" },
   experience: { label: "experience", pathname: "/experience" },
@@ -57,7 +59,7 @@ const Navbar = () => {
                       closed: { rotate: 0, y: 0 },
                       open: { rotate: 45, y: 7 },
                     }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.22, ease: EASE }}
                   />
                   <motion.span
                     className="block h-[2px] w-5 bg-current rounded"
@@ -65,7 +67,7 @@ const Navbar = () => {
                       closed: { opacity: 1 },
                       open: { opacity: 0 },
                     }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.22, ease: EASE }}
                   />
                   <motion.span
                     className="block h-[2px] w-5 bg-current rounded origin-center"
@@ -73,7 +75,7 @@ const Navbar = () => {
                       closed: { rotate: 0, y: 0 },
                       open: { rotate: -45, y: -7 },
                     }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.22, ease: EASE }}
                   />
                 </motion.div>
               </button>
@@ -87,7 +89,7 @@ const Navbar = () => {
                   initial={{ opacity: 0, y: -6, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.2, ease: EASE }}
                   className="absolute inset-x-0 top-full mt-2 z-50 md:hidden"
                 >
                   <motion.div
