@@ -8,7 +8,24 @@ const manhattanProjectData = {
     ],
 };
 
+import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Manhattan Project",
+  description: "A decade-long personal mission to master Quantum Computing and AI — tracking courses, ideas, and progress toward building quantum-accelerated intelligence systems.",
+  alternates: { canonical: "/manhattan-project" },
+  openGraph: {
+    title: "Manhattan Project — Suraj Singh",
+    description: "A decade-long personal mission to master Quantum Computing and AI — tracking courses, ideas, and progress toward building quantum-accelerated intelligence systems.",
+    url: "/manhattan-project",
+    type: "website",
+  },
+  twitter: {
+    title: "Manhattan Project — Suraj Singh",
+    description: "A decade-long personal mission to master Quantum Computing and AI — tracking courses, ideas, and progress toward building quantum-accelerated intelligence systems.",
+  },
+}
 
 const ManhattanProject = () => (
     <PageShell>

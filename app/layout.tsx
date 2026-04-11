@@ -13,9 +13,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const BASE_URL = "https://portfolio-ivory-gamma-65.vercel.app"
+
 export const metadata: Metadata = {
-  title: "Suraj Singh",
-  description: "Software Development Engineer with 3.8 years of experience in full stack development using modern technologies such as HTML, CSS, JavaScript, React, React Native, Next.js, Node, Express, Nest.js, Docker, MongoDB, and SQL. Skilled in building high-performance web applications with Web Workers, Service Workers, and IndexedDB, and AWS for scalable deployments.",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "Suraj Singh — Software Engineer",
+    template: "%s — Suraj Singh",
+  },
+  description: "Software engineer with nearly 4 years building full-stack web and mobile applications. Currently at Fynd, shipping production systems with React, Next.js, Node.js, and React Native.",
+  openGraph: {
+    siteName: "Suraj Singh",
+    type: "website",
+    locale: "en_US",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Suraj Singh — Software Engineer" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@__SurajSingh__",
+    images: ["/opengraph-image"],
+  },
 };
 
 export default function RootLayout({
@@ -29,11 +46,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="min-h-screen bg-white text-black dark:bg-[#111010] dark:text-white font-sans selection:bg-neutral-200 dark:selection:bg-neutral-700">
-          <div className="max-w-2xl mx-auto px-6 py-12 md:px-0 md:py-20 lg:px-0">
+          <main className="max-w-2xl mx-auto px-6 py-12 md:px-0 md:py-20 lg:px-0">
 
             <Navbar />
             {children}
-          </div>
+          </main>
         </div>
       </body>
     </html>

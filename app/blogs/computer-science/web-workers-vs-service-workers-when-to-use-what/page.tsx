@@ -1,28 +1,31 @@
-// app/blog/  (or wherever your route lives)
-import Head from "next/head";
+import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Web Workers vs Service Workers — When to Use What?",
+  description: "A concise engineering guide comparing Web Workers and Service Workers — their roles, key differences, and when to reach for each in production applications.",
+  alternates: { canonical: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what" },
+  authors: [{ name: "Suraj Singh" }],
+  keywords: ["Web Workers", "Service Workers", "browser APIs", "IndexedDB", "offline-first", "React performance"],
+  openGraph: {
+    title: "Web Workers vs Service Workers — When to Use What?",
+    description: "A concise engineering guide comparing Web Workers and Service Workers — their roles, key differences, and when to reach for each in production applications.",
+    url: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+    type: "article",
+    siteName: "Suraj Singh",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Web Workers vs Service Workers — Suraj Singh" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Web Workers vs Service Workers — When to Use What?",
+    description: "A concise engineering guide comparing Web Workers and Service Workers — their roles, key differences, and when to reach for each in production applications.",
+    creator: "@__SurajSingh__",
+    images: ["/opengraph-image"],
+  },
+}
 
 const WebWorkersVsServiceWorkers = () => (
     <PageShell>
-
-        {/* SEO HEAD */}
-        <Head>
-            <title>Web Workers vs Service Workers — When to Use What?</title>
-            <meta
-                name="description"
-                content="A concise engineering guide comparing Web Workers and Service Workers — their roles, differences, and ideal usage in modern web applications."
-            />
-            <meta name="author" content="Suraj Singh" />
-            <meta name="keywords" content="Web Workers, Service Workers, Offline First, Browser APIs, IndexedDB, React Performance, Service Worker Cache" />
-            <meta property="og:title" content="Web Workers vs Service Workers — When to Use What?" />
-            <meta property="og:description" content="An engineering perspective on how and when to use Web Workers and Service Workers effectively in production-ready web systems." />
-            <meta property="og:type" content="article" />
-            <meta property="og:site_name" content="Suraj Singh" />
-            {/* <meta property="twitter:card" content="summary_large_image" /> */}
-            <meta property="twitter:title" content="Web Workers vs Service Workers — When to Use What?" />
-            <meta property="twitter:creator" content="@__SurajSingh__" />
-            <link rel="canonical" href="https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what" />
-        </Head>
 
         {/* Structured Data for SEO */}
         <script
@@ -30,13 +33,21 @@ const WebWorkersVsServiceWorkers = () => (
             dangerouslySetInnerHTML={{
                 __html: JSON.stringify({
                     "@context": "https://schema.org",
-                    "@type": "TechArticle",
+                    "@type": "Article",
                     headline: "Web Workers vs Service Workers — When to Use What?",
-                    author: { "@type": "Person", name: "Suraj Singh" },
-                    description:
-                        "Short technical explanation of the core differences and use cases between Web Workers and Service Workers with production examples.",
+                    description: "A concise engineering guide comparing Web Workers and Service Workers — their roles, key differences, and when to reach for each in production applications.",
+                    url: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
                     datePublished: "2025-11-28",
-                    mainEntityOfPage: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+                    dateModified: "2025-11-28",
+                    author: {
+                        "@type": "Person",
+                        name: "Suraj Singh",
+                        url: "https://portfolio-ivory-gamma-65.vercel.app",
+                    },
+                    mainEntityOfPage: {
+                        "@type": "WebPage",
+                        "@id": "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+                    },
                 }),
             }}
         />

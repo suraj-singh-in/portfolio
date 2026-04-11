@@ -1,6 +1,23 @@
+import type { Metadata } from "next"
 import Listing from "@/components/ListingComponent";
 import Link from "next/link";
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Data Structures & Algorithms",
+  description: "Notes on data structures and algorithms — recursion, complexity analysis, and core problem-solving patterns, written for clarity and long-term retention.",
+  alternates: { canonical: "/compass/computer-science/data-structure-and-algorithms" },
+  openGraph: {
+    title: "Data Structures & Algorithms — Suraj Singh",
+    description: "Notes on data structures and algorithms — recursion, complexity analysis, and core problem-solving patterns, written for clarity and long-term retention.",
+    url: "/compass/computer-science/data-structure-and-algorithms",
+    type: "website",
+  },
+  twitter: {
+    title: "Data Structures & Algorithms — Suraj Singh",
+    description: "Notes on data structures and algorithms — recursion, complexity analysis, and core problem-solving patterns, written for clarity and long-term retention.",
+  },
+}
 
 const indexData = {
   sections: [

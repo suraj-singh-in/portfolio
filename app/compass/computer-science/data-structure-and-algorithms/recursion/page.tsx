@@ -1,6 +1,23 @@
+import type { Metadata } from "next"
 import List from "@/components/List";
 import CodeBlock from "@/components/SyntaxHighlighter";
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Recursion",
+  description: "A deep-dive into recursion: base conditions, tail and head recursion, tree and indirect recursion, with C++ examples and classic practice problems.",
+  alternates: { canonical: "/compass/computer-science/data-structure-and-algorithms/recursion" },
+  openGraph: {
+    title: "Recursion — Suraj Singh",
+    description: "A deep-dive into recursion: base conditions, tail and head recursion, tree and indirect recursion, with C++ examples and classic practice problems.",
+    url: "/compass/computer-science/data-structure-and-algorithms/recursion",
+    type: "article",
+  },
+  twitter: {
+    title: "Recursion — Suraj Singh",
+    description: "A deep-dive into recursion: base conditions, tail and head recursion, tree and indirect recursion, with C++ examples and classic practice problems.",
+  },
+}
 
 const constants = {
   basicRecursion: `type fun(params) {

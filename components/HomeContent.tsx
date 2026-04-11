@@ -16,6 +16,36 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } }
 }
 
+// LCP-safe variant: no opacity fade so the h1 is paint-visible on first SSR render
+const itemSlide = {
+  hidden: { y: 10 },
+  visible: { y: 0, transition: { duration: 0.35, ease: EASE } }
+}
+
+const currently = [
+  { type: "listening", label: "Love Will Tear Us Apart",     detail: "Joy Division" },
+  { type: "reading",   label: "The Brothers Karamazov",      detail: "Fyodor Dostoevsky" },
+  { type: "thinking",  label: "whether karma is debt or just memory the soul carries", detail: null },
+  { type: "listening", label: "Chaand Aawara",               detail: "Shrey Gupta & Swanand Kirkire" },
+  { type: "reading",   label: "Notes from Underground",      detail: "Fyodor Dostoevsky" },
+  { type: "thinking",  label: "what the Gita means by action without the doer",        detail: null },
+  { type: "listening", label: "Beqaaboo",                    detail: "Rumii & Krameri" },
+  { type: "reading",   label: "Letters from a Stoic",        detail: "Seneca" },
+  { type: "thinking",  label: "Neti Neti — and what remains when you stop naming things", detail: null },
+  { type: "listening", label: "Jaane Kyon Log Pyar",         detail: "Udit Narayan & Alka Yagnik" },
+  { type: "reading",   label: "The Prophet",                 detail: "Kahlil Gibran" },
+  { type: "listening", label: "Nazara",                      detail: "Raf Saperra" },
+] as const
+
+const week = Math.floor(Date.now() / 604800000)
+const current = currently[week % currently.length]
+
+const prefixMap: Record<string, string> = {
+  listening: "Currently listening to",
+  reading:   "Currently reading",
+  thinking:  "Currently thinking about",
+}
+
 const linkHover: Variants = {
   hover: { x: 2, transition: { duration: 0.15, ease: "easeOut" } }
 }
@@ -28,7 +58,7 @@ export default function HomeContent() {
   return (
     <motion.section variants={container} initial="hidden" animate="visible">
 
-      <motion.div variants={item}>
+      <motion.div variants={itemSlide}>
         <h1 className="mb-8 text-2xl font-semibold tracking-tighter text-neutral-900 dark:text-neutral-100">
           Suraj Singh
         </h1>
@@ -76,6 +106,18 @@ export default function HomeContent() {
             Node.js
           </motion.span>
           .
+        </p>
+      </motion.div>
+
+      <motion.div variants={item}>
+        <p className="mb-4 text-xs text-neutral-400 dark:text-neutral-500 tracking-wide">
+          {prefixMap[current.type]} —{" "}
+          <span className="text-neutral-500 dark:text-neutral-400">
+            {current.label}
+            {current.detail && (
+              <span className="text-neutral-400 dark:text-neutral-500"> by {current.detail}</span>
+            )}
+          </span>
         </p>
       </motion.div>
 

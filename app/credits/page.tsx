@@ -1,4 +1,21 @@
+import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Credits",
+  description: "Attribution for the icons, libraries, and open-source tools used across this site.",
+  alternates: { canonical: "/credits" },
+  openGraph: {
+    title: "Credits — Suraj Singh",
+    description: "Attribution for the icons, libraries, and open-source tools used across this site.",
+    url: "/credits",
+    type: "website",
+  },
+  twitter: {
+    title: "Credits — Suraj Singh",
+    description: "Attribution for the icons, libraries, and open-source tools used across this site.",
+  },
+}
 
 const CreditsPage = () => (
     <PageShell>

@@ -1,4 +1,23 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { ArrowUpRight } from "lucide-react"
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Experience",
+  description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
+  alternates: { canonical: "/experience" },
+  openGraph: {
+    title: "Experience — Suraj Singh",
+    description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
+    url: "/experience",
+    type: "website",
+  },
+  twitter: {
+    title: "Experience — Suraj Singh",
+    description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
+  },
+}
 
 const ExperiencePage = () => (
     <PageShell>
@@ -14,10 +33,26 @@ const ExperiencePage = () => (
                 </div>
                 <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-medium">Software Developer Engineer</p>
                 <ul className="list-disc pl-5 space-y-2 text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
-                    <li>Engineered a robust Offline POS client leveraging IndexedDB, Service Workers, and web workers, achieving full offline-first capability.</li>
+                    <li>
+                        Engineered a robust Offline POS client leveraging IndexedDB, Service Workers, and web workers, achieving full offline-first capability.{" "}
+                        <Link
+                            href="/blogs/computer-science/offline-first-architecture-in-retail-pos"
+                            className="inline-flex items-center gap-0.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                        >
+                            Read more <ArrowUpRight size={13} />
+                        </Link>
+                    </li>
                     <li>Reduced average order time from 1 min to 20 seconds through optimized local data handling.</li>
                     <li>Delivered the StoreOS system for retail outlets in just 4 months.</li>
-                    <li>Designed the FSI (Fynd StoreOS Interface) to standardize inter-platform communication between Android and Web layers.</li>
+                    <li>
+                        Designed the FSI (Fynd StoreOS Interface) to standardize inter-platform communication between Android and Web layers.{" "}
+                        <Link
+                            href="/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions"
+                            className="inline-flex items-center gap-0.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                        >
+                            Read more <ArrowUpRight size={13} />
+                        </Link>
+                    </li>
                 </ul>
             </div>
 

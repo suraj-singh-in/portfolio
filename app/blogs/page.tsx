@@ -1,11 +1,36 @@
+import type { Metadata } from "next"
 import Listing, { IList } from "@/components/ListingComponent";
 import PageShell from "@/components/PageShell"
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description: "Writing on computer science, philosophy, and books — from browser APIs and service workers to Dostoevsky, with an engineering perspective throughout.",
+  alternates: { canonical: "/blogs" },
+  openGraph: {
+    title: "Blog — Suraj Singh",
+    description: "Writing on computer science, philosophy, and books — from browser APIs and service workers to Dostoevsky, with an engineering perspective throughout.",
+    url: "/blogs",
+    type: "website",
+  },
+  twitter: {
+    title: "Blog — Suraj Singh",
+    description: "Writing on computer science, philosophy, and books — from browser APIs and service workers to Dostoevsky, with an engineering perspective throughout.",
+  },
+}
 
 const blogsData: IList = {
   sections: [
     {
       title: "Computer Science",
       items: [
+        {
+          title: "Building a Cross-Frame SDK for POS Extensions",
+          url: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
+        },
+        {
+          title: "Building an Offline-First Architecture for a Retail POS",
+          url: "/blogs/computer-science/offline-first-architecture-in-retail-pos",
+        },
         {
           title: "Web Workers vs Service Workers — When to Use What?",
           url: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
