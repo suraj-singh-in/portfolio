@@ -21,7 +21,7 @@ const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Suraj Singh",
-  url: "https://portfolio-ivory-gamma-65.vercel.app",
+  url: "https://notasecondhandlife.com",
   jobTitle: "Software Development Engineer",
   worksFor: {
     "@type": "Organization",

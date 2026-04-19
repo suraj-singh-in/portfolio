@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const BASE_URL = "https://portfolio-ivory-gamma-65.vercel.app"
+const BASE_URL = "https://notasecondhandlife.com"
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

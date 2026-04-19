@@ -38,17 +38,17 @@ const FSIBlog = () => (
           "@type": "Article",
           headline: "Building a Cross-Frame SDK for POS Extensions",
           description: "How I designed FSI — a small JavaScript SDK that creates a two-way communication channel between a host POS application and independently deployed extension iframes, including a native Android WebView bridge.",
-          url: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
+          url: "https://notasecondhandlife.com/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
           datePublished: "2026-04-11",
           dateModified: "2026-04-11",
           author: {
             "@type": "Person",
             name: "Suraj Singh",
-            url: "https://portfolio-ivory-gamma-65.vercel.app",
+            url: "https://notasecondhandlife.com",
           },
           mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
+            "@id": "https://notasecondhandlife.com/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
           },
         }),
       }}

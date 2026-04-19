@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-const BASE_URL = "https://portfolio-ivory-gamma-65.vercel.app"
+const BASE_URL = "https://notasecondhandlife.com"
 
 // Static public routes — exclude /credits (non-content utility page)
 const staticRoutes: { path: string; priority: number }[] = [

@@ -38,17 +38,17 @@ const OfflineFirstPOS = () => (
           "@type": "Article",
           headline: "Building an Offline-First Architecture for a Retail POS",
           description: "A deep-dive into the layered offline system powering StoreOS — covering service workers, IndexedDB, web workers, state machines, and the engineering decisions behind a POS that never goes down.",
-          url: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/offline-first-architecture-in-retail-pos",
+          url: "https://notasecondhandlife.com/blogs/computer-science/offline-first-architecture-in-retail-pos",
           datePublished: "2026-04-11",
           dateModified: "2026-04-11",
           author: {
             "@type": "Person",
             name: "Suraj Singh",
-            url: "https://portfolio-ivory-gamma-65.vercel.app",
+            url: "https://notasecondhandlife.com",
           },
           mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/offline-first-architecture-in-retail-pos",
+            "@id": "https://notasecondhandlife.com/blogs/computer-science/offline-first-architecture-in-retail-pos",
           },
         }),
       }}

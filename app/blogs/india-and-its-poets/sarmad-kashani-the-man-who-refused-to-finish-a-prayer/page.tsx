@@ -39,17 +39,17 @@ const SarmadKashani = () => (
           "@type": "Article",
           headline: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
           description: "A Jewish merchant from Persia who gave away everything, wandered naked through Mughal Delhi, and was beheaded for refusing to complete a sentence.",
-          url: "https://portfolio-ivory-gamma-65.vercel.app/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
+          url: "https://notasecondhandlife.com/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
           datePublished: "2026-04-19",
           dateModified: "2026-04-19",
           author: {
             "@type": "Person",
             name: "Suraj Singh",
-            url: "https://portfolio-ivory-gamma-65.vercel.app",
+            url: "https://notasecondhandlife.com",
           },
           mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": "https://portfolio-ivory-gamma-65.vercel.app/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
+            "@id": "https://notasecondhandlife.com/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
           },
         }),
       }}

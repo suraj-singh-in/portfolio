@@ -36,17 +36,17 @@ const WebWorkersVsServiceWorkers = () => (
                     "@type": "Article",
                     headline: "Web Workers vs Service Workers — When to Use What?",
                     description: "A concise engineering guide comparing Web Workers and Service Workers — their roles, key differences, and when to reach for each in production applications.",
-                    url: "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+                    url: "https://notasecondhandlife.com/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
                     datePublished: "2025-11-28",
                     dateModified: "2025-11-28",
                     author: {
                         "@type": "Person",
                         name: "Suraj Singh",
-                        url: "https://portfolio-ivory-gamma-65.vercel.app",
+                        url: "https://notasecondhandlife.com",
                     },
                     mainEntityOfPage: {
                         "@type": "WebPage",
-                        "@id": "https://portfolio-ivory-gamma-65.vercel.app/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
+                        "@id": "https://notasecondhandlife.com/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
                     },
                 }),
             }}
