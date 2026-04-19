@@ -17,6 +17,10 @@ const staticRoutes: { path: string; priority: number }[] = [
 // Blog/writing posts — add new entries here as posts are published
 const blogPosts: { path: string; lastModified: string }[] = [
   {
+    path: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
+    lastModified: "2026-04-19",
+  },
+  {
     path: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
     lastModified: "2026-04-11",
   },

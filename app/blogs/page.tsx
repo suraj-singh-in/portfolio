@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
-import Listing, { IList } from "@/components/ListingComponent";
+import type { IList } from "@/components/ListingComponent"
 import PageShell from "@/components/PageShell"
+import BlogSearch from "@/components/BlogSearch"
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -38,6 +39,15 @@ const blogsData: IList = {
       ],
     },
     {
+      title: "India and its Poets",
+      items: [
+        {
+          title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
+          url: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
+        },
+      ],
+    },
+    {
       title: "Philosophy",
       items: [
         {
@@ -64,14 +74,7 @@ const blogsData: IList = {
 
 const Blogs = () => (
   <PageShell>
-    <header className="mb-8">
-      <h1 className="font-semibold text-2xl tracking-tighter text-neutral-900 dark:text-neutral-100">Blogs</h1>
-      <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-medium">By Suraj Singh</p>
-    </header>
-
-    <div className="flex flex-col gap-10">
-      <Listing list={blogsData} />
-    </div>
+    <BlogSearch list={blogsData} />
   </PageShell>
 );
 
