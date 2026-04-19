@@ -2,19 +2,19 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, type Variants } from "framer-motion"
 import { Search, X } from "lucide-react"
 import type { IList } from "@/components/ListingComponent"
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden:  { opacity: 0, y: 6 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } },
   exit:    { opacity: 0, y: -4, transition: { duration: 0.15, ease: "easeIn" } },
 }
 
-const sectionVariants = {
+const sectionVariants: Variants = {
   hidden:  { opacity: 0, y: 8 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } },
   exit:    { opacity: 0, y: -4, transition: { duration: 0.18, ease: "easeIn" } },
