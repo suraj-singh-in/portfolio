@@ -66,46 +66,40 @@ export default function HomeContent() {
 
       <motion.div variants={item}>
         <p className="mb-4 text-neutral-700 dark:text-neutral-300 leading-relaxed">
-          I'm a Software Development Engineer with nearly 4 years of experience in full-stack development.
-          I currently work at{" "}
-          <span className="font-semibold text-neutral-900 dark:text-neutral-100">
-            <a
-              href="https://fynd.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors underline"
-            >
-              Fynd
-            </a>
-          </span>
-          , where I engineer robust Offline POS clients and retail systems.
+          I&apos;m a software engineer based in Delhi. I build things that work even when the internet
+          doesn&apos;t — offline-first retail systems, RAG pipelines, developer tools.
         </p>
       </motion.div>
 
       <motion.div variants={item}>
         <p className="mb-4 text-neutral-700 dark:text-neutral-300 leading-relaxed">
-          I specialize in building high-performance web applications using modern technologies like{" "}
-          <motion.span
-            className="font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded mx-1 text-neutral-900 dark:text-neutral-100 inline-block"
-            whileHover={{ y: -1, transition: { duration: 0.15 } }}
+          I work at{" "}
+          <a
+            href="https://fynd.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
           >
-            Next.js
-          </motion.span>
-          ,{" "}
-          <motion.span
-            className="font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded mx-1 text-neutral-900 dark:text-neutral-100 inline-block"
-            whileHover={{ y: -1, transition: { duration: 0.15 } }}
+            Fynd
+          </a>
+          , where I cut average POS order time from 1 minute to 20 seconds.
+        </p>
+      </motion.div>
+
+      <motion.div variants={item}>
+        <p className="mb-4 text-neutral-700 dark:text-neutral-300 leading-relaxed">
+          By day I write code. By night I research philosophy and Indian history, and slowly,
+          painfully, write fiction — starting with{" "}
+          <a
+            href="https://medium.com/@singh.suraj/court-of-the-grim-reaper-introduction-3d4c919a89a0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
           >
-            React Native
-          </motion.span>
-          , and{" "}
-          <motion.span
-            className="font-mono text-sm bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded mx-1 text-neutral-900 dark:text-neutral-100 inline-block"
-            whileHover={{ y: -1, transition: { duration: 0.15 } }}
-          >
-            Node.js
-          </motion.span>
-          .
+            a story
+          </a>{" "}
+          about arguing your case before the Grim Reaper. I have a weakness for Sufi mystics,
+          half-finished stories, and books I&apos;ll never stop recommending.
         </p>
       </motion.div>
 
