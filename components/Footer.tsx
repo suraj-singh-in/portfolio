@@ -52,7 +52,7 @@ const Footer = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="mt-20 pt-8 border-t border-neutral-100 dark:border-neutral-800 flex justify-between text-neutral-500 dark:text-neutral-400 text-sm"
+      className="pt-8 border-t border-neutral-100 dark:border-neutral-800 flex justify-between text-neutral-500 dark:text-neutral-400 text-sm"
     >
       <span>
         ©{" "}
