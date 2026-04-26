@@ -23,6 +23,7 @@ const blogsData: IList = {
   sections: [
     {
       title: "Computer Science",
+      categoryUrl: "/blogs/computer-science",
       items: [
         {
           title: "Building a Cross-Frame SDK for POS Extensions",
@@ -40,6 +41,7 @@ const blogsData: IList = {
     },
     {
       title: "Indian History",
+      categoryUrl: "/blogs/indian-history",
       items: [
         {
           title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
@@ -49,6 +51,7 @@ const blogsData: IList = {
     },
     {
       title: "India and its Poets",
+      categoryUrl: "/blogs/india-and-its-poets",
       items: [
         {
           title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",

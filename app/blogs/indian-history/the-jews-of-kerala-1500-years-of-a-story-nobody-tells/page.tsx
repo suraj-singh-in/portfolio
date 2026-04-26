@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import PageShell from "@/components/PageShell"
 
 export const metadata: Metadata = {
@@ -56,9 +57,12 @@ const JewsOfKerala = () => (
     />
 
     {/* Series label */}
-    <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500 mb-4">
+    <Link
+      href="/blogs/indian-history"
+      className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors mb-4 inline-block"
+    >
       India and its History · Episode 001
-    </p>
+    </Link>
 
     <h1 className="font-semibold text-2xl mb-2 tracking-tighter text-neutral-900 dark:text-neutral-100">
       The Jews of Kerala — 1,500 Years of a Story Nobody Tells
@@ -232,7 +236,10 @@ const JewsOfKerala = () => (
 
       <hr className="border-neutral-100 dark:border-neutral-800" />
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-        Part of the series — <em>India and its History</em>
+        Part of the series —{" "}
+        <Link href="/blogs/indian-history" className="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">
+          <em>India and its History</em>
+        </Link>
       </p>
 
     </div>

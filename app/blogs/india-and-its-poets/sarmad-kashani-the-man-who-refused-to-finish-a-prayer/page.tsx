@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
+import Link from "next/link"
 import PageShell from "@/components/PageShell"
 
 export const metadata: Metadata = {
@@ -56,9 +57,12 @@ const SarmadKashani = () => (
     />
 
     {/* Series label */}
-    <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500 mb-4">
+    <Link
+      href="/blogs/india-and-its-poets"
+      className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors mb-4 inline-block"
+    >
       India and its Poets · Episode 001
-    </p>
+    </Link>
 
     <h1 className="font-semibold text-2xl mb-2 tracking-tighter text-neutral-900 dark:text-neutral-100">
       Sarmad Kashani — The Man Who Refused to Finish a Prayer
@@ -257,7 +261,10 @@ const SarmadKashani = () => (
 
       <hr className="border-neutral-100 dark:border-neutral-800" />
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
-        Part of the series — <em>India and its Poets</em>
+        Part of the series —{" "}
+        <Link href="/blogs/india-and-its-poets" className="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">
+          <em>India and its Poets</em>
+        </Link>
       </p>
 
     </div>

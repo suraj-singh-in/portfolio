@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export interface IList {
-  sections: { title: string; items: { title: string; url: string }[] }[];
+  sections: { title: string; categoryUrl?: string; items: { title: string; url: string }[] }[];
 }
 export interface ListingComponentProps {
   list: IList;

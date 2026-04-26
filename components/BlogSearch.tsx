@@ -185,7 +185,13 @@ export default function BlogSearch({ list }: { list: IList }) {
               >
                 <div className="flex justify-between items-baseline mb-2">
                   <h2 className="font-medium text-lg text-neutral-900 dark:text-neutral-100">
-                    {section.title}
+                    {section.categoryUrl ? (
+                      <Link href={section.categoryUrl} className="hover:underline">
+                        {section.title}
+                      </Link>
+                    ) : (
+                      section.title
+                    )}
                   </h2>
                 </div>
 
