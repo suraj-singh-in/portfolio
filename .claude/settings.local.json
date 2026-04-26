@@ -16,7 +16,8 @@
       "WebFetch(domain:x.com)",
       "Bash(ls \"G:/My Drive/obsidian/5 - Notes/Indian History/Places & States\")",
       "Bash(cat \"G:/My Drive/obsidian/5 - Notes/Indian History/Books/The Ivory Throne — Manu S. Pillai \\(2015\\).md\")",
-      "Bash(cat \"G:/My Drive/obsidian/5 - Notes/Indian History/Places & States/Kerala.md\")"
+      "Bash(cat \"G:/My Drive/obsidian/5 - Notes/Indian History/Places & States/Kerala.md\")",
+      "WebSearch"
     ]
   }
 }

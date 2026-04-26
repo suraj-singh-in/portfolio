@@ -16,6 +16,13 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    episode: "Episode 002",
+    title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
+    description: "A painter from Kerala who combined European oil technique with Hindu mythology and accidentally defined how an entire civilization visualizes its own gods.",
+    url: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
+    date: "April 2026",
+  },
+  {
     episode: "Episode 001",
     title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
     description: "In 70 AD, Jews fleeing the destruction of the Second Temple found safety on the coast of Kerala. They stayed for 1,500 years — until the Portuguese arrived.",

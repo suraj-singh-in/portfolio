@@ -44,6 +44,10 @@ const blogsData: IList = {
       categoryUrl: "/blogs/indian-history",
       items: [
         {
+          title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
+          url: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
+        },
+        {
           title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
           url: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
         },

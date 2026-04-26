@@ -17,6 +17,10 @@ const staticRoutes: { path: string; priority: number }[] = [
 // Blog/writing posts — add new entries here as posts are published
 const blogPosts: { path: string; lastModified: string }[] = [
   {
+    path: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
+    lastModified: "2026-04-26",
+  },
+  {
     path: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
     lastModified: "2026-04-26",
   },
