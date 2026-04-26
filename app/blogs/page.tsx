@@ -39,6 +39,15 @@ const blogsData: IList = {
       ],
     },
     {
+      title: "Indian History",
+      items: [
+        {
+          title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
+          url: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
+        },
+      ],
+    },
+    {
       title: "India and its Poets",
       items: [
         {

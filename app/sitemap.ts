@@ -17,6 +17,10 @@ const staticRoutes: { path: string; priority: number }[] = [
 // Blog/writing posts — add new entries here as posts are published
 const blogPosts: { path: string; lastModified: string }[] = [
   {
+    path: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
+    lastModified: "2026-04-26",
+  },
+  {
     path: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
     lastModified: "2026-04-19",
   },
