@@ -59,9 +59,12 @@ export default function HomeContent() {
     <motion.section variants={container} initial="hidden" animate="visible">
 
       <motion.div variants={itemSlide}>
-        <h1 className="mb-8 text-2xl font-semibold tracking-tighter text-neutral-900 dark:text-neutral-100">
+        <h1 className="mb-1 text-2xl font-semibold tracking-tighter text-neutral-900 dark:text-neutral-100">
           Suraj Singh
         </h1>
+        <p className="mb-8 text-sm text-neutral-400 dark:text-neutral-500 tracking-wide">
+          Software Engineer · Delhi
+        </p>
       </motion.div>
 
       <motion.div variants={item}>

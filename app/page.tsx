@@ -3,17 +3,17 @@ import HomeContent from '@/components/HomeContent'
 
 export const metadata: Metadata = {
   title: "Suraj Singh — Software Engineer",
-  description: "Software engineer with nearly 4 years of full-stack experience. Currently at Fynd building offline-first retail systems with React, Next.js, and Node.js.",
+  description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Suraj Singh — Software Engineer",
-    description: "Software engineer with nearly 4 years of full-stack experience. Currently at Fynd building offline-first retail systems with React, Next.js, and Node.js.",
+    description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
     url: "/",
     type: "website",
   },
   twitter: {
     title: "Suraj Singh — Software Engineer",
-    description: "Software engineer with nearly 4 years of full-stack experience. Currently at Fynd building offline-first retail systems with React, Next.js, and Node.js.",
+    description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
   },
 }
 
@@ -34,12 +34,29 @@ const personJsonLd = {
   ],
 }
 
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Not a Second Hand Life",
+  alternateName: "notasecondhandlife.com",
+  url: "https://notasecondhandlife.com",
+  author: {
+    "@type": "Person",
+    name: "Suraj Singh",
+  },
+  description: "Not a second hand life — writing on Indian history, philosophy, and software engineering by Suraj Singh.",
+}
+
 export default function Home() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
       <HomeContent />
     </>

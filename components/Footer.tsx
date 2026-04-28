@@ -63,7 +63,7 @@ const Footer = () => {
         >
           {display}
         </span>
-        {" "}Suraj Singh
+        {" "}Suraj Singh · Not a Second Hand Life
       </span>
       <div className="flex space-x-4">
         <motion.span className="relative" whileHover="hover">
