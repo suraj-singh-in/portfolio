@@ -162,7 +162,7 @@ export default function HomeContent() {
       </motion.div>
 
       <motion.div variants={item} className="prose prose-neutral dark:prose-invert">
-        <p className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center pb-2">
           <motion.span
             className="mr-1 flex items-center"
             animate={{ opacity: [1, 0.4, 1] }}

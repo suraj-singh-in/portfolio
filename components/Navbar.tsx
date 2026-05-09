@@ -11,7 +11,7 @@ const navItems = {
   experience: { label: "experience", pathname: "/experience" },
   projects: { label: "projects", pathname: "/projects" },
   blogs: { label: "blogs", pathname: "/blogs" },
-  compass: { label: "compass", pathname: "/compass" },
+  about: { label: "about", pathname: "/about" },
   manhattanProject: { label: "manhattan project", pathname: "/manhattan-project" },
 };
 

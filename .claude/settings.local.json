@@ -17,7 +17,9 @@
       "Bash(ls \"G:/My Drive/obsidian/5 - Notes/Indian History/Places & States\")",
       "Bash(cat \"G:/My Drive/obsidian/5 - Notes/Indian History/Books/The Ivory Throne — Manu S. Pillai \\(2015\\).md\")",
       "Bash(cat \"G:/My Drive/obsidian/5 - Notes/Indian History/Places & States/Kerala.md\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(powershell -Command \"\nAdd-Type -AssemblyName System.Drawing\n\\\\$ico = New-Object System.Drawing.Icon\\('C:\\\\Users\\\\Suraj Singh\\\\Desktop\\\\preparation\\\\portfolio\\\\app\\\\favicon.ico', 32, 32\\)\n\\\\$bmp = \\\\$ico.ToBitmap\\(\\)\n\\\\$resized = New-Object System.Drawing.Bitmap\\(\\\\$bmp, 192, 192\\)\n\\\\$resized.Save\\('C:\\\\Users\\\\Suraj Singh\\\\Desktop\\\\preparation\\\\portfolio\\\\app\\\\icon.png', [System.Drawing.Imaging.ImageFormat]::Png\\)\n\\\\$ico.Dispose\\(\\); \\\\$bmp.Dispose\\(\\); \\\\$resized.Dispose\\(\\)\nWrite-Host 'Done'\n\")",
+      "Bash(npm run:*)"
     ]
   }
 }

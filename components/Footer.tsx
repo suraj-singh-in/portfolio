@@ -67,7 +67,19 @@ const Footer = () => {
       </span>
       <div className="flex space-x-4">
         <motion.span className="relative" whileHover="hover">
-          <Link href="credits">credits</Link>
+          <Link href="/compass">compass</Link>
+          <motion.span
+            className="absolute bottom-0 left-0 h-[1px] w-full bg-neutral-400 dark:bg-neutral-500"
+            variants={{
+              initial: { scaleX: 0, originX: 0 },
+              hover: { scaleX: 1 },
+            }}
+            initial="initial"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          />
+        </motion.span>
+        <motion.span className="relative" whileHover="hover">
+          <Link href="/credits">credits</Link>
           <motion.span
             className="absolute bottom-0 left-0 h-[1px] w-full bg-neutral-400 dark:bg-neutral-500"
             variants={{

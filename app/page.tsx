@@ -31,6 +31,8 @@ const personJsonLd = {
   sameAs: [
     "https://linkedin.com/in/suraj-singh-in",
     "https://github.com/suraj-singh-in",
+    "https://x.com/__SurajSingh__",
+    "https://medium.com/@singh.suraj",
   ],
 }
 
