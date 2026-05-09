@@ -1,19 +1,13 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
 import { getBlogsDataByCategory } from "../constants/blogs-data.service"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
-  title: "India and its History",
+export const metadata = pageMetadata({
+  title: "India and its History — Suraj Singh",
   description: "Essays on Indian history — the people, events, and ideas that shaped the subcontinent, told without the textbook distance.",
-  alternates: { canonical: "/blogs/indian-history" },
-  openGraph: {
-    title: "India and its History — Suraj Singh",
-    description: "Essays on Indian history — the people, events, and ideas that shaped the subcontinent, told without the textbook distance.",
-    url: "/blogs/indian-history",
-    type: "website",
-  },
-}
+  path: "/blogs/indian-history",
+})
 
 const section = getBlogsDataByCategory("Indian History")
 

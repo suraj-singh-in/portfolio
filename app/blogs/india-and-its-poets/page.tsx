@@ -1,19 +1,13 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
 import { getBlogsDataByCategory } from "../constants/blogs-data.service"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
-  title: "India and its Poets",
+export const metadata = pageMetadata({
+  title: "India and its Poets — Suraj Singh",
   description: "A series on the poets, mystics, and wanderers who shaped India's literary and spiritual imagination — the ones most people have never heard of.",
-  alternates: { canonical: "/blogs/india-and-its-poets" },
-  openGraph: {
-    title: "India and its Poets — Suraj Singh",
-    description: "A series on the poets, mystics, and wanderers who shaped India's literary and spiritual imagination — the ones most people have never heard of.",
-    url: "/blogs/india-and-its-poets",
-    type: "website",
-  },
-}
+  path: "/blogs/india-and-its-poets",
+})
 
 const section = getBlogsDataByCategory("India and its Poets")
 

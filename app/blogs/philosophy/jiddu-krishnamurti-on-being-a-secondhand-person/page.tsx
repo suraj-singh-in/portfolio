@@ -1,32 +1,14 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "Jiddu Krishnamurti — On Being a Second-Hand Person",
   description: "Krishnamurti had one argument. He made it for sixty years. The argument was: you are not thinking. You are repeating.",
-  alternates: { canonical: "/blogs/philosophy/jiddu-krishnamurti-on-being-a-secondhand-person" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "Jiddu Krishnamurti", "second-hand person", "conditioning", "philosophy",
-    "Theosophical Society", "Freedom from the Known", "self-knowledge", "attention"
-  ],
-  openGraph: {
-    title: "Jiddu Krishnamurti — On Being a Second-Hand Person",
-    description: "Krishnamurti had one argument. He made it for sixty years. The argument was: you are not thinking. You are repeating.",
-    url: "/blogs/philosophy/jiddu-krishnamurti-on-being-a-secondhand-person",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Jiddu Krishnamurti — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Jiddu Krishnamurti — On Being a Second-Hand Person",
-    description: "Krishnamurti had one argument. He made it for sixty years. The argument was: you are not thinking. You are repeating.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/philosophy/jiddu-krishnamurti-on-being-a-secondhand-person",
+  keywords: ["Jiddu Krishnamurti", "second-hand person", "conditioning", "philosophy", "Theosophical Society", "Freedom from the Known", "self-knowledge", "attention"],
+  ogImageAlt: "Jiddu Krishnamurti — Suraj Singh",
+})
 
 const KrishnamurtiSecondHand = () => (
   <PageShell>

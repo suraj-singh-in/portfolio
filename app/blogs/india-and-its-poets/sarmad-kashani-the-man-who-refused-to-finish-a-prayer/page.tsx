@@ -1,33 +1,15 @@
-import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
   description: "A Jewish merchant from Persia who gave away everything, wandered naked through Mughal Delhi, and was beheaded for refusing to complete a sentence. The story of Sarmad Kashani.",
-  alternates: { canonical: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "Sarmad Kashani", "Mughal India", "Sufi poetry", "Dara Shikoh", "Aurangzeb",
-    "Indian history", "Persian poetry", "India and its Poets"
-  ],
-  openGraph: {
-    title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
-    description: "A Jewish merchant from Persia who gave away everything, wandered naked through Mughal Delhi, and was beheaded for refusing to complete a sentence. The story of Sarmad Kashani.",
-    url: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Sarmad Kashani — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
-    description: "A Jewish merchant from Persia who gave away everything, wandered naked through Mughal Delhi, and was beheaded for refusing to complete a sentence.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
+  keywords: ["Sarmad Kashani", "Mughal India", "Sufi poetry", "Dara Shikoh", "Aurangzeb", "Indian history", "Persian poetry", "India and its Poets"],
+  ogImageAlt: "Sarmad Kashani — Suraj Singh",
+})
 
 const SarmadKashani = () => (
   <PageShell>

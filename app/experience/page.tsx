@@ -1,23 +1,13 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 import PageShell from "@/components/PageShell"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
-  title: "Experience",
+export const metadata = pageMetadata({
+  title: "Experience — Suraj Singh",
   description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
-  alternates: { canonical: "/experience" },
-  openGraph: {
-    title: "Experience — Suraj Singh",
-    description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
-    url: "/experience",
-    type: "website",
-  },
-  twitter: {
-    title: "Experience — Suraj Singh",
-    description: "Four years of full-stack engineering across Fynd, Freecharge, and ProsperMe — building offline POS systems, payment platforms, and high-traffic web applications.",
-  },
-}
+  path: "/experience",
+})
 
 const ExperiencePage = () => (
     <PageShell>

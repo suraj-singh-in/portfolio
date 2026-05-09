@@ -1,31 +1,14 @@
-import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "Building a Cross-Frame SDK for POS Extensions",
   description: "How I designed FSI — a small JavaScript SDK that creates a two-way communication channel between a host POS application and independently deployed extension iframes, including a native Android WebView bridge.",
-  alternates: { canonical: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "postMessage", "iframe", "SDK", "cross-origin", "observable", "event bus",
-    "POS", "WebView", "Android", "JavascriptInterface", "Fynd", "StoreOS"
-  ],
-  openGraph: {
-    title: "Building a Cross-Frame SDK for POS Extensions",
-    description: "How I designed FSI — a small JavaScript SDK that creates a two-way communication channel between a host POS application and independently deployed extension iframes, including a native Android WebView bridge.",
-    url: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Cross-Frame SDK for POS Extensions — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Building a Cross-Frame SDK for POS Extensions",
-    description: "How I designed FSI — a small JavaScript SDK that creates a two-way communication channel between a host POS application and independently deployed extension iframes, including a native Android WebView bridge.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
+  keywords: ["postMessage", "iframe", "SDK", "cross-origin", "observable", "event bus", "POS", "WebView", "Android", "JavascriptInterface", "Fynd", "StoreOS"],
+  ogImageAlt: "Cross-Frame SDK for POS Extensions — Suraj Singh",
+})
+
 
 const FSIBlog = () => (
   <PageShell>

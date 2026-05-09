@@ -1,33 +1,14 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
   description: "A painter from Kerala who combined European oil technique with Hindu mythology and accidentally defined how an entire civilization visualizes its own gods. He died in 1906. His images never did.",
-  alternates: { canonical: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "Raja Ravi Varma", "Indian art", "Kerala history", "Hindu mythology",
-    "Dadasaheb Phalke", "Indian cinema", "Travancore", "Indian history",
-    "calendar art", "lithographic press"
-  ],
-  openGraph: {
-    title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
-    description: "A painter from Kerala who combined European oil technique with Hindu mythology and accidentally defined how an entire civilization visualizes its own gods.",
-    url: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Raja Ravi Varma — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
-    description: "A painter from Kerala who combined European oil technique with Hindu mythology and accidentally defined how an entire civilization visualizes its own gods.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
+  keywords: ["Raja Ravi Varma", "Indian art", "Kerala history", "Hindu mythology", "Dadasaheb Phalke", "Indian cinema", "Travancore", "Indian history", "calendar art", "lithographic press"],
+  ogImageAlt: "Raja Ravi Varma — Suraj Singh",
+})
 
 const RajaRaviVarma = () => (
   <PageShell>

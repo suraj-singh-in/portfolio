@@ -1,22 +1,12 @@
-import type { Metadata } from "next"
 import { ArrowUpRight } from 'lucide-react';
 import PageShell from "@/components/PageShell"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
-  title: "Projects",
+export const metadata = pageMetadata({
+  title: "Projects — Suraj Singh",
   description: "Selected work including a RAG pipeline for Obsidian notes, a Dockerised API mocking service, and a freelance website for a sustainables company.",
-  alternates: { canonical: "/projects" },
-  openGraph: {
-    title: "Projects — Suraj Singh",
-    description: "Selected work including a RAG pipeline for Obsidian notes, a Dockerised API mocking service, and a freelance website for a sustainables company.",
-    url: "/projects",
-    type: "website",
-  },
-  twitter: {
-    title: "Projects — Suraj Singh",
-    description: "Selected work including a RAG pipeline for Obsidian notes, a Dockerised API mocking service, and a freelance website for a sustainables company.",
-  },
-}
+  path: "/projects",
+})
 
 const ProjectsPage = () => (
     <PageShell>

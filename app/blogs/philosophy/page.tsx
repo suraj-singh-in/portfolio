@@ -1,19 +1,13 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
 import { getBlogsDataByCategory } from "../constants/blogs-data.service"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Philosophy — Suraj Singh",
   description: "Writing on philosophy — thinkers who make you uncomfortable, ideas that don't resolve cleanly, and the question of whether you are actually thinking.",
-  alternates: { canonical: "/blogs/philosophy" },
-  openGraph: {
-    title: "Philosophy — Suraj Singh",
-    description: "Writing on philosophy — thinkers who make you uncomfortable, ideas that don't resolve cleanly, and the question of whether you are actually thinking.",
-    url: "/blogs/philosophy",
-    type: "website",
-  },
-}
+  path: "/blogs/philosophy",
+})
 
 const section = getBlogsDataByCategory("Philosophy")
 const localPosts = section.items.filter((p) => !p.url.startsWith("http"))

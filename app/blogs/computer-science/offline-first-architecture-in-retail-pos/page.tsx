@@ -1,31 +1,13 @@
-import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "Building an Offline-First Architecture for a Retail POS",
   description: "A deep-dive into the layered offline system powering StoreOS — covering service workers, IndexedDB, web workers, state machines, and the engineering decisions behind a POS that never goes down.",
-  alternates: { canonical: "/blogs/computer-science/offline-first-architecture-in-retail-pos" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "offline-first", "PWA", "IndexedDB", "Dexie", "Service Worker", "Web Worker",
-    "BullMQ", "React", "POS", "retail", "Workbox", "background sync"
-  ],
-  openGraph: {
-    title: "Building an Offline-First Architecture for a Retail POS",
-    description: "A deep-dive into the layered offline system powering StoreOS — covering service workers, IndexedDB, web workers, state machines, and the engineering decisions behind a POS that never goes down.",
-    url: "/blogs/computer-science/offline-first-architecture-in-retail-pos",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Offline-First POS Architecture — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Building an Offline-First Architecture for a Retail POS",
-    description: "A deep-dive into the layered offline system powering StoreOS — covering service workers, IndexedDB, web workers, state machines, and the engineering decisions behind a POS that never goes down.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/computer-science/offline-first-architecture-in-retail-pos",
+  keywords: ["offline-first", "PWA", "IndexedDB", "Dexie", "Service Worker", "Web Worker", "BullMQ", "React", "POS", "retail", "Workbox", "background sync"],
+  ogImageAlt: "Offline-First POS Architecture — Suraj Singh",
+})
 
 const OfflineFirstPOS = () => (
   <PageShell>

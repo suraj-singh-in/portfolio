@@ -1,19 +1,13 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
 import { getBlogsDataByCategory } from "../constants/blogs-data.service"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
-  title: "Computer Science — Blog",
+export const metadata = pageMetadata({
+  title: "Computer Science — Suraj Singh",
   description: "Engineering writing on browser APIs, offline-first architecture, developer tooling, and the decisions behind production systems.",
-  alternates: { canonical: "/blogs/computer-science" },
-  openGraph: {
-    title: "Computer Science — Suraj Singh",
-    description: "Engineering writing on browser APIs, offline-first architecture, developer tooling, and the decisions behind production systems.",
-    url: "/blogs/computer-science",
-    type: "website",
-  },
-}
+  path: "/blogs/computer-science",
+})
 
 const section = getBlogsDataByCategory("Computer Science")
 

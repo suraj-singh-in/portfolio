@@ -1,17 +1,11 @@
-import type { Metadata } from "next"
 import PageShell from "@/components/PageShell"
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "About — Not a Second Hand Life",
   description: "On Krishnamurti's idea of the second-hand person, and a pledge to not live a borrowed life.",
-  alternates: { canonical: "/about" },
-  openGraph: {
-    title: "About — Not a Second Hand Life",
-    description: "On Krishnamurti's idea of the second-hand person, and a pledge to not live a borrowed life.",
-    url: "/about",
-    type: "website",
-  },
-}
+  path: "/about",
+})
 
 const About = () => (
   <PageShell>

@@ -1,33 +1,14 @@
-import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { articleMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = articleMetadata({
   title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
   description: "In 70 AD, Jews fleeing the destruction of the Second Temple found safety on the coast of Kerala. They stayed for 1,500 years — until the Portuguese arrived.",
-  alternates: { canonical: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells" },
-  authors: [{ name: "Suraj Singh" }],
-  keywords: [
-    "Jews of Kerala", "Cochin Jews", "Paradesi Synagogue", "Indian history",
-    "Kerala history", "Portuguese India", "Vasco da Gama", "Joseph Rabban",
-    "Malabar", "Kochi"
-  ],
-  openGraph: {
-    title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
-    description: "In 70 AD, Jews fleeing the destruction of the Second Temple found safety on the coast of Kerala. They stayed for 1,500 years — until the Portuguese arrived.",
-    url: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
-    type: "article",
-    siteName: "Suraj Singh",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "The Jews of Kerala — Suraj Singh" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
-    description: "In 70 AD, Jews fleeing the destruction of the Second Temple found safety on the coast of Kerala. They stayed for 1,500 years — until the Portuguese arrived.",
-    creator: "@__SurajSingh__",
-    images: ["/opengraph-image"],
-  },
-}
+  path: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
+  keywords: ["Jews of Kerala", "Cochin Jews", "Paradesi Synagogue", "Indian history", "Kerala history", "Portuguese India", "Vasco da Gama", "Joseph Rabban", "Malabar", "Kochi"],
+  ogImageAlt: "The Jews of Kerala — Suraj Singh",
+})
 
 const JewsOfKerala = () => (
   <PageShell>

@@ -1,21 +1,11 @@
-import type { Metadata } from "next"
 import HomeContent from '@/components/HomeContent'
+import { pageMetadata } from "@/lib/metadata"
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Suraj Singh — Software Engineer",
   description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "Suraj Singh — Software Engineer",
-    description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
-    url: "/",
-    type: "website",
-  },
-  twitter: {
-    title: "Suraj Singh — Software Engineer",
-    description: "Suraj Singh is a software engineer based in Delhi. Nearly 4 years building offline-first retail systems, RAG pipelines, and developer tools — currently at Fynd.",
-  },
-}
+  path: "/",
+})
 
 const personJsonLd = {
   "@context": "https://schema.org",
