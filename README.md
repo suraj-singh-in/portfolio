@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# notasecondhandlife.com
 
-## Getting Started
+Personal site of Suraj Singh — software engineer based in Delhi.
 
-First, run the development server:
+Writing on Indian history, philosophy, and software engineering. Live at [notasecondhandlife.com](https://notasecondhandlife.com).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Built with Next.js 16 (App Router), Tailwind CSS, TypeScript, deployed on Vercel.
+
+---
+
+## Project Structure
+
+```
+app/
+  page.tsx                        # Homepage
+  about/                          # About page (Krishnamurti / second-hand life)
+  experience/                     # Work experience
+  projects/                       # Side projects
+  blogs/
+    page.tsx                      # Blog listing (all categories)
+    constants/
+      blogs-data.service.ts       # Single source of truth for all blog data
+    computer-science/             # Category + posts
+    indian-history/               # Category + posts (India and its History series)
+    india-and-its-poets/          # Category + posts
+    philosophy/                   # Category + posts (The Uncomfortable Philosophers series)
+  compass/                        # CS learning notes (DSA, recursion)
+  manhattan-project/              # Reading list
+
+components/
+  Navbar.tsx
+  Footer.tsx
+  PageShell.tsx
+  BlogSearch.tsx
+  ListingComponent.tsx            # IList / ISection types used across blog pages
+  HomeContent.tsx
+
+lib/
+  metadata.ts                     # pageMetadata() and articleMetadata() helpers
+
+public/
+  Suraj_Singh_Resume.pdf
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Conventions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Adding a blog post**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Add entry to `app/blogs/constants/blogs-data.service.ts` with `title`, `url`, `description`, `date`, and optionally `episode`
+2. Create `app/blogs/[category]/[slug]/page.tsx` using `articleMetadata()` from `lib/metadata`
+3. Add the URL to `app/sitemap.ts`
 
-## Learn More
+**Metadata**
 
-To learn more about Next.js, take a look at the following resources:
+All pages use helpers from `lib/metadata.ts`:
+- `pageMetadata({ title, description, path })` — for listing/category pages
+- `articleMetadata({ title, description, path, keywords?, ogImageAlt? })` — for blog posts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Both auto-fill `og:site_name`, `twitter:card: summary_large_image`, `twitter:creator`, and the OG image.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Blog data**
 
-## Deploy on Vercel
+`app/blogs/constants/blogs-data.service.ts` exports:
+- `blogsData` — the full `IList` object
+- `getBlogsData()` — used by the blog listing page
+- `getBlogsDataByCategory(title)` — used by each category page
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # localhost:3000
+npm run build    # production build (also runs as pre-commit hook)
+```
+
+Pre-commit hook runs `npm run build` via Husky — commits are blocked if the build fails.
