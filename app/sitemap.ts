@@ -17,6 +17,10 @@ const staticRoutes: { path: string; priority: number }[] = [
 // Blog/writing posts — add new entries here as posts are published
 const blogPosts: { path: string; lastModified: string }[] = [
   {
+    path: "/blogs/philosophy/jiddu-krishnamurti-on-being-a-secondhand-person",
+    lastModified: "2026-05-09",
+  },
+  {
     path: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
     lastModified: "2026-04-26",
   },

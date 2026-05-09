@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { getBlogsDataByCategory } from "../constants/blogs-data.service"
 
 export const metadata: Metadata = {
   title: "India and its History",
@@ -14,22 +15,7 @@ export const metadata: Metadata = {
   },
 }
 
-const posts = [
-  {
-    episode: "Episode 002",
-    title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
-    description: "A painter from Kerala who combined European oil technique with Hindu mythology and accidentally defined how an entire civilization visualizes its own gods.",
-    url: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
-    date: "April 2026",
-  },
-  {
-    episode: "Episode 001",
-    title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
-    description: "In 70 AD, Jews fleeing the destruction of the Second Temple found safety on the coast of Kerala. They stayed for 1,500 years — until the Portuguese arrived.",
-    url: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
-    date: "April 2026",
-  },
-]
+const section = getBlogsDataByCategory("Indian History")
 
 const IndianHistoryPage = () => (
   <PageShell>
@@ -43,15 +29,13 @@ const IndianHistoryPage = () => (
     <h1 className="font-semibold text-2xl mb-1 tracking-tighter text-neutral-900 dark:text-neutral-100">
       India and its History
     </h1>
-    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">
-      The people, events, and ideas that shaped the subcontinent — told without the textbook distance.
-    </p>
+    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">{section.subtitle}</p>
 
     <div className="flex flex-col gap-8">
-      {posts.map((post) => (
+      {section.items.map((post) => (
         <div key={post.url} className="flex flex-col gap-1">
           <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500">
-            {post.episode} · {post.date}
+            {post.episode ? `${post.episode} · ` : ""}{post.date}
           </p>
           <Link
             href={post.url}
@@ -59,9 +43,11 @@ const IndianHistoryPage = () => (
           >
             {post.title}
           </Link>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-            {post.description}
-          </p>
+          {post.description && (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              {post.description}
+            </p>
+          )}
         </div>
       ))}
     </div>

@@ -4,20 +4,21 @@ import PageShell from "@/components/PageShell"
 import { getBlogsDataByCategory } from "../constants/blogs-data.service"
 
 export const metadata: Metadata = {
-  title: "Computer Science — Blog",
-  description: "Engineering writing on browser APIs, offline-first architecture, developer tooling, and the decisions behind production systems.",
-  alternates: { canonical: "/blogs/computer-science" },
+  title: "Philosophy — Suraj Singh",
+  description: "Writing on philosophy — thinkers who make you uncomfortable, ideas that don't resolve cleanly, and the question of whether you are actually thinking.",
+  alternates: { canonical: "/blogs/philosophy" },
   openGraph: {
-    title: "Computer Science — Suraj Singh",
-    description: "Engineering writing on browser APIs, offline-first architecture, developer tooling, and the decisions behind production systems.",
-    url: "/blogs/computer-science",
+    title: "Philosophy — Suraj Singh",
+    description: "Writing on philosophy — thinkers who make you uncomfortable, ideas that don't resolve cleanly, and the question of whether you are actually thinking.",
+    url: "/blogs/philosophy",
     type: "website",
   },
 }
 
-const section = getBlogsDataByCategory("Computer Science")
+const section = getBlogsDataByCategory("Philosophy")
+const localPosts = section.items.filter((p) => !p.url.startsWith("http"))
 
-const ComputerSciencePage = () => (
+const PhilosophyPage = () => (
   <PageShell>
     <Link
       href="/blogs"
@@ -27,12 +28,12 @@ const ComputerSciencePage = () => (
     </Link>
 
     <h1 className="font-semibold text-2xl mb-1 tracking-tighter text-neutral-900 dark:text-neutral-100">
-      Computer Science
+      Philosophy
     </h1>
     <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">{section.subtitle}</p>
 
     <div className="flex flex-col gap-8">
-      {section.items.map((post) => (
+      {localPosts.map((post) => (
         <div key={post.url} className="flex flex-col gap-1">
           <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500">
             {post.episode ? `${post.episode} · ` : ""}{post.date}
@@ -54,4 +55,4 @@ const ComputerSciencePage = () => (
   </PageShell>
 )
 
-export default ComputerSciencePage
+export default PhilosophyPage

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
-import type { IList } from "@/components/ListingComponent"
 import PageShell from "@/components/PageShell"
 import BlogSearch from "@/components/BlogSearch"
+import { getBlogsData } from "./constants/blogs-data.service"
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -19,79 +19,11 @@ export const metadata: Metadata = {
   },
 }
 
-const blogsData: IList = {
-  sections: [
-    {
-      title: "Computer Science",
-      categoryUrl: "/blogs/computer-science",
-      items: [
-        {
-          title: "Building a Cross-Frame SDK for POS Extensions",
-          url: "/blogs/computer-science/building-a-cross-frame-sdk-for-pos-extensions",
-        },
-        {
-          title: "Building an Offline-First Architecture for a Retail POS",
-          url: "/blogs/computer-science/offline-first-architecture-in-retail-pos",
-        },
-        {
-          title: "Web Workers vs Service Workers — When to Use What?",
-          url: "/blogs/computer-science/web-workers-vs-service-workers-when-to-use-what",
-        },
-      ],
-    },
-    {
-      title: "Indian History",
-      categoryUrl: "/blogs/indian-history",
-      items: [
-        {
-          title: "Raja Ravi Varma — The Man Who Gave India Its Gods",
-          url: "/blogs/indian-history/raja-ravi-varma-the-man-who-gave-india-its-gods",
-        },
-        {
-          title: "The Jews of Kerala — 1,500 Years of a Story Nobody Tells",
-          url: "/blogs/indian-history/the-jews-of-kerala-1500-years-of-a-story-nobody-tells",
-        },
-      ],
-    },
-    {
-      title: "India and its Poets",
-      categoryUrl: "/blogs/india-and-its-poets",
-      items: [
-        {
-          title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
-          url: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
-        },
-      ],
-    },
-    {
-      title: "Philosophy",
-      items: [
-        {
-          title: "Eyes on Eternity: Exploring Jordan Peterson’s Narrative on God",
-          url: "https://medium.com/@singh.suraj/eyes-on-eternity-exploring-jordan-petersons-narrative-on-god-e491794a158",
-        },
-      ],
-    },
-    {
-      title: "Book Review",
-      items: [
-        {
-          title: "Dune by Frank Herbert: 5 Point Book Review",
-          url: "https://medium.com/@singh.suraj/dune-by-frank-herbert-5-point-book-review-cc637d66b3d8",
-        },
-        {
-          title: "400 Days by Chetan Bhagat: 5 Point Book Review",
-          url: "https://medium.com/@singh.suraj/400-days-by-chetan-bhagat-5-point-book-review-5c4a05df47f0",
-        },
-      ],
-    },
-  ],
-};
 
 const Blogs = () => (
   <PageShell>
-    <BlogSearch list={blogsData} />
+    <BlogSearch list={getBlogsData()} />
   </PageShell>
-);
+);  
 
 export default Blogs;

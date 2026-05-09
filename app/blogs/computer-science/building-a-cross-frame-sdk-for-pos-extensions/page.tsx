@@ -57,7 +57,7 @@ const FSIBlog = () => (
     <h1 className="font-semibold text-2xl mb-2 tracking-tighter text-neutral-900 dark:text-neutral-100">
       Building a Cross-Frame SDK for POS Extensions
     </h1>
-    <p className="text-sm text-neutral-400 dark:text-neutral-500 mb-10">April 2026 · 12 min read</p>
+    <p className="text-sm text-neutral-400 dark:text-neutral-500 mb-10">11 Apr 2026 · 12 min read</p>
 
     <div className="flex flex-col gap-6 text-neutral-700 dark:text-neutral-300 leading-relaxed">
 

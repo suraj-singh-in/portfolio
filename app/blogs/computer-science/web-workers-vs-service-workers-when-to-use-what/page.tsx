@@ -53,9 +53,10 @@ const WebWorkersVsServiceWorkers = () => (
         />
 
         {/* BLOG CONTENT */}
-        <h1 className="font-semibold text-2xl mb-8 tracking-tighter text-neutral-900 dark:text-neutral-100">
+        <h1 className="font-semibold text-2xl mb-2 tracking-tighter text-neutral-900 dark:text-neutral-100">
             Web Workers vs Service Workers — When to Use What?
         </h1>
+        <p className="text-sm text-neutral-400 dark:text-neutral-500 mb-8">28 Nov 2025 · 5 min read</p>
 
         <div className="flex flex-col gap-6 text-neutral-700 dark:text-neutral-300 leading-relaxed">
 

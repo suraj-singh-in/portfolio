@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
+import { getBlogsDataByCategory } from "../constants/blogs-data.service"
 
 export const metadata: Metadata = {
   title: "India and its Poets",
@@ -14,15 +15,7 @@ export const metadata: Metadata = {
   },
 }
 
-const posts = [
-  {
-    episode: "Episode 001",
-    title: "Sarmad Kashani — The Man Who Refused to Finish a Prayer",
-    description: "A Jewish merchant from Persia who gave away everything, wandered naked through Mughal Delhi, and was beheaded for refusing to complete a sentence.",
-    url: "/blogs/india-and-its-poets/sarmad-kashani-the-man-who-refused-to-finish-a-prayer",
-    date: "April 2026",
-  },
-]
+const section = getBlogsDataByCategory("India and its Poets")
 
 const IndiaAndItsPoetsPage = () => (
   <PageShell>
@@ -36,15 +29,13 @@ const IndiaAndItsPoetsPage = () => (
     <h1 className="font-semibold text-2xl mb-1 tracking-tighter text-neutral-900 dark:text-neutral-100">
       India and its Poets
     </h1>
-    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">
-      The poets, mystics, and wanderers who shaped India&apos;s literary and spiritual imagination — the ones most people have never heard of.
-    </p>
+    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-10">{section.subtitle}</p>
 
     <div className="flex flex-col gap-8">
-      {posts.map((post) => (
+      {section.items.map((post) => (
         <div key={post.url} className="flex flex-col gap-1">
           <p className="text-xs font-medium tracking-widest uppercase text-neutral-400 dark:text-neutral-500">
-            {post.episode} · {post.date}
+            {post.episode ? `${post.episode} · ` : ""}{post.date}
           </p>
           <Link
             href={post.url}
@@ -52,9 +43,11 @@ const IndiaAndItsPoetsPage = () => (
           >
             {post.title}
           </Link>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
-            {post.description}
-          </p>
+          {post.description && (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              {post.description}
+            </p>
+          )}
         </div>
       ))}
     </div>
