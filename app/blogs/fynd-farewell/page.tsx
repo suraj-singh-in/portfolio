@@ -67,9 +67,18 @@ const FarewellFynd = () => (
         Every time something broke, production caught fire, or panic started spreading — you were always like:
       </p>
 
-      <blockquote className="border-l-2 border-neutral-300 dark:border-neutral-700 pl-4 italic text-neutral-600 dark:text-neutral-400">
-        &ldquo;Mera baccha hai tu… dhurandar hai dhurandar.&rdquo;
-      </blockquote>
+      <figure className="my-2">
+        <Image
+          src="https://static.india.com/wp-content/uploads/2026/03/bachcha-hai-tu-mera.jpg"
+          alt="Mera baccha hai tu mera — meme"
+          width={800}
+          height={500}
+          className="w-full rounded-md object-cover"
+        />
+        <figcaption className="mt-2 text-xs text-neutral-400 dark:text-neutral-500 text-center leading-relaxed">
+          Every. Single. Time.
+        </figcaption>
+      </figure>
 
       <p>
         Thank you for always backing the team and somehow keeping everyone sane.
@@ -88,6 +97,19 @@ const FarewellFynd = () => (
 
       <p>Turns out web won in the end.</p>
 
+      <figure className="my-2">
+        <Image
+          src="https://pbs.twimg.com/media/DSxdraAWsAALZ7G.jpg"
+          alt="Web won — Android vs iOS vs Web meme"
+          width={800}
+          height={500}
+          className="w-full rounded-md object-cover"
+        />
+        <figcaption className="mt-2 text-xs text-neutral-400 dark:text-neutral-500 text-center leading-relaxed">
+          The eternal platform war, settled.
+        </figcaption>
+      </figure>
+
       <hr className="border-neutral-100 dark:border-neutral-800" />
 
       {/* Mithali */}
@@ -99,9 +121,18 @@ const FarewellFynd = () => (
         Every time a new task came in — no matter how complicated or impossible it sounded — your instant reaction was:
       </p>
 
-      <blockquote className="border-l-2 border-neutral-300 dark:border-neutral-700 pl-4 italic text-neutral-600 dark:text-neutral-400">
-        &ldquo;Mast plan hai.&rdquo;
-      </blockquote>
+      <figure className="my-2">
+        <Image
+          src="https://indianmemetemplates.com/wp-content/uploads/mast-plan-hai.jpg"
+          alt="Mast plan hai — meme"
+          width={800}
+          height={500}
+          className="w-full rounded-md object-cover"
+        />
+        <figcaption className="mt-2 text-xs text-neutral-400 dark:text-neutral-500 text-center leading-relaxed">
+          &ldquo;Mast plan hai.&rdquo; — Every time, without fail.
+        </figcaption>
+      </figure>
 
       <p>Meanwhile the rest of us were still trying to understand the requirement.</p>
 
@@ -116,6 +147,19 @@ const FarewellFynd = () => (
 
       <p>Half the conversations were work. The other half were random nonsense and memes.</p>
 
+      <figure className="my-2">
+        <Image
+          src="https://scontent.fdel3-1.fna.fbcdn.net/v/t1.6435-9/60831236_406394226757918_7482608322768535552_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2wCJFVsF190Q7kNvwHEXJ79&_nc_oc=Adr9QRw8C-MBP7ekrlgnxGxt3FpWyl98a3FszKetCTWAl1mDh7ijD_5dH3pwBq2CGJM&_nc_zt=23&_nc_ht=scontent.fdel3-1.fna&_nc_gid=toW1qXAzgbydyPDcTVQchA&_nc_ss=7b289&oh=00_Af56gZGvSPAzdnAVV7KAPII4VJKVbegp1ibSLbUaqGtwbA&oe=6A409B89"
+          alt="Bhai bhai cinematic universe"
+          width={800}
+          height={500}
+          className="w-full rounded-md object-cover"
+        />
+        <figcaption className="mt-2 text-xs text-neutral-400 dark:text-neutral-500 text-center leading-relaxed">
+          The bhai bhai cinematic universe, in its natural habitat.
+        </figcaption>
+      </figure>
+
       <hr className="border-neutral-100 dark:border-neutral-800" />
 
       {/* QA */}
@@ -126,6 +170,19 @@ const FarewellFynd = () => (
       <p>
         You blocked builds harder than Thakur blocked Gabbar&apos;s happiness.
       </p>
+
+      <figure className="my-2">
+        <Image
+          src="https://cdn-cekmh.nitrocdn.com/SlrtebQxNZbUBkfXeRIcTgUmxZsOSldb/assets/images/optimized/rev-1e11f57/codoid.com/wp-content/uploads/2023/02/QA-Tester-meme.jpg"
+          alt="QA tester meme"
+          width={800}
+          height={500}
+          className="w-full rounded-md object-cover"
+        />
+        <figcaption className="mt-2 text-xs text-neutral-400 dark:text-neutral-500 text-center leading-relaxed">
+          The QA team, every sprint, no exceptions.
+        </figcaption>
+      </figure>
 
       <p>
         But genuinely — thank you for saving us from shipping disasters every single sprint.
@@ -139,7 +196,7 @@ const FarewellFynd = () => (
       </h2>
 
       <p>
-        Jalak and everyone else I annoyed daily with pings, calls, follow-ups, &ldquo;quick syncs&rdquo; that were never quick, and random memes.
+        Jalak, Kedar and everyone else I annoyed daily with pings, calls, follow-ups, &ldquo;quick syncs&rdquo; that were never quick, and random memes.
       </p>
 
       <hr className="border-neutral-100 dark:border-neutral-800" />
