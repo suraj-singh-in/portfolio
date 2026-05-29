@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import PageShell from "@/components/PageShell"
 import { articleMetadata } from "@/lib/metadata"
@@ -68,7 +67,7 @@ const FarewellFynd = () => (
       </p>
 
       <figure className="my-2">
-        <Image
+        <img
           src="https://static.india.com/wp-content/uploads/2026/03/bachcha-hai-tu-mera.jpg"
           alt="Mera baccha hai tu mera — meme"
           width={800}
@@ -98,7 +97,7 @@ const FarewellFynd = () => (
       <p>Turns out web won in the end.</p>
 
       <figure className="my-2">
-        <Image
+        <img
           src="https://pbs.twimg.com/media/DSxdraAWsAALZ7G.jpg"
           alt="Web won — Android vs iOS vs Web meme"
           width={800}
@@ -122,7 +121,7 @@ const FarewellFynd = () => (
       </p>
 
       <figure className="my-2">
-        <Image
+        <img
           src="https://indianmemetemplates.com/wp-content/uploads/mast-plan-hai.jpg"
           alt="Mast plan hai — meme"
           width={800}
@@ -148,7 +147,7 @@ const FarewellFynd = () => (
       <p>Half the conversations were work. The other half were random nonsense and memes.</p>
 
       <figure className="my-2">
-        <Image
+        <img
           src="https://scontent.fdel3-1.fna.fbcdn.net/v/t1.6435-9/60831236_406394226757918_7482608322768535552_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2wCJFVsF190Q7kNvwHEXJ79&_nc_oc=Adr9QRw8C-MBP7ekrlgnxGxt3FpWyl98a3FszKetCTWAl1mDh7ijD_5dH3pwBq2CGJM&_nc_zt=23&_nc_ht=scontent.fdel3-1.fna&_nc_gid=toW1qXAzgbydyPDcTVQchA&_nc_ss=7b289&oh=00_Af56gZGvSPAzdnAVV7KAPII4VJKVbegp1ibSLbUaqGtwbA&oe=6A409B89"
           alt="Bhai bhai cinematic universe"
           width={800}
@@ -172,8 +171,8 @@ const FarewellFynd = () => (
       </p>
 
       <figure className="my-2">
-        <Image
-          src="https://cdn-cekmh.nitrocdn.com/SlrtebQxNZbUBkfXeRIcTgUmxZsOSldb/assets/images/optimized/rev-1e11f57/codoid.com/wp-content/uploads/2023/02/QA-Tester-meme.jpg"
+        <img
+          src="https://cdn-cekmh.nitrocdn.com/SlrtebQxNZbUBkfXeRIcTgUmxZsOSldb/assets/imgs/optimized/rev-1e11f57/codoid.com/wp-content/uploads/2023/02/QA-Tester-meme.jpg"
           alt="QA tester meme"
           width={800}
           height={500}
