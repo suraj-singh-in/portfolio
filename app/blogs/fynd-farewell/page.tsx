@@ -172,7 +172,7 @@ const FarewellFynd = () => (
 
       <figure className="my-2">
         <img
-          src="https://cdn-cekmh.nitrocdn.com/SlrtebQxNZbUBkfXeRIcTgUmxZsOSldb/assets/imgs/optimized/rev-1e11f57/codoid.com/wp-content/uploads/2023/02/QA-Tester-meme.jpg"
+          src="https://cdn-cekmh.nitrocdn.com/SlrtebQxNZbUBkfXeRIcTgUmxZsOSldb/assets/images/optimized/rev-1e11f57/codoid.com/wp-content/uploads/2023/02/QA-Tester-meme.jpg"
           alt="QA tester meme"
           width={800}
           height={500}
@@ -207,7 +207,7 @@ const FarewellFynd = () => (
       <p>Thank you everyone for making this journey memorable.</p>
 
       <p className="italic text-neutral-500 dark:text-neutral-400">
-        Until next time&hellip; Fir milenge chalte chalte.
+        Until next time&hellip; Fir milenge chalte chalte. 🚶🚶🚶
       </p>
 
     </div>
