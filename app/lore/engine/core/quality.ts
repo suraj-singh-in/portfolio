@@ -9,7 +9,7 @@ const TIERS: Record<QualityTier['name'], QualityTier> = {
 }
 
 /** Integrated / mobile-class GPUs that should not get the full grass count by default. */
-const INTEGRATED = /intel|uhd|iris|hd graphics|mali|adreno|powervr|apple gpu|swiftshader|llvmpipe/i
+const INTEGRATED = /intel|uhd|iris|hd graphics|radeon\(tm\) graphics|radeon vega|mali|adreno|powervr|apple gpu|swiftshader|llvmpipe/i
 
 /**
  * Pick a quality tier from the GPU renderer string and a short frame-time probe.
@@ -17,7 +17,7 @@ const INTEGRATED = /intel|uhd|iris|hd graphics|mali|adreno|powervr|apple gpu|swi
  */
 export function pickTier(probe: { renderer: string; frameMs: number }, override?: string | null): QualityTier {
   if (override && override in TIERS) return TIERS[override as QualityTier['name']]
-  if (probe.frameMs > 22) return TIERS.low
-  if (probe.frameMs > 12 || INTEGRATED.test(probe.renderer)) return TIERS.medium
+  if (probe.frameMs > 17.5) return TIERS.low       // below ~57 fps: target is 60
+  if (probe.frameMs > 11 || INTEGRATED.test(probe.renderer)) return TIERS.medium
   return TIERS.high
 }
