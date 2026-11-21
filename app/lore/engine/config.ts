@@ -24,6 +24,8 @@ export const CONFIG = {
   CAMERA: { offset: [0, 9, 8.2] as const, followRate: 2.5, zoomRate: 8 },
   AUDIO: { ambience: 0.5, step: 0.45, stepPool: 4, walkInterval: 0.48, runInterval: 0.3 },
   TRAMPLE: { recoverPerSec: 0.085 },
+  /** mounted horse: speeds m/s, accel m/s², turn rad/s, collision radius m, mount/dismount s, side offset m */
+  RIDE: { walk: 2.6, gallop: 6, accel: 6, turnRate: 3, radius: 1.1, mountSecs: 1.0, dismountSecs: 1.0, sideOffset: 1.2 },
   MAX_DPR: 2,
   LORE_LOADING_TEXT: 'Before the paths had names, a fire was kept burning at the edge of the forest.',
   CAPTIONS: [
