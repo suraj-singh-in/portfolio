@@ -9,6 +9,7 @@ const staticRoutes: { path: string; priority: number }[] = [
   { path: "/projects", priority: 0.8 },
   { path: "/blogs", priority: 0.8 },
   { path: "/compass", priority: 0.7 },
+  { path: "/library", priority: 0.7 },
   { path: "/manhattan-project", priority: 0.7 },
   { path: "/compass/computer-science/data-structure-and-algorithms", priority: 0.6 },
   { path: "/compass/computer-science/data-structure-and-algorithms/recursion", priority: 0.6 },

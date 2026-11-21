@@ -12,6 +12,7 @@ const navItems = {
   projects: { label: "projects", pathname: "/projects" },
   blogs: { label: "blogs", pathname: "/blogs" },
   about: { label: "about", pathname: "/about" },
+  library: { label: "library", pathname: "/library" },
   manhattanProject: { label: "manhattan project", pathname: "/manhattan-project" },
 };
 
