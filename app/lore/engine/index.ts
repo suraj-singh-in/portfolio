@@ -13,7 +13,7 @@ import { trailingDebounce } from './core/debounce'
 import { pickTier } from './core/quality'
 import { mulberry32 } from './core/rng'
 import type { Vec2 } from './core/types'
-import { createHorse, horseLookAngle, strokeHorse, updateHorse } from './entities/horse'
+import { createHorse, horseLookAngle, reactionSide, strokeHorse, updateHorse } from './entities/horse'
 import { createCaptions, inStrokeRange, neckPoint } from './entities/interaction'
 import { createPlayer, faceToward, updatePlayer } from './entities/player'
 import { createInput } from './input/input'
@@ -46,6 +46,8 @@ export type EngineEvents = {
   error: string
   /** debug overlay text (only with debug) */
   stats: string
+  /** ambience playing, or waiting for a click/key because the browser blocked autoplay */
+  sound: 'on' | 'blocked'
 }
 
 export type Engine = {
@@ -62,6 +64,8 @@ const UNDER_LOOK: Partial<GlyphOpts> = { tint: 0.8, ink: '#18281a', contrast: 1.
 /** The meadow field is deterministic from the seed, so restarts (narrow→wide, revisits) reuse it. */
 let fieldCache: { seed: number; field: GrassField } | null = null
 const nextTick = () => new Promise<void>((r) => setTimeout(r, 0))
+/** Bake scenery at a few fixed sizes and stretch the quad for the rest: far fewer bakes, same look. */
+const bakeScale = (scale: number) => Math.max(0.5, Math.round(scale * 2) / 2)
 
 export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanvasElement }, opts: { quality?: string | null; debug: boolean }): Engine {
   const events = createEvents<EngineEvents>()
@@ -81,6 +85,18 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     canvases.gl.addEventListener('webglcontextlost', onLost)
     cleanups.push(() => canvases.gl.removeEventListener('webglcontextlost', onLost))
 
+    // ---------- audio first: the forest should be heard during the loading screen ----------
+    const audio: AudioController = createAudio({
+      ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), make: (u) => new Audio(u),
+      storage: safeStorage(() => window.localStorage), onState: (st) => events.emit('sound', st),
+    })
+    cleanups.push(() => audio.dispose())
+    const unlock = () => audio.unlock()
+    window.addEventListener('keydown', unlock); window.addEventListener('pointerdown', unlock)
+    cleanups.push(() => { window.removeEventListener('keydown', unlock); window.removeEventListener('pointerdown', unlock) })
+    events.emit('mute', audio.isMuted())
+    audio.unlock()   // works when the visitor arrived by clicking (e.g. the nav link); otherwise waits for a gesture
+
     // ---------- assets ----------
     const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
     const texLoader = new THREE.TextureLoader()
@@ -88,14 +104,11 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const loadTex = (file: string) => new Promise<THREE.Texture>((res, rej) => texLoader.load(assetUrl(`sprites/${file}`), (t) => {
       t.colorSpace = THREE.NoColorSpace; t.premultiplyAlpha = false; t.anisotropy = 4; res(t)
     }, undefined, rej))
-    const audioOk = (path: string) => () => fetch(assetUrl(path), { method: 'HEAD' }).then((r) => { if (!r.ok) throw new Error(path); return true })
     const loaded = await loadAll({
       sprites: async () => Object.fromEntries(await Promise.all(Object.entries(manifest).map(async ([k, m]) => [k, await loadTex(m.file)] as const))),
       hero: () => gltf.loadAsync(assetUrl(ASSETS.hero)),
       horse: () => gltf.loadAsync(assetUrl(ASSETS.horse)),
-      ambience: audioOk(ASSETS.ambience),
-      step: audioOk(ASSETS.step),
-    }, ['ambience', 'step'], (p) => events.emit('progress', p))
+    }, [], (p) => events.emit('progress', p * 0.7))   // downloads are the first 70 %, baking the rest
     if (teardown.done) return
     const sprites = loaded.sprites!
     cleanups.push(() => Object.values(sprites).forEach((t) => t.dispose()))
@@ -175,15 +188,6 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     hero.play('Idle', 0); horse.play('Eating', 0)
 
     // ---------- audio + input ----------
-    let audio: AudioController | null = null
-    if (loaded.ambience && loaded.step) {
-      audio = createAudio({ ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), make: (u) => new Audio(u), storage: safeStorage(() => window.localStorage) })
-      cleanups.push(() => audio?.dispose())
-      const unlock = () => audio?.unlock()
-      window.addEventListener('keydown', unlock); window.addEventListener('pointerdown', unlock)
-      cleanups.push(() => { window.removeEventListener('keydown', unlock); window.removeEventListener('pointerdown', unlock) })
-      events.emit('mute', audio.isMuted())
-    }
     const input = createInput(window, { debug: opts.debug })
     cleanups.push(() => input.dispose())
     let zoomStep: -1 | 0 | 1 = 0
@@ -191,33 +195,54 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     let sceneScale: number = CONFIG.SCENERY_SYMBOL_SCALE, raw = false
     input.onPress('zoomIn', () => { zoomStep = 1 })
     input.onPress('zoomOut', () => { zoomStep = -1 })
-    input.onPress('mute', () => { if (audio) events.emit('mute', audio.toggleMute()) })
+    input.onPress('mute', () => events.emit('mute', audio.toggleMute()))
     let clock = 0
     input.onPress('interact', () => {
       if (player.mode !== 'free' || !inStrokeRange(player, LAYOUT.horse)) return
       player = faceToward(player, neckPoint(LAYOUT.horse, horseFacing), clock)
-      horseState = strokeHorse(horseState, clock)
+      horseState = strokeHorse(horseState, clock, reactionSide(horseFacing, LAYOUT.horse, player))
       events.emit('caption', captions.next())
     })
 
     // ---------- layout ----------
-    const layout = () => {
+    const layout = (clearCache = true) => {
       const w = window.innerWidth, h = window.innerHeight, dpr = Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR)
       camera.setViewport(w, h)
       renderer.setPixelRatio(dpr); renderer.setSize(w, h, false)
       paper.resize(w, h, dpr)
       compositor.setViewport(w, h)
-      baker.setLayout(camera.ppu, dpr, sceneScale, raw)
+      if (clearCache) baker.setLayout(camera.ppu, dpr, sceneScale, raw)
       for (const s of scenery) {
-        const b = baker.bake(s.sprite, s.scale, s.cell, s.glyph)
-        s.pxW = b.pxW; s.pxH = b.pxH; s.ax = b.ax; s.ay = b.ay
+        const bs = bakeScale(s.scale), b = baker.bake(s.sprite, bs, s.cell, s.glyph), k = s.scale / bs
+        s.pxW = b.pxW * k; s.pxH = b.pxH * k; s.ax = b.ax * k; s.ay = b.ay * k
         ;(s.mesh.material as THREE.ShaderMaterial).uniforms.map.value = b.texture
       }
       heroSrc.layout(camera.ppu, 1)
       horseSrc.layout(camera.ppu, CONFIG.HORSE_SYMBOL_SCALE)
       heroSrc.material.uniforms.mode.value = horseSrc.material.uniforms.mode.value = raw ? 1 : 0
     }
-    layout()
+    const layoutAsync = async () => {
+      const order = [...scenery]
+      let slice = performance.now()
+      // bake everything once, a few sprites per macrotask, then run the normal (now fully cached) layout
+      const w = window.innerWidth, h = window.innerHeight, dpr = Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR)
+      camera.setViewport(w, h)
+      baker.setLayout(camera.ppu, dpr, sceneScale, raw)
+      for (let i = 0; i < order.length; i++) {
+        const s = order[i]
+        baker.bake(s.sprite, bakeScale(s.scale), s.cell, s.glyph)
+        if (performance.now() - slice > 12) {           // yield after ~12 ms of work so the loading screen keeps animating
+          events.emit('progress', 0.7 + 0.3 * (i / order.length))
+          await nextTick(); if (teardown.done) return
+          slice = performance.now()
+        }
+      }
+      events.emit('progress', 1)
+      layout(false)
+    }
+    // first layout: bake scenery in small batches so the loading screen keeps animating
+    await layoutAsync()
+    if (teardown.done) return
     // re-baking every sprite is expensive: wait until the window stops resizing
     const relayout = trailingDebounce(layout, 150)
     const onResize = () => relayout.call()
@@ -252,7 +277,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       playerItem.world.x = player.x; playerItem.world.z = player.z
       trample.stamp(player.x, player.z, Math.sin(player.facing), Math.cos(player.facing), player.moving ? (player.running ? 1.1 : 0.8) * dt * 9 : dt * 1.5, player.moving ? 0.42 : 0.32)
       trample.update(dt)
-      audio?.step(dt, player.moving, player.running)
+      audio.step(dt, player.moving, player.running)
       hero.play(player.mode === 'stroke' ? 'Interact' : player.moving ? (player.running ? 'Run' : 'Walk') : 'Idle', player.moving ? 0.2 : 0.3)
       hero.root.rotation.y = player.facing
       hero.mixer.update(dt)
@@ -261,7 +286,8 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
 
       const dh = Math.hypot(player.x - LAYOUT.horse.x, player.z - LAYOUT.horse.z)
       horseState = updateHorse(horseState, dh, t, rand)
-      horse.play(horseState.clip, horseState.mode === 'graze' ? 0.8 : 0.6)
+      const reacting = horseState.clip.startsWith('Idle_HitReact')
+      horse.play(horseState.clip, reacting ? 0.12 : horseState.mode === 'graze' ? 0.8 : 0.6, reacting)
       horse.mixer.update(dt)
       look += (horseLookAngle(horseFacing, LAYOUT.horse, player, horseState.mode) - look) * Math.min(1, dt * 2.5)
       horse.applyLook(look)

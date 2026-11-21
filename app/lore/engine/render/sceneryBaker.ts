@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import type { SpriteMeta } from '../assets/manifest'
 import type { GlyphAtlas } from './glyphAtlas'
+import { bakeKey } from './bakeKey'
 import { glyphMaterial, type GlyphOpts } from './glyphMaterial'
 
 export type BakedSprite = {
@@ -38,7 +39,7 @@ export function createSceneryBaker(renderer: THREE.WebGLRenderer, atlas: GlyphAt
     bake(name, scale, cell, opts) {
       const m = manifest[name]
       const sc = Math.round(scale * 10) / 10
-      const key = JSON.stringify([name, sc, cell, opts])
+      const key = bakeKey(name, scale, cell, opts)
       const hit = cache.get(key)
       if (hit) return hit
       const k = (ppu / m.ppu) * sc, cw = cell[0] * symbolScale, ch = cell[1] * symbolScale

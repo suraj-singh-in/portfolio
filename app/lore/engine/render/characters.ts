@@ -5,7 +5,8 @@ import { CONFIG } from '../config'
 export type Animated = {
   root: THREE.Object3D
   mixer: THREE.AnimationMixer
-  play(name: string, fade?: number): void
+  /** cross-fade to a clip; once = play a single time and hold the last pose */
+  play(name: string, fade?: number, once?: boolean): void
   readonly current: string | null
 }
 
@@ -16,10 +17,12 @@ function animated(root: THREE.Object3D, clips: THREE.AnimationClip[]): Animated 
   let current: string | null = null
   return {
     root, mixer,
-    play(name, fade = 0.3) {
+    play(name, fade = 0.3, once = false) {
       if (current === name) return
       const a = actions.get(name)
       if (!a) return
+      a.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, once ? 1 : Infinity)
+      a.clampWhenFinished = once
       a.reset().fadeIn(fade).play()
       if (current) actions.get(current)?.fadeOut(fade)
       current = name

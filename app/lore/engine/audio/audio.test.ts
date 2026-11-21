@@ -66,4 +66,13 @@ describe('audio', () => {
     expect(a.isMuted()).toBe(false)
     expect(a.toggleMute()).toBe(true)
   })
+
+  it('reports blocked then on, so the loading screen can ask for a click', async () => {
+    const states: string[] = []
+    const f = fakeAudio(true)
+    const a = createAudio({ ambienceUrl: 'a', stepUrl: 's', make: f.make, storage: memStorage(), onState: (st) => states.push(st) })
+    a.unlock(); await flush()
+    a.unlock(); await flush()
+    expect(states).toEqual(['blocked', 'on'])
+  })
 })

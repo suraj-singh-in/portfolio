@@ -28,6 +28,8 @@ export function createAudio(opts: {
   stepUrl: string
   make: (url: string) => AudioLike
   storage: Pick<Storage, 'getItem' | 'setItem'>
+  /** 'blocked' when the browser refuses autoplay (needs a click/key), 'on' once ambience plays */
+  onState?: (s: 'on' | 'blocked') => void
 }): AudioController {
   const A = CONFIG.AUDIO
   const ambience = opts.make(opts.ambienceUrl)
@@ -45,7 +47,10 @@ export function createAudio(opts: {
     unlock() {
       if (unlocked || pending) return
       pending = true
-      ambience.play().then(() => { unlocked = true }).catch(() => { /* blocked: retry on next gesture */ }).finally(() => { pending = false })
+      ambience.play()
+        .then(() => { unlocked = true; opts.onState?.('on') })
+        .catch(() => { opts.onState?.('blocked') })   // retry on the next gesture
+        .finally(() => { pending = false })
     },
     toggleMute() {
       muted = !muted

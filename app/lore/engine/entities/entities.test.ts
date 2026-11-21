@@ -3,7 +3,7 @@ import { mulberry32 } from '../core/rng'
 import { edgeRadius } from '../world/clearing'
 import { CONFIG } from '../config'
 import { createPlayer, faceToward, updatePlayer } from './player'
-import { createHorse, horseLookAngle, strokeHorse, updateHorse } from './horse'
+import { createHorse, horseLookAngle, reactionSide, strokeHorse, updateHorse } from './horse'
 
 const step = (s: ReturnType<typeof createPlayer>, move: { x: number; z: number; run: boolean }, secs: number, t0 = 0) => {
   let t = t0
@@ -52,7 +52,7 @@ describe('horse', () => {
   })
 
   it('stroke lasts 3.2 s then alert', () => {
-    let h = strokeHorse(createHorse(), 10)
+    let h = strokeHorse(createHorse(), 10, 'left')
     expect(h.mode).toBe('stroked')
     h = updateHorse(h, 1, 13.1, rand); expect(h.mode).toBe('stroked')
     h = updateHorse(h, 1, 13.3, rand); expect(h.mode).toBe('alert')
@@ -72,5 +72,18 @@ describe('horse', () => {
     const a = horseLookAngle(0, { x: 0, z: 0 }, { x: 0, z: -3 }, 'alert')
     expect(Math.abs(a)).toBeCloseTo(0.9)
     expect(horseLookAngle(0, { x: 0, z: 0 }, { x: 0.3, z: 3 }, 'alert')).toBeCloseTo(Math.atan2(0.3, 3))
+  })
+
+  it('E plays the side reaction first, then settles into Idle', () => {
+    let h = strokeHorse(createHorse(), 10, 'left')
+    expect(h.clip).toBe('Idle_HitReact_Left')
+    h = updateHorse(h, 1, 10.3, rand); expect(h.clip).toBe('Idle_HitReact_Left')
+    h = updateHorse(h, 1, 10.8, rand); expect(h.clip).toBe('Idle')
+    expect(strokeHorse(createHorse(), 0, 'right').clip).toBe('Idle_HitReact_Right')
+  })
+
+  it('reaction side follows which side of the horse the player stands', () => {
+    expect(reactionSide(0, { x: 0, z: 0 }, { x: 2, z: 0 })).toBe('left')
+    expect(reactionSide(0, { x: 0, z: 0 }, { x: -2, z: 0 })).toBe('right')
   })
 })
