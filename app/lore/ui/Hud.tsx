@@ -19,7 +19,6 @@ export default function Hud({ s, playerName, nameRef }: { s: HudState; playerNam
   const controls = asciiBox("controls", [
     ["W A S D", "walk"],
     ["shift", "run"],
-    ["E", "stroke the horse"],
     ["scroll", "zoom"],
     ["M", s.muted === null ? "sound" : s.muted ? "unmute" : "mute"],
   ], 8)
