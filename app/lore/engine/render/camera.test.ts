@@ -24,6 +24,14 @@ describe('camera', () => {
     expect(c.zoom).toBeCloseTo(0.8, 3)
   })
 
+  it('a fast burst of wheel input in one frame still reaches max zoom', () => {
+    const c = createCamera()
+    c.setViewport(1600, 800)
+    c.update(0.016, { x: 0, z: 0 }, -2400, 0)
+    for (let i = 0; i < 200; i++) c.update(0.05, { x: 0, z: 0 }, 0, 0)
+    expect(c.zoom).toBeCloseTo(1.7, 3)
+  })
+
   it('eases toward the target zoom instead of jumping', () => {
     const c = createCamera()
     c.setViewport(1600, 800)

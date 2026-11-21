@@ -40,7 +40,8 @@ export function createCamera(): Camera {
   return {
     setViewport(nw, nh) { w = nw; h = nh; ppu = Math.max(56, Math.min(120, nh / 8)) },
     update(dt, follow, wheel, zoomStep) {
-      if (wheel) zoomT = clampZ(zoomT * Math.exp(-Math.max(-300, Math.min(300, wheel)) * 0.0016))
+      // wheel is the deltaY accumulated since last frame; the target is clamped, so no per-frame cap is needed
+      if (wheel) zoomT = clampZ(zoomT * Math.exp(-wheel * 0.0016))
       if (zoomStep) zoomT = clampZ(zoomStep > 0 ? zoomT * 1.1 : zoomT / 1.1)
       zoom += (zoomT - zoom) * Math.min(1, dt * CONFIG.CAMERA.zoomRate)
       const k = Math.min(1, dt * CONFIG.CAMERA.followRate)
