@@ -8,6 +8,7 @@ import Hud, { type HudState } from "./ui/Hud"
 import LoadingScreen from "./ui/LoadingScreen"
 import { detectWebGL } from "./ui/detectWebGL"
 import { isDesktop } from "./ui/isDesktop"
+import { applyNameLabel } from "./ui/nameLabel"
 
 type Mode = "checking" | "scene" | "small" | "webgl" | "error"
 
@@ -17,7 +18,8 @@ export default function LoreClient() {
   const [mode, setMode] = useState<Mode>("checking")
   const [progress, setProgress] = useState(0)
   const [ready, setReady] = useState(false)
-  const [hud, setHud] = useState<HudState>({ caption: null, prompt: false, muted: null, name: { x: 0, y: 0, opacity: 0 }, playerName: CONFIG.PLAYER_NAME, stats: null })
+  const [hud, setHud] = useState<HudState>({ caption: null, prompt: false, muted: null, stats: null })
+  const nameRef = useRef<HTMLDivElement>(null)
   const glRef = useRef<HTMLCanvasElement>(null)
   const paperRef = useRef<HTMLCanvasElement>(null)
 
@@ -25,10 +27,11 @@ export default function LoreClient() {
   useEffect(() => {
     const coarse = window.matchMedia("(pointer: coarse)")
     const params = new URLSearchParams(window.location.search)
-    const forceNoGL = params.has("debug") && params.has("nowebgl")
+    // probe WebGL once per mount (each probe creates a GPU context); resize only re-checks the cheap width/pointer gate
+    const hasGL = !(params.has("debug") && params.has("nowebgl")) && detectWebGL(() => document.createElement("canvas"))
     const evaluate = () => {
       if (!isDesktop({ width: window.innerWidth, coarsePointer: coarse.matches })) return setMode("small")
-      if (forceNoGL || !detectWebGL(() => document.createElement("canvas"))) return setMode("webgl")
+      if (!hasGL) return setMode("webgl")
       setMode((m) => (m === "error" ? m : "scene"))
     }
     evaluate()
@@ -52,7 +55,7 @@ export default function LoreClient() {
       engine.on("ready", () => setReady(true))
       engine.on("prompt", (prompt) => setHud((h) => ({ ...h, prompt })))
       engine.on("mute", (muted) => setHud((h) => ({ ...h, muted })))
-      engine.on("name", (name) => setHud((h) => ({ ...h, name })))
+      engine.on("name", (name) => { if (nameRef.current) applyNameLabel(nameRef.current, name) })   // per frame: no React state
       engine.on("stats", (stats) => setHud((h) => ({ ...h, stats })))
       engine.on("caption", (caption) => {
         setHud((h) => ({ ...h, caption }))
@@ -72,7 +75,7 @@ export default function LoreClient() {
     <div className="fixed inset-0 z-[55] overflow-hidden bg-[#fbfaf6]">
       <canvas ref={paperRef} className="fixed inset-0 block h-screen w-screen" aria-hidden />
       <canvas ref={glRef} className="fixed inset-0 block h-screen w-screen" aria-label="A walkable scene: a hut, a fire and a horse in a forest clearing" />
-      <Hud s={hud} />
+      <Hud s={hud} playerName={CONFIG.PLAYER_NAME} nameRef={nameRef} />
       <LoadingScreen text={CONFIG.LORE_LOADING_TEXT} progress={progress} done={ready} />
     </div>
   )

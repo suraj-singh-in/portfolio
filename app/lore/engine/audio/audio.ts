@@ -34,7 +34,8 @@ export function createAudio(opts: {
   ambience.loop = true
   ambience.volume = A.ambience
   const steps = Array.from({ length: A.stepPool }, () => { const s = opts.make(opts.stepUrl); s.volume = A.step; return s })
-  let muted = opts.storage.getItem(MUTE_KEY) === '1'
+  let muted = false
+  try { muted = opts.storage.getItem(MUTE_KEY) === '1' } catch { /* storage unavailable */ }
   let unlocked = false, pending = false, stepIdx = 0, timer = 0.1
 
   const applyMute = () => { ambience.muted = muted; steps.forEach((s) => (s.muted = muted)) }

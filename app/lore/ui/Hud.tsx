@@ -1,20 +1,19 @@
 "use client"
 
 import Link from "next/link"
+import type { RefObject } from "react"
 
 export type HudState = {
   caption: string | null
   prompt: boolean
   muted: boolean | null
-  name: { x: number; y: number; opacity: number }
-  playerName: string
   stats: string | null
 }
 
 const box = "pointer-events-none fixed z-[60] rounded bg-[#fbfaf6]/85 px-2 py-1 font-mono text-xs text-neutral-800"
 
 /** DOM overlay above the canvas: back link, controls hint, caption, interact prompt, name label, mute state. */
-export default function Hud({ s }: { s: HudState }) {
+export default function Hud({ s, playerName, nameRef }: { s: HudState; playerName: string; nameRef: RefObject<HTMLDivElement | null> }) {
   return (
     <>
       <Link href="/" className="fixed left-4 top-4 z-[60] rounded bg-[#fbfaf6]/85 px-2 py-1 font-mono text-xs text-neutral-800 hover:underline">
@@ -34,9 +33,10 @@ export default function Hud({ s }: { s: HudState }) {
       </div>
       <div
         className="pointer-events-none fixed left-0 top-0 z-[60] whitespace-nowrap font-mono text-[11px] font-semibold tracking-wide text-[#2a2722]"
-        style={{ transform: `translate(${Math.round(s.name.x)}px, ${Math.round(s.name.y)}px) translate(-50%, -100%)`, opacity: s.name.opacity }}
+        ref={nameRef}
+        style={{ opacity: 0 }}
       >
-        {s.playerName}
+        {playerName}
       </div>
     </>
   )

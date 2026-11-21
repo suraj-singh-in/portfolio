@@ -7,6 +7,9 @@ import { createAudio, type AudioController } from './audio/audio'
 import { CONFIG } from './config'
 import { createEvents } from './core/events'
 import { createLoop } from './core/loop'
+import { safeStorage } from './core/safeStorage'
+import { createTeardown } from './core/teardown'
+import { trailingDebounce } from './core/debounce'
 import { pickTier } from './core/quality'
 import { mulberry32 } from './core/rng'
 import type { Vec2 } from './core/types'
@@ -21,7 +24,7 @@ import { createFire } from './render/fire'
 import { createGlyphAtlas } from './render/glyphAtlas'
 import { cachedMaterial, type GlyphOpts } from './render/glyphMaterial'
 import { createGrass } from './render/grass'
-import { buildGrassField } from './render/grassField'
+import { buildGrassFieldAsync, type GrassField } from './render/grassField'
 import { createLiveSource } from './render/liveSource'
 import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
@@ -56,13 +59,21 @@ type SceneryItem = DrawItem & { sprite: string; scale: number; cell: [number, nu
 const TREE_LOOK: Partial<GlyphOpts> = { tint: 0.78, ink: '#17241a', contrast: 1.8, mid: 0.5, wash: 0.42 }
 const UNDER_LOOK: Partial<GlyphOpts> = { tint: 0.8, ink: '#18281a', contrast: 1.8, mid: 0.5, wash: 0.4 }
 
+/** The meadow field is deterministic from the seed, so restarts (narrow→wide, revisits) reuse it. */
+let fieldCache: { seed: number; field: GrassField } | null = null
+const nextTick = () => new Promise<void>((r) => setTimeout(r, 0))
+
 export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanvasElement }, opts: { quality?: string | null; debug: boolean }): Engine {
   const events = createEvents<EngineEvents>()
-  const cleanups: (() => void)[] = []
-  let disposed = false
-  let dispose = () => { disposed = true }
+  const teardown = createTeardown()
+  const cleanups = { push: (fn: () => void) => teardown.add(fn) }
+  const dispose = () => { teardown.run(); events.clear() }
 
   async function start() {
+    try { await run() } catch (e) { dispose(); throw e }
+  }
+
+  async function run() {
     const renderer = new THREE.WebGLRenderer({ canvas: canvases.gl, alpha: true, antialias: false, premultipliedAlpha: false })
     cleanups.push(() => { renderer.dispose(); renderer.forceContextLoss() })
     renderer.setClearColor(0x000000, 0)
@@ -85,14 +96,16 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       ambience: audioOk(ASSETS.ambience),
       step: audioOk(ASSETS.step),
     }, ['ambience', 'step'], (p) => events.emit('progress', p))
-    if (disposed) { cleanups.forEach((f) => f()); return }
+    if (teardown.done) return
     const sprites = loaded.sprites!
     cleanups.push(() => Object.values(sprites).forEach((t) => t.dispose()))
 
     // ---------- world ----------
     const rand = mulberry32(CONFIG.SEED)
     const world = scatterWorld(CONFIG.SEED)
-    const field = buildGrassField(world)
+    if (fieldCache?.seed !== CONFIG.SEED) fieldCache = { seed: CONFIG.SEED, field: await buildGrassFieldAsync(world, nextTick) }
+    if (teardown.done) return
+    const field = fieldCache.field
     const camera = createCamera()
     const atlas = createGlyphAtlas()
     cleanups.push(() => atlas.texture.dispose())
@@ -164,7 +177,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     // ---------- audio + input ----------
     let audio: AudioController | null = null
     if (loaded.ambience && loaded.step) {
-      audio = createAudio({ ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), make: (u) => new Audio(u), storage: window.localStorage })
+      audio = createAudio({ ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), make: (u) => new Audio(u), storage: safeStorage(() => window.localStorage) })
       cleanups.push(() => audio?.dispose())
       const unlock = () => audio?.unlock()
       window.addEventListener('keydown', unlock); window.addEventListener('pointerdown', unlock)
@@ -205,8 +218,11 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       heroSrc.material.uniforms.mode.value = horseSrc.material.uniforms.mode.value = raw ? 1 : 0
     }
     layout()
-    window.addEventListener('resize', layout)
-    cleanups.push(() => window.removeEventListener('resize', layout))
+    // re-baking every sprite is expensive: wait until the window stops resizing
+    const relayout = trailingDebounce(layout, 150)
+    const onResize = () => relayout.call()
+    window.addEventListener('resize', onResize)
+    cleanups.push(() => { relayout.cancel(); window.removeEventListener('resize', onResize) })
     camera.snap(player)
 
     if (opts.debug) {
@@ -277,18 +293,11 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const loop = createLoop(step, { raf: (cb) => window.requestAnimationFrame(cb), caf: (id) => window.cancelAnimationFrame(id), doc: document })
     cleanups.push(() => loop.stop())
     loop.start()
-
-    dispose = () => {
-      if (disposed) return
-      disposed = true
-      for (const f of cleanups.reverse()) { try { f() } catch { /* keep disposing */ } }
-      events.clear()
-    }
   }
 
   return {
     start,
-    dispose: () => dispose(),
+    dispose,
     on: events.on,
   }
 }

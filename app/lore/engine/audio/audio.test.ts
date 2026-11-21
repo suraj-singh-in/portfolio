@@ -59,4 +59,11 @@ describe('audio', () => {
     a.dispose()
     expect(f.made[0].paused).toBe(true)
   })
+
+  it('still works when storage.getItem throws', () => {
+    const storage = { getItem: () => { throw new Error('denied') }, setItem: () => { throw new Error('denied') } }
+    const a = createAudio({ ambienceUrl: 'a', stepUrl: 's', make: fakeAudio().make, storage })
+    expect(a.isMuted()).toBe(false)
+    expect(a.toggleMute()).toBe(true)
+  })
 })

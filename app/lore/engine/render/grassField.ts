@@ -19,6 +19,22 @@ export type GrassField = {
 
 /** Bake the meadow's density, height and grass-type regions once (same noise as the prototype). */
 export function buildGrassField(world: World): GrassField {
+  const job = fieldJob(world)
+  for (let j = 0; j < FIELD.h; j++) job.row(j)
+  return job.result()
+}
+
+/** Same as buildGrassField, but yields to the browser every few rows so the loading screen keeps animating. */
+export async function buildGrassFieldAsync(world: World, yieldFn: () => Promise<void>, rowsPerChunk = 16): Promise<GrassField> {
+  const job = fieldJob(world)
+  for (let j = 0; j < FIELD.h; j++) {
+    job.row(j)
+    if ((j + 1) % rowsPerChunk === 0) await yieldFn()
+  }
+  return job.result()
+}
+
+function fieldJob(world: World) {
   const { w, h } = FIELD
   const data = new Uint8Array(w * h * 4)
   const sx = CONFIG.CLEARING.stretchX
@@ -29,7 +45,7 @@ export function buildGrassField(world: World): GrassField {
   const hut = LAYOUT.hut, fire = LAYOUT.fire
   let acc = 0
 
-  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+  const row = (j: number) => { for (let i = 0; i < w; i++) {
     const x = FIELD.minX + ((i + 0.5) / w) * FIELD.sx, z = FIELD.minZ + ((j + 0.5) / h) * FIELD.sz
     const o = (j * w + i) * 4
     const blocked = (Math.abs(x - hut.x) < 2.3 && Math.abs(z - hut.z) < 2.0) || Math.hypot(x - fire.x, z - fire.z) < 0.95
@@ -48,6 +64,6 @@ export function buildGrassField(world: World): GrassField {
     data[o + 2] = (flower ? 128 : 0) + (dry ? 64 : 0)
     data[o + 3] = Math.round(tall * 255)
     acc += Math.min(1, Math.pow(d, 1.4) * 1.15)
-  }
-  return { data, meanAcceptance: acc / (w * h) }
+  } }
+  return { row, result: (): GrassField => ({ data, meanAcceptance: acc / (w * h) }) }
 }

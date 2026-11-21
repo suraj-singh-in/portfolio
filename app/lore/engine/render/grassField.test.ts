@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { LAYOUT } from '../world/clearing'
 import { scatterWorld } from '../world/scatter'
-import { FIELD, buildGrassField } from './grassField'
+import { FIELD, buildGrassField, buildGrassFieldAsync } from './grassField'
 
 describe('grass field', () => {
   const world = scatterWorld(CONFIG.SEED)
@@ -31,5 +31,13 @@ describe('grass field', () => {
 
   it('is deterministic', () => {
     expect(buildGrassField(world).data).toEqual(f.data)
+  })
+
+  it('async build yields to the browser between chunks and matches the sync result', async () => {
+    let yields = 0
+    const a = await buildGrassFieldAsync(world, async () => { yields++ })
+    expect(yields).toBeGreaterThan(10)
+    expect(a.data).toEqual(f.data)
+    expect(a.meanAcceptance).toBeCloseTo(f.meanAcceptance, 10)
   })
 })
