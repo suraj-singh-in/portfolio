@@ -20,6 +20,8 @@ export type Camera = {
   readonly up: THREE.Vector3
   /** unit vector from the scene toward the camera */
   readonly back: THREE.Vector3
+  /** world point at the centre of the screen */
+  readonly target: THREE.Vector3
 }
 
 export function createCamera(): Camera {
@@ -56,6 +58,6 @@ export function createCamera(): Camera {
     get pz() { return ppu * zoom },
     get width() { return w },
     get height() { return h },
-    right, up, back,
+    right, up, back, target,
   }
 }
