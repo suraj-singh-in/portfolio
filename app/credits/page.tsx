@@ -33,6 +33,14 @@ const CreditsPage = () => (
                 </ul>
             </div>
 
+            <div className="flex flex-col">
+                <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-medium">3D models and textures (lore)</p>
+                <ul className="list-disc pl-5 space-y-2 text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
+                    <li><a target="_blank" href="https://poly.pizza/m/5EGWBMpuXq">Adventurer</a> and <a target="_blank" href="https://poly.pizza/m/qvTrSG9pZF">Horse</a> by <a target="_blank" href="https://quaternius.com">Quaternius</a> (CC0)</li>
+                    <li>Trees, ferns, shrubs, rocks, stumps, fire pit, branches and axe from <a target="_blank" href="https://polyhaven.com">Poly Haven</a> by Rico Cilliers, Rob Tuytel, Kless Gyzen, Jenelle van Heerden, Sebastian Platen and Ulan Cabanilla (CC0)</li>
+                </ul>
+            </div>
+
         </div>
     </PageShell>
 )
