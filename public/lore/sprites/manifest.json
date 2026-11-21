@@ -1,0 +1,343 @@
+{
+ "firepit": {
+  "file": "firepit.webp",
+  "w": 178,
+  "h": 171,
+  "ppu": 100,
+  "anchor": [
+   90.3,
+   89.2
+  ],
+  "foot": 0.8
+ },
+ "hut": {
+  "file": "hut.webp",
+  "w": 668,
+  "h": 773,
+  "ppu": 100,
+  "anchor": [
+   334.4,
+   500.3
+  ],
+  "foot": 3.08
+ },
+ "log": {
+  "file": "log.webp",
+  "w": 318,
+  "h": 222,
+  "ppu": 100,
+  "anchor": [
+   151.9,
+   121.7
+  ],
+  "foot": 1.42
+ },
+ "pine_a": {
+  "file": "pine_a.webp",
+  "w": 358,
+  "h": 935,
+  "ppu": 100,
+  "anchor": [
+   166,
+   763.6
+  ],
+  "foot": 1.75
+ },
+ "pine_b": {
+  "file": "pine_b.webp",
+  "w": 466,
+  "h": 840,
+  "ppu": 100,
+  "anchor": [
+   220.4,
+   642.7
+  ],
+  "foot": 2.08
+ },
+ "pine_c": {
+  "file": "pine_c.webp",
+  "w": 484,
+  "h": 889,
+  "ppu": 100,
+  "anchor": [
+   262.4,
+   683.9
+  ],
+  "foot": 2.17
+ },
+ "fir_a": {
+  "file": "fir_a.webp",
+  "w": 307,
+  "h": 823,
+  "ppu": 100,
+  "anchor": [
+   151.5,
+   687
+  ],
+  "foot": 1.37
+ },
+ "fir_b": {
+  "file": "fir_b.webp",
+  "w": 437,
+  "h": 827,
+  "ppu": 100,
+  "anchor": [
+   216.7,
+   647.3
+  ],
+  "foot": 1.95
+ },
+ "fir_c": {
+  "file": "fir_c.webp",
+  "w": 440,
+  "h": 832,
+  "ppu": 100,
+  "anchor": [
+   231.5,
+   649
+  ],
+  "foot": 1.98
+ },
+ "oak": {
+  "file": "oak.webp",
+  "w": 425,
+  "h": 909,
+  "ppu": 100,
+  "anchor": [
+   193.1,
+   578.5
+  ],
+  "foot": 2.79
+ },
+ "oak_b": {
+  "file": "oak_b.webp",
+  "w": 659,
+  "h": 818,
+  "ppu": 100,
+  "anchor": [
+   256.8,
+   622.2
+  ],
+  "foot": 2.94
+ },
+ "gnarled": {
+  "file": "gnarled.webp",
+  "w": 781,
+  "h": 977,
+  "ppu": 100,
+  "anchor": [
+   398,
+   677.4
+  ],
+  "foot": 3.5
+ },
+ "shrub_a": {
+  "file": "shrub_a.webp",
+  "w": 149,
+  "h": 216,
+  "ppu": 100,
+  "anchor": [
+   69.9,
+   156.7
+  ],
+  "foot": 0.74
+ },
+ "fern_a": {
+  "file": "fern_a.webp",
+  "w": 74,
+  "h": 87,
+  "ppu": 100,
+  "anchor": [
+   39.6,
+   53.2
+  ],
+  "foot": 0.37
+ },
+ "shrub_b": {
+  "file": "shrub_b.webp",
+  "w": 207,
+  "h": 198,
+  "ppu": 100,
+  "anchor": [
+   89.8,
+   131.7
+  ],
+  "foot": 0.92
+ },
+ "fern_b": {
+  "file": "fern_b.webp",
+  "w": 151,
+  "h": 157,
+  "ppu": 100,
+  "anchor": [
+   73.7,
+   89.9
+  ],
+  "foot": 0.72
+ },
+ "shrub_c": {
+  "file": "shrub_c.webp",
+  "w": 237,
+  "h": 188,
+  "ppu": 100,
+  "anchor": [
+   115.8,
+   134
+  ],
+  "foot": 1.06
+ },
+ "fern_c": {
+  "file": "fern_c.webp",
+  "w": 154,
+  "h": 142,
+  "ppu": 100,
+  "anchor": [
+   79.9,
+   80.5
+  ],
+  "foot": 0.69
+ },
+ "shrub_d": {
+  "file": "shrub_d.webp",
+  "w": 150,
+  "h": 152,
+  "ppu": 100,
+  "anchor": [
+   92.1,
+   107.1
+  ],
+  "foot": 0.78
+ },
+ "fern_d": {
+  "file": "fern_d.webp",
+  "w": 111,
+  "h": 101,
+  "ppu": 100,
+  "anchor": [
+   50.5,
+   54.7
+  ],
+  "foot": 0.49
+ },
+ "rock_01": {
+  "file": "rock_01.webp",
+  "w": 105,
+  "h": 164,
+  "ppu": 100,
+  "anchor": [
+   52.3,
+   84.8
+  ],
+  "foot": 0.71
+ },
+ "rock_02": {
+  "file": "rock_02.webp",
+  "w": 197,
+  "h": 179,
+  "ppu": 100,
+  "anchor": [
+   97.7,
+   95.8
+  ],
+  "foot": 0.88
+ },
+ "rock_03": {
+  "file": "rock_03.webp",
+  "w": 130,
+  "h": 132,
+  "ppu": 100,
+  "anchor": [
+   65,
+   71.2
+  ],
+  "foot": 0.58
+ },
+ "rock_04": {
+  "file": "rock_04.webp",
+  "w": 112,
+  "h": 134,
+  "ppu": 100,
+  "anchor": [
+   60.2,
+   76.7
+  ],
+  "foot": 0.5
+ },
+ "rock_05": {
+  "file": "rock_05.webp",
+  "w": 163,
+  "h": 154,
+  "ppu": 100,
+  "anchor": [
+   87.5,
+   79.7
+  ],
+  "foot": 0.73
+ },
+ "rock_06": {
+  "file": "rock_06.webp",
+  "w": 153,
+  "h": 138,
+  "ppu": 100,
+  "anchor": [
+   74,
+   76.9
+  ],
+  "foot": 0.68
+ },
+ "rock_07": {
+  "file": "rock_07.webp",
+  "w": 95,
+  "h": 78,
+  "ppu": 100,
+  "anchor": [
+   49.8,
+   41
+  ],
+  "foot": 0.42
+ },
+ "rock_09": {
+  "file": "rock_09.webp",
+  "w": 97,
+  "h": 102,
+  "ppu": 100,
+  "anchor": [
+   48.4,
+   61.5
+  ],
+  "foot": 0.48
+ },
+ "rock_10": {
+  "file": "rock_10.webp",
+  "w": 130,
+  "h": 139,
+  "ppu": 100,
+  "anchor": [
+   66.2,
+   82.8
+  ],
+  "foot": 0.66
+ },
+ "rock_11": {
+  "file": "rock_11.webp",
+  "w": 120,
+  "h": 123,
+  "ppu": 100,
+  "anchor": [
+   60.9,
+   67.9
+  ],
+  "foot": 0.54
+ },
+ "rock_13": {
+  "file": "rock_13.webp",
+  "w": 125,
+  "h": 144,
+  "ppu": 100,
+  "anchor": [
+   39.8,
+   58.4
+  ],
+  "foot": 0.58
+ }
+}
