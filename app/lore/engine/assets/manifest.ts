@@ -17,8 +17,8 @@ export const ASSETS = {
   sprites: 'sprites/manifest.json',
   hero: 'models/hero.glb',
   horse: 'models/horse.glb',
-  ambience: 'audio/ambience.mp3',
-  step: 'audio/step.mp3',
+  ambience: 'audio/ambience.wav',
+  step: 'audio/step.wav',
 } as const
 
 export const assetUrl = (path: string) => `${ASSETS.base}/${path}`

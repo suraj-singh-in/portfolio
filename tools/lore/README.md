@@ -15,9 +15,9 @@ Source assets live outside this repo in `side-quest/text-draw/spike-ascii-3d/` (
 - horse ← `spike-ascii-3d/models/horse.glb` (Quaternius "Horse", exported from Blender with only the needed clips)
 
 ## Audio
-`public/lore/audio/ambience.mp3` ← https://sfxmint.com/dl/ambience-forest-55.mp3
-`public/lore/audio/step.mp3` ← https://sfxmint.com/dl/footsteps-single-01.mp3
-sfxmint: free to use, no attribution required (confirmed by Suraj).
+`public/lore/audio/ambience.wav` ← sfxmint "growth … part 1" (10 s loop, saved manually by Suraj — sfxmint rate-limits scripted downloads)
+`public/lore/audio/step.wav` ← sfxmint "footsteps-single-01" (1 s)
+sfxmint: free to use, no attribution required (confirmed by Suraj). WAV kept as-is (~1.9 MB total); convert to MP3/OGG later to save bandwidth.
 
 ## Licences / sources
 - Quaternius (via poly.pizza): Adventurer, Horse — CC0.
