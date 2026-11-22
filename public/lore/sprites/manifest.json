@@ -342,14 +342,14 @@
  },
  "town_wall_side": {
   "file": "town_wall_side.webp",
-  "w": 261,
-  "h": 1534,
+  "w": 892,
+  "h": 1509,
   "ppu": 100,
   "anchor": [
-   140.3,
-   940.9
+   457.3,
+   925
   ],
-  "foot": 6.91
+  "foot": 6.76
  },
  "stone_wall": {
   "file": "stone_wall.webp",
@@ -372,5 +372,38 @@
    165.6
   ],
   "foot": 3.42
+ },
+ "person_a": {
+  "file": "person_a.webp",
+  "w": 138,
+  "h": 186,
+  "ppu": 100,
+  "anchor": [
+   69,
+   152.6
+  ],
+  "foot": 0.61
+ },
+ "person_b": {
+  "file": "person_b.webp",
+  "w": 128,
+  "h": 181,
+  "ppu": 100,
+  "anchor": [
+   64,
+   150.6
+  ],
+  "foot": 0.57
+ },
+ "person_c": {
+  "file": "person_c.webp",
+  "w": 81,
+  "h": 196,
+  "ppu": 100,
+  "anchor": [
+   40.5,
+   157.5
+  ],
+  "foot": 0.38
  }
 }

@@ -2,7 +2,7 @@ import { CONFIG } from '../config'
 import { mulberry32 } from '../core/rng'
 import type { Circle } from '../core/types'
 import { LAYOUT, edgeRadius } from './clearing'
-import { ROAD, STONE_WALL, WALL, inClearing, roadQuery } from './road'
+import { ROAD, STONE_WALL, WALL, inClearing, roadQuery, wallLine, wallXAt } from './road'
 
 export type Placed = { sprite: string; x: number; z: number; scale: number; sway: number }
 export type Rock = Placed & { tufts: boolean; tuftCount: number }
@@ -96,7 +96,7 @@ export function scatterWorld(seed: number): World {
     return { x: p.x + (-(b.z - a.z) / l) * off, z: p.z + ((b.x - a.x) / l) * off }
   }
   // keep the walls and the paved path behind the gate clear of trees
-  const wallZone = (x: number, z: number) => (Math.abs(z - WALL.z) < WALL.half + 2.5 && x > WALL.x - 4)
+  const wallZone = (x: number, z: number) => (Math.abs(z - WALL.z) < WALL.half + 2.5 && x > wallXAt(z) - 4)
     || (Math.abs(z - STONE_WALL.z) < 3 && x > STONE_WALL.x0 - 1.5 && x < STONE_WALL.x1 + 1.5)
   for (let tries = 0, made = 0; made < 700 && tries < 40000; tries++) {
     const s = rand() * (ROAD.length + 6), side = rand() < 0.5 ? -1 : 1
@@ -127,7 +127,7 @@ export function scatterWorld(seed: number): World {
     rocks.push({ sprite: ROCKS[(rand() * ROCKS.length) | 0], x, z, scale: 0.16 + rand() * 0.18, sway: 0, tufts: false, tuftCount: 0 })
   }
   // the town wall closes the road
-  for (let z = WALL.z - WALL.half; z <= WALL.z + WALL.half + 1e-6; z += 0.9) obstacles.push({ x: WALL.x, z, r: 0.7 })
+  for (const p of wallLine(0.9)) obstacles.push({ x: p.x, z: p.z, r: 0.7 })
 
   return { trees, undergrowth, rocks, obstacles }
 }

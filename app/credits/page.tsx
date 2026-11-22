@@ -36,7 +36,8 @@ const CreditsPage = () => (
             <div className="flex flex-col">
                 <p className="text-neutral-600 dark:text-neutral-400 mb-3 text-sm font-medium">3D models and textures (lore)</p>
                 <ul className="list-disc pl-5 space-y-2 text-neutral-700 dark:text-neutral-300 leading-relaxed text-sm">
-                    <li><a target="_blank" href="https://poly.pizza/m/5EGWBMpuXq">Adventurer</a>, <a target="_blank" href="https://poly.pizza/m/qvTrSG9pZF">Horse</a> and <a target="_blank" href="https://poly.pizza/m/5d80r2XX3O">Wall Towers Door</a>, <a target="_blank" href="https://poly.pizza/m/tdeAOh3LQV">Stone Wall</a> and <a target="_blank" href="https://poly.pizza/m/ZuRHRsKWoz">Path Straight</a> by <a target="_blank" href="https://quaternius.com">Quaternius</a> (CC0)</li>
+                    <li><a target="_blank" href="https://poly.pizza/m/5EGWBMpuXq">Adventurer</a>, <a target="_blank" href="https://poly.pizza/m/qvTrSG9pZF">Horse</a>, <a target="_blank" href="https://poly.pizza/m/5d80r2XX3O">Wall Towers Door</a>, <a target="_blank" href="https://poly.pizza/m/tdeAOh3LQV">Stone Wall</a> and <a target="_blank" href="https://poly.pizza/m/ZuRHRsKWoz">Path Straight</a> by <a target="_blank" href="https://quaternius.com">Quaternius</a> (CC0)</li>
+                    <li><a target="_blank" href="https://poly.pizza/m/fyhTCnE2xlT">People Poses</a> by Don Carson, recoloured (<a target="_blank" href="https://creativecommons.org/licenses/by/3.0/">CC-BY 3.0</a>)</li>
                     <li>Trees, ferns, shrubs, rocks, stumps, fire pit, branches and axe from <a target="_blank" href="https://polyhaven.com">Poly Haven</a> by Rico Cilliers, Rob Tuytel, Kless Gyzen, Jenelle van Heerden, Sebastian Platen and Ulan Cabanilla (CC0)</li>
                 </ul>
             </div>

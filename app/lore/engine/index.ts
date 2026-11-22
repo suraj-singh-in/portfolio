@@ -31,7 +31,7 @@ import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
-import { GATE_PATH, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
+import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
 import { scatterWorld } from './world/scatter'
 
 export type EngineEvents = {
@@ -157,6 +157,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
         rect(c) { const [gx, gy] = c.worldToScreen(at.x, 0, at.z); const z = c.zoom; return { left: Math.round(gx - item.ax * z), top: Math.round(gy - item.ay * z), w: item.pxW * z, h: item.pxH * z } },
       }
       scenery.push(item); compositor.add(item)
+      return item
       cleanups.push(() => { mesh.geometry.dispose(); (mesh.material as THREE.Material).dispose() })
     }
     addScenery('hut', LAYOUT.hut, 1, [3.5, 5.25], { solid: true, tint: 0.62, wash: 0.3 }, 3.0, false)
@@ -165,7 +166,8 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const STONE: Partial<GlyphOpts> = { solid: true, tint: 0.6, wash: 0.28 }
     addScenery('town_wall_side', WALL, 1, [3.5, 5.25], STONE, 0, false)
     for (const p of STONE_WALL_SEGMENTS) addScenery('stone_wall', p, 1, [3.5, 5.25], STONE, 0, false)
-    for (const p of GATE_PATH) addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false)
+    for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
+    for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)
     addScenery('log', LAYOUT.log, 1, [4, 6], { solid: true, tint: 0.45 }, 0.8, false)
     for (const t of world.trees) addScenery(t.sprite, t, t.scale, [4, 6], { ...TREE_LOOK, sway: t.sway }, 1.6, true)
     for (const u of world.undergrowth) addScenery(u.sprite, u, u.scale, [3, 4.5], { ...UNDER_LOOK, sway: u.sway }, 0.4, false)

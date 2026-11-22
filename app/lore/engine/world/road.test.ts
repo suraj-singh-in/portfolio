@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { scatterWorld } from './scatter'
 import { clampToClearing, edgeRadius } from './clearing'
-import { GATE_PATH, ROAD, STONE_WALL, WALL, clampToWorld, createWallCaption, roadQuery } from './road'
+import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, clampToWorld, createWallCaption, roadQuery, wallXAt } from './road'
 
 const inClearing = (p: { x: number; z: number }) => {
   const sx = p.x / CONFIG.CLEARING.stretchX
@@ -37,9 +37,30 @@ describe('east road', () => {
     expect(STONE_WALL.z).toBeLessThan(northMost - 2)
     const cornerX = ROAD.points.find((p) => p.z < -12)!.x
     expect(STONE_WALL.x0).toBeLessThan(cornerX - 3)
-    expect(STONE_WALL.x1).toBeGreaterThanOrEqual(WALL.x - 1)
+    expect(STONE_WALL.x1).toBeGreaterThanOrEqual(wallXAt(STONE_WALL.z) - 0.5)   // meets the town wall
     expect(GATE_PATH.length).toBeGreaterThanOrEqual(2)
     for (const t of GATE_PATH) expect(t.x).toBeGreaterThan(WALL.x)
+  })
+
+  it('turns the town wall a little toward the camera, north end west, so its gate face shows', () => {
+    expect(WALL.tilt).toBeGreaterThan(0.2)
+    expect(WALL.tilt).toBeLessThan(0.7)
+    expect(wallXAt(WALL.z - 5)).toBeLessThan(WALL.x)
+    expect(wallXAt(WALL.z + 5)).toBeGreaterThan(WALL.x)
+  })
+
+  it('starts the paved path right behind the wall with no gap between tiles', () => {
+    const back = wallXAt(WALL.z) + WALL.depth / 2
+    expect(GATE_PATH[0].x - GATE_TILE.half).toBeLessThanOrEqual(back + 0.05)
+    for (let i = 1; i < GATE_PATH.length; i++) expect(GATE_PATH[i].x - GATE_PATH[i - 1].x).toBeLessThanOrEqual(GATE_TILE.half * 2)
+  })
+
+  it('puts a few townsfolk on the far side of the wall, off the walkable road', () => {
+    expect(PEOPLE.length).toBeGreaterThanOrEqual(3)
+    for (const p of PEOPLE) {
+      expect(p.x).toBeGreaterThan(wallXAt(p.z) + WALL.depth)
+      expect(clampToWorld(p)).not.toEqual(p)
+    }
   })
 
   it('keeps points on the road and inside the clearing as they are', () => {
@@ -80,7 +101,7 @@ describe('east road', () => {
   it('blocks the way at the wall', () => {
     const w = scatterWorld(CONFIG.SEED)
     const end = ROAD.points[ROAD.points.length - 1]
-    const blockers = w.obstacles.filter((o) => Math.abs(o.x - WALL.x) < 0.01 && Math.abs(o.z - end.z) < 3)
+    const blockers = w.obstacles.filter((o) => Math.abs(o.x - wallXAt(o.z)) < 0.01 && Math.abs(o.z - end.z) < 3)
     expect(blockers.length).toBeGreaterThan(0)
   })
 
