@@ -35,7 +35,7 @@ export const CONFIG = {
   /** ground speed (m/s) at which the horse's Walk / Gallop clips play at 1× — feet stay planted */
   RIDE_CLIP_SPEED: { walk: 2.6, gallop: 6 },
   /** saddle point relative to the horse's Torso2 bone (horse space, metres; measured in Blender) */
-  SADDLE: [0, 0.314, 0.081] as const,
+  SADDLE: [0, 0.374, -0.089] as const,
   DISMOUNT_CAPTION: 'You slide down. It stays close.',
   MAX_DPR: 2,
   LORE_LOADING_TEXT: 'Before the paths had names, a fire was kept burning at the edge of the forest.',

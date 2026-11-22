@@ -41,7 +41,10 @@ def rot(name, axis_world, deg):
     vl.update()
 
 
-def seated(lean=8.0, bob=0.0, rock=0.0, legs=1.0, arms=1.0, flex=75, knee=90, spread=28, tuck=24, swingR=0.0):
+def seated(lean=14.0, bob=0.0, rock=0.0, legs=1.0, arms=1.0, flex=40, knee=70, spread=8, tuck=0, swingR=0.0,
+           upper=75, fore=-45, inward=30, evenR=-20, shoulder=0):
+    # defaults fitted against the horse mesh (2026-11-22): knee/ankle hug the flank ~5 cm out,
+    # hands rest over the base of the mane; seat = lowest point of the back
     """Seated rider pose on top of the current pose. legs/arms blend 0..1; swingR lifts the right leg over."""
     if bob:
         pb = P["Body"]
@@ -61,9 +64,10 @@ def seated(lean=8.0, bob=0.0, rock=0.0, legs=1.0, arms=1.0, flex=75, knee=90, sp
         foot.matrix = m
         vl.update()
         rot("Foot." + s, WX, -15 * legs)
-        rot("UpperArm." + s, WX, -22 * arms)
-        rot("LowerArm." + s, WX, -30 * arms)   # hands low and forward, at rein height
-        rot("LowerArm." + s, WY, -20 * sg * arms)
+        rot("Shoulder." + s, WX, -shoulder * arms)   # shoulders drop forward to reach the reins
+        rot("UpperArm." + s, WX, -upper * arms)
+        rot("LowerArm." + s, WX, -(fore + (evenR if s == "R" else 0)) * arms)   # evenR: the idle base holds the right hand higher
+        rot("LowerArm." + s, WY, -inward * sg * arms)
     rot("Abdomen", WX, (lean + rock) * 0.5)
     rot("Chest", WX, (lean + rock) * 0.5)
 
@@ -87,17 +91,17 @@ def build():
     two_pi = 2 * math.pi
     W, G = 29, 15
     clips = {
-        "Ride_Idle": [(f, capture(dict(lean=8 + 2 * math.sin(two_pi * f / 48), bob=0.004 * math.sin(two_pi * f / 48)), f % idle_len))
+        "Ride_Idle": [(f, capture(dict(lean=14 + 2 * math.sin(two_pi * f / 48), bob=0.004 * math.sin(two_pi * f / 48)), f % idle_len))
                       for f in (0, 12, 24, 36, 48)],
-        "Ride_Walk": [(f, capture(dict(lean=10, bob=-0.025 * abs(math.sin(two_pi * f / W)), rock=3 * math.sin(two_pi * f / W))))
+        "Ride_Walk": [(f, capture(dict(lean=16, bob=-0.025 * abs(math.sin(two_pi * f / W)), rock=3 * math.sin(two_pi * f / W))))
                       for f in list(range(0, W, 4)) + [W]],
-        "Ride_Gallop": [(f, capture(dict(lean=16, bob=0.05 * math.sin(two_pi * f / G), rock=6 * math.sin(two_pi * f / G + 0.8), flex=70, knee=95)))
+        "Ride_Gallop": [(f, capture(dict(lean=32, bob=0.05 * math.sin(two_pi * f / G), rock=6 * math.sin(two_pi * f / G + 0.8), flex=48, knee=82)))
                         for f in list(range(0, G, 2)) + [G]],
         "Ride_Mount": [
             (0, capture(dict(lean=0, legs=0, arms=0))),
-            (8, capture(dict(lean=14, legs=0.35, arms=0.7))),
+            (8, capture(dict(lean=18, legs=0.35, arms=0.7))),
             (14, capture(dict(lean=20, legs=0.8, arms=1.0, swingR=1.0))),
-            (20, capture(dict(lean=12, legs=1.0, arms=1.0, swingR=0.3))),
+            (20, capture(dict(lean=16, legs=1.0, arms=1.0, swingR=0.3))),
             (24, capture(dict())),
         ],
     }
@@ -143,6 +147,7 @@ def export():
                               export_yup=True, export_materials="NONE", export_apply=False)
 
 
-build()
-export()
-print("wrote", OUT)
+if __name__ == "__main__":
+    build()
+    export()
+    print("wrote", OUT)
