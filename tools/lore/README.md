@@ -23,4 +23,5 @@ sfxmint: free to use, no attribution required (confirmed by Suraj). WAV kept as-
 ## Licences / sources
 - Quaternius (via poly.pizza): Adventurer, Horse — CC0.
 - Poly Haven (CC0): pine_tree_01, fir_tree_01 (Rico Cilliers, Rob Tuytel); tree_small_02 (Rico Cilliers); island_tree_01 (Rico Cilliers, Rob Tuytel); fern_02 (Rico Cilliers, Rob Tuytel); shrub_02 (Rico Cilliers); rock_moss_set_01, rock_moss_set_02 (Kless Gyzen); tree_stump_01 (Rob Tuytel); dead_tree_trunk_02 (Jenelle van Heerden, Rico Cilliers); stone_fire_pit (Sebastian Platen); dry_branches_medium_01 (Rico Cilliers); wooden_axe (Ulan Cabanilla).
+- Quaternius (via poly.pizza, CC0): Wall Towers Door Seco — baked as `town_wall` (×7) with `bake_sprites.render_asset` from a scratch scene; source in `spike-ascii-3d/models/wall_raw/`.
 - Hut: modelled in Blender for this project.

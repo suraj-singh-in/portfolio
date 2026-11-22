@@ -3,8 +3,10 @@ import { fbm, valueNoise } from '../core/rng'
 import { LAYOUT, edgeRadius } from '../world/clearing'
 import type { World } from '../world/scatter'
 
-/** Ground area the grass covers (world metres) and the resolution of its field map. */
-export const FIELD = { minX: -32, minZ: -28, sx: 64, sz: 56, w: 512, h: 448 } as const
+/** Ground the field map covers (world metres; clearing + east road) at 6 cells per metre — finer than any grass pattern. */
+export const FIELD = { minX: -32, minZ: -40, sx: 144, sz: 68, w: 864, h: 408 } as const
+/** The blades live in a window this size that follows the camera; each blade stays pinned to the world. */
+export const GRASS_WINDOW = { sx: 64, sz: 56 } as const
 
 export type GrassField = {
   /**
@@ -39,7 +41,7 @@ function fieldJob(world: World) {
   const data = new Uint8Array(w * h * 4)
   const sx = CONFIG.CLEARING.stretchX
   const props = [
-    ...world.rocks.map((r) => ({ x: r.x, z: r.z, r: 0.55 * r.scale })),
+    ...world.rocks.filter((r) => r.scale >= 0.4).map((r) => ({ x: r.x, z: r.z, r: 0.55 * r.scale })),   // pebbles are too small to bare the ground
     { ...LAYOUT.log, r: 0.9 }, { ...LAYOUT.gnarled, r: 0.9 },
   ]
   const hut = LAYOUT.hut, fire = LAYOUT.fire

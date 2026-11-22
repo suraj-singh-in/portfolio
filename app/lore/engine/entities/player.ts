@@ -1,6 +1,7 @@
 import { CONFIG } from '../config'
 import type { Circle, Vec2 } from '../core/types'
-import { clampToClearing, resolveCollisions } from '../world/clearing'
+import { resolveCollisions } from '../world/clearing'
+import { clampToWorld } from '../world/road'
 
 export type PlayerState = {
   x: number; z: number
@@ -31,7 +32,7 @@ export function updatePlayer(s: PlayerState, move: { x: number; z: number; run: 
     facing += wrap(Math.atan2(move.x, move.z) - facing) * Math.min(1, dt * 12)
   }
   let p: Vec2 = resolveCollisions({ x, z }, obstacles, CONFIG.PLAYER.radius)
-  p = clampToClearing(p)
+  p = clampToWorld(p)
   return { x: p.x, z: p.z, facing, mode, until: s.until, moving, running }
 }
 

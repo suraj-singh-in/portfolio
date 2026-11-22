@@ -25,12 +25,13 @@ import { createFire } from './render/fire'
 import { createGlyphAtlas } from './render/glyphAtlas'
 import { cachedMaterial, type GlyphOpts } from './render/glyphMaterial'
 import { createGrass } from './render/grass'
-import { buildGrassFieldAsync, type GrassField } from './render/grassField'
+import { FIELD, buildGrassFieldAsync, type GrassField } from './render/grassField'
 import { createLiveSource } from './render/liveSource'
 import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
+import { WALL, createWallCaption } from './world/road'
 import { scatterWorld } from './world/scatter'
 
 export type EngineEvents = {
@@ -118,7 +119,10 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     // ---------- world ----------
     const rand = mulberry32(CONFIG.SEED)
     const world = scatterWorld(CONFIG.SEED)
-    if (fieldCache?.seed !== CONFIG.SEED) fieldCache = { seed: CONFIG.SEED, field: await buildGrassFieldAsync(world, nextTick) }
+    if (fieldCache?.seed !== CONFIG.SEED) {
+      let chunk = 0; const chunks = Math.ceil(FIELD.h / 16)   // field build: 70 → 85 % of the bar
+      fieldCache = { seed: CONFIG.SEED, field: await buildGrassFieldAsync(world, () => { events.emit('progress', 0.7 + 0.15 * (++chunk / chunks)); return nextTick() }) }
+    }
     if (teardown.done) return
     const field = fieldCache.field
     const camera = createCamera()
@@ -158,6 +162,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     addScenery('hut', LAYOUT.hut, 1, [3.5, 5.25], { solid: true, tint: 0.62, wash: 0.3 }, 3.0, false)
     addScenery('firepit', LAYOUT.fire, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.12, contrast: 3.2, mid: 0.52 }, 0, false)
     addScenery('gnarled', LAYOUT.gnarled, 1, [4, 6], { ...TREE_LOOK, sway: 0.01 }, 2.2, true)
+    addScenery('town_wall', WALL, 1, [3.5, 5.25], { solid: true, tint: 0.6, wash: 0.28 }, 0, false)
     addScenery('log', LAYOUT.log, 1, [4, 6], { solid: true, tint: 0.45 }, 0.8, false)
     for (const t of world.trees) addScenery(t.sprite, t, t.scale, [4, 6], { ...TREE_LOOK, sway: t.sway }, 1.6, true)
     for (const u of world.undergrowth) addScenery(u.sprite, u, u.scale, [3, 4.5], { ...UNDER_LOOK, sway: u.sway }, 0.4, false)
@@ -204,6 +209,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const seat = new THREE.Vector3(), ground = new THREE.Vector3(), hipRot = new THREE.Vector3(), riderEuler = new THREE.Euler()
     let mountFrom: Vec2 = { x: 0, z: 0 }, lean = 0, prevFacing = ride.facing
     let approach: { side: 'left' | 'right'; until: number } | null = null
+    const wallCaption = createWallCaption()
     let snortAt = 0   // the horse answers a stroke with a snort, a beat after the touch
     /** hero.root position in horse space that puts the hip on the saddle, this frame; lean pivots about the hip */
     const seatPos = (roll: number) => {
@@ -284,7 +290,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
         const s = order[i]
         baker.bake(s.sprite, bakeScale(s.scale), s.cell, s.glyph)
         if (performance.now() - slice > 12) {           // yield after ~12 ms of work so the loading screen keeps animating
-          events.emit('progress', 0.7 + 0.3 * (i / order.length))
+          events.emit('progress', 0.85 + 0.15 * (i / order.length))
           await nextTick(); if (teardown.done) return
           slice = performance.now()
         }
@@ -358,6 +364,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       audio.step(dt, player.moving, player.running)
       audio.hoof(dt, ride.phase === 'riding' && ride.speed > 0.3, ride.galloping)
       if (snortAt && t >= snortAt) { snortAt = 0; audio.snort() }
+      if (wallCaption.update(player)) events.emit('caption', CONFIG.WALL_CAPTION)
 
       // horse: its own life when free, the rider's gait when ridden
       let gaitScale = 1

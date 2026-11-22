@@ -1,6 +1,7 @@
 import { CONFIG } from '../config'
 import type { Circle, Vec2 } from '../core/types'
-import { clampToClearing, resolveCollisions } from '../world/clearing'
+import { resolveCollisions } from '../world/clearing'
+import { clampToWorld } from '../world/road'
 
 export type RidePhase = 'onFoot' | 'mounting' | 'riding' | 'dismounting'
 
@@ -48,7 +49,7 @@ export function updateRide(s: RideState, move: { x: number; z: number; run: bool
   const target = steering ? (move.run ? R.gallop : R.walk) : 0
   const speed = s.speed + Math.max(-R.accel * dt, Math.min(R.accel * dt, target - s.speed))
   let p: Vec2 = { x: s.x + Math.sin(facing) * speed * dt, z: s.z + Math.cos(facing) * speed * dt }
-  p = clampToClearing(resolveCollisions(p, obstacles, R.radius))
+  p = clampToWorld(resolveCollisions(p, obstacles, R.radius))
   return { ...s, x: p.x, z: p.z, facing, speed, galloping: speed > (R.walk + R.gallop) / 2 }
 }
 
@@ -65,7 +66,7 @@ export function sidePoint(s: RideState, obstacles: readonly Circle[], side: 'lef
         const [ux, uz] = d > 1e-6 ? [dx / d, dz / d] : [dir.x, dir.z]   // dead centre: push further out this way
         p = { x: o.x + ux * (o.r + r), z: o.z + uz * (o.r + r) }
       }
-      p = clampToClearing(p)
+      p = clampToWorld(p)
       if (clear(p)) return p
     }
     return null
@@ -75,5 +76,5 @@ export function sidePoint(s: RideState, obstacles: readonly Circle[], side: 'lef
   const left = { x: Math.cos(f), z: -Math.sin(f) }, right = { x: -left.x, z: -left.z }
   const dirs: Vec2[] = [side === 'left' ? left : right, side === 'left' ? right : left, { x: -Math.sin(f), z: -Math.cos(f) }, { x: Math.sin(f), z: Math.cos(f) }]
   for (const d of dirs) { const p = settle(d); if (p) return p }
-  return clampToClearing({ x: s.x + dirs[0].x * CONFIG.RIDE.sideOffset, z: s.z + dirs[0].z * CONFIG.RIDE.sideOffset })
+  return clampToWorld({ x: s.x + dirs[0].x * CONFIG.RIDE.sideOffset, z: s.z + dirs[0].z * CONFIG.RIDE.sideOffset })
 }

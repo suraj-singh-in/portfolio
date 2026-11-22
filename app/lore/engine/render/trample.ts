@@ -16,7 +16,7 @@ export type Trample = {
 }
 
 /** Footpath memory: grass stays pressed where you walked, springing back over ~12 s. */
-export function createTrample(bounds: TrampleBounds = { minX: -32, minZ: -28, sx: 64, sz: 56, w: 256, h: 224 }): Trample {
+export function createTrample(bounds: TrampleBounds = { minX: -32, minZ: -40, sx: 144, sz: 68, w: 576, h: 272 }): Trample {
   const { w, h } = bounds
   const amt = new Float32Array(w * h), dxs = new Float32Array(w * h), dzs = new Float32Array(w * h)
   const data = new Uint8Array(w * h * 4)

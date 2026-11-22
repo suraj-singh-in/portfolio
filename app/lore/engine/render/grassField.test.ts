@@ -4,7 +4,8 @@ import { LAYOUT } from '../world/clearing'
 import { scatterWorld } from '../world/scatter'
 import { FIELD, buildGrassField, buildGrassFieldAsync } from './grassField'
 
-describe('grass field', () => {
+// the field covers the clearing and the east road: a full build takes a few seconds in Node
+describe('grass field', { timeout: 15000 }, () => {
   const world = scatterWorld(CONFIG.SEED)
   const f = buildGrassField(world)
   const at = (x: number, z: number) => {

@@ -3,7 +3,7 @@ import { CONFIG } from '../config'
 import type { Vec2 } from '../core/types'
 import type { World } from '../world/scatter'
 import type { Camera } from './camera'
-import { FIELD, type GrassField } from './grassField'
+import { FIELD, GRASS_WINDOW, type GrassField } from './grassField'
 import type { Trample } from './trample'
 
 const MAX_TUFT_ROCKS = 32
@@ -43,6 +43,7 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
       camT: { value: new THREE.Vector3() }, R: { value: new THREE.Vector3() }, U: { value: new THREE.Vector3() },
       ppu: { value: 80 }, view: { value: new THREE.Vector2(1, 1) }, time: { value: 0 },
       player: { value: new THREE.Vector2() }, horse: { value: new THREE.Vector2() },
+      winMin: { value: new THREE.Vector2(-GRASS_WINDOW.sx / 2, -GRASS_WINDOW.sz / 2) }, winSize: { value: new THREE.Vector2(GRASS_WINDOW.sx, GRASS_WINDOW.sz) },
       field: { value: fieldTex }, fieldMin: { value: new THREE.Vector2(FIELD.minX, FIELD.minZ) }, fieldSize: { value: new THREE.Vector2(FIELD.sx, FIELD.sz) },
       trample: { value: opts.trample.texture },
       trMin: { value: new THREE.Vector2(opts.trample.bounds.minX, opts.trample.bounds.minZ) },
@@ -54,7 +55,7 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
       #define MAX_TUFT_ROCKS ${MAX_TUFT_ROCKS}
       uniform vec3 camT; uniform vec3 R; uniform vec3 U; uniform float ppu; uniform vec2 view; uniform float time;
       uniform vec2 player; uniform vec2 horse;
-      uniform sampler2D field; uniform vec2 fieldMin; uniform vec2 fieldSize;
+      uniform sampler2D field; uniform vec2 fieldMin; uniform vec2 fieldSize; uniform vec2 winMin; uniform vec2 winSize;
       uniform sampler2D trample; uniform vec2 trMin; uniform vec2 trSize; uniform vec2 wind; uniform float windStr;
       uniform vec4 tuftRocks[MAX_TUFT_ROCKS]; uniform float tuftEnd[MAX_TUFT_ROCKS]; uniform float tuftTotal;
       out float vSh; out float vT; out float vFlat; out float vType;
@@ -62,6 +63,9 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
       uint pcg(uint v){ uint s = v*747796405u + 2891336453u; uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u; return (w >> 22u) ^ w; }
       float h01(uint v){ return float(pcg(v)) / 4294967296.0; }
       vec2 proj(vec3 w){ vec3 d = w - camT; return vec2(view.x*0.5 + dot(d,R)*ppu, view.y*0.5 + dot(d,U)*ppu); }
+      // a blade's home in [0, winSize) repeats every winSize; show the copy that falls inside the camera window,
+      // so blades never drift as the window slides — they wrap from the trailing edge to the leading one off-screen
+      vec2 inWindow(vec2 home){ return winMin + mod(home - winMin, winSize); }
       vec4 fieldAt(vec2 p){ return texture(field, (p - fieldMin)/fieldSize); }
       bool accept(float d, float r){ return r <= pow(d, 1.4)*1.15; }
       float heightOf(float ty, float f){
@@ -96,9 +100,9 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
         } else {
           uint fidx = id - uint(tuftTotal);
           uint cid = fidx / ${CLUMP}u;
-          vec2 c = fieldMin + vec2(h01(cid*5u), h01(cid*5u+1u))*fieldSize;
+          vec2 c = inWindow(vec2(h01(cid*5u), h01(cid*5u+1u))*winSize);
           bool clump = h01(cid*5u+2u) < 0.5;
-          vec2 p = clump ? c : fieldMin + vec2(h01(fidx*3u+11u), h01(fidx*3u+12u))*fieldSize;
+          vec2 p = clump ? c : inWindow(vec2(h01(fidx*3u+11u), h01(fidx*3u+12u))*winSize);
           vec4 fl = fieldAt(p);
           if (!accept(fl.r, clump ? h01(cid*5u+3u) : h01(fidx*3u+13u))) { cull(); return; }
           if (clump) {
@@ -175,6 +179,7 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
     update(camera, t, player, horse) {
       const u = material.uniforms
       u.camT.value.copy(camera.target)
+      u.winMin.value.set(camera.target.x - GRASS_WINDOW.sx / 2, camera.target.z - GRASS_WINDOW.sz / 2)
       u.R.value.copy(camera.right); u.U.value.copy(camera.up)
       u.ppu.value = camera.pz; u.view.value.set(camera.width, camera.height)
       u.time.value = t; u.player.value.set(player.x, player.z); u.horse.value.set(horse.x, horse.z)

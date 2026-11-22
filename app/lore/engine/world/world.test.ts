@@ -41,8 +41,9 @@ describe('scatterWorld', () => {
     for (const t of w.trees) { const s = stretched(t); expect(s.r).toBeGreaterThan(edgeRadius(s.a)) }
   })
 
-  it('gives about half the rocks grass tufts', () => {
-    const share = w.rocks.filter((r) => r.tufts).length / w.rocks.length
+  it('gives about half the clearing rocks grass tufts (road stones have none)', () => {
+    const big = w.rocks.filter((r) => r.scale >= 0.4)
+    const share = big.filter((r) => r.tufts).length / big.length
     expect(share).toBeGreaterThan(0.3)
     expect(share).toBeLessThan(0.7)
     for (const r of w.rocks) if (r.tufts) { expect(r.tuftCount).toBeGreaterThanOrEqual(150); expect(r.tuftCount).toBeLessThanOrEqual(600) }

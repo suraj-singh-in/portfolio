@@ -74,9 +74,9 @@ describe('ride', () => {
   })
 
   it('dismount at the clearing edge with the left side facing out lands clear of the horse, inside the clearing', () => {
-    // horse centred on the east edge, facing +z so its left (cos f, -sin f) = (+1, 0) points out of the clearing
-    const edgeX = edgeRadius(0) * CONFIG.CLEARING.stretchX
-    const s = riding(edgeX, 0, 0)
+    // horse centred on the north edge (the east edge opens onto the road), facing +x so its left (cos f, -sin f) = (0, -1) points out
+    const edgeZ = -edgeRadius(-Math.PI / 2)
+    const s = riding(0, edgeZ, Math.PI / 2)
     const horse = { x: s.x, z: s.z, r: 1.35 }
     const rock = { x: s.x - 1.2, z: s.z - 1.6, r: 0.6 }
     const p = sidePoint(s, [horse, rock])
@@ -95,7 +95,7 @@ describe('ride', () => {
     const rock = { x: 1.2, z: 0, r: 0.6 }
     const p = sidePoint(riding(0, 0, 0), [rock])
     expect(Math.hypot(p.x - rock.x, p.z - rock.z)).toBeGreaterThanOrEqual(rock.r + CONFIG.PLAYER.radius - 1e-6)
-    const edge = sidePoint(riding(40, 0, 0), [])
+    const edge = sidePoint(riding(0, -40, Math.PI / 2), [])
     const sx = edge.x / CONFIG.CLEARING.stretchX
     expect(Math.hypot(sx, edge.z)).toBeLessThanOrEqual(edgeRadius(Math.atan2(edge.z, sx)) + 1e-6)
   })

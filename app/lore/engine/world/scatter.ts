@@ -2,6 +2,7 @@ import { CONFIG } from '../config'
 import { mulberry32 } from '../core/rng'
 import type { Circle } from '../core/types'
 import { LAYOUT, edgeRadius } from './clearing'
+import { ROAD, WALL, inClearing, roadQuery } from './road'
 
 export type Placed = { sprite: string; x: number; z: number; scale: number; sway: number }
 export type Rock = Placed & { tufts: boolean; tuftCount: number }
@@ -11,15 +12,39 @@ const TREE_KINDS: readonly [string, number][] = [['fir_a', 3], ['fir_b', 3], ['f
 const UNDER = ['fern_a', 'fern_b', 'fern_c', 'fern_d', 'shrub_a', 'shrub_b', 'shrub_c', 'shrub_d']
 const ROCKS = ['rock_01', 'rock_02', 'rock_03', 'rock_04', 'rock_05', 'rock_06', 'rock_07', 'rock_09', 'rock_10', 'rock_11', 'rock_13']
 
+/** Spacing check over everything placed so far, bucketed in 4 m cells so a check only visits its neighbours. */
+function spacingGrid(initial: Circle[]) {
+  const CELL = 4, cells = new Map<number, Circle[]>()
+  let maxR = 0
+  const key = (i: number, j: number) => (i + 4096) * 8192 + (j + 4096)
+  const push = (c: Circle) => {
+    maxR = Math.max(maxR, c.r)
+    const k = key(Math.floor(c.x / CELL), Math.floor(c.z / CELL))
+    const list = cells.get(k); if (list) list.push(c); else cells.set(k, [c])
+  }
+  const free = (x: number, z: number, r: number) => {
+    const reach = Math.ceil((r + maxR) / CELL), ci = Math.floor(x / CELL), cj = Math.floor(z / CELL)
+    for (let i = ci - reach; i <= ci + reach; i++) for (let j = cj - reach; j <= cj + reach; j++) {
+      const list = cells.get(key(i, j)); if (!list) continue
+      for (const p of list) if (Math.hypot(p.x - x, p.z - z) < p.r + r) return false
+    }
+    return true
+  }
+  initial.forEach(push)
+  return { push, free }
+}
+
 /** Seeded placement of the forest ring, edge undergrowth and rocks around the fixed landmarks. */
 export function scatterWorld(seed: number): World {
   const rand = mulberry32(seed)
   const sx = CONFIG.CLEARING.stretchX
-  const placed: Circle[] = [
+  const placed = spacingGrid([
     { ...LAYOUT.hut, r: 3.4 }, { ...LAYOUT.fire, r: 1.2 }, { ...LAYOUT.horse, r: 2 },
     { ...LAYOUT.gnarled, r: 2.2 }, { ...LAYOUT.log, r: 1.3 },
-  ]
-  const free = (x: number, z: number, r: number) => !placed.some((p) => Math.hypot(p.x - x, p.z - z) < p.r + r)
+  ])
+  /** distance outside the road edge (negative = on the road) */
+  const offRoad = (x: number, z: number) => { const q = roadQuery({ x, z }); return q.d - ROAD.halfWidth(q.s) }
+  const free = placed.free
   const pickTree = () => {
     let r = rand() * TREE_KINDS.reduce((s, [, w]) => s + w, 0)
     for (const [n, w] of TREE_KINDS) if ((r -= w) <= 0) return n
@@ -34,7 +59,7 @@ export function scatterWorld(seed: number): World {
   for (let tries = 0; trees.length < 340 && tries < 40000; tries++) {
     const a = rand() * Math.PI * 2, d = edgeRadius(a) + 1.2 + Math.pow(rand(), 0.8) * 22
     const x = Math.cos(a) * d * sx, z = Math.sin(a) * d
-    if (!free(x, z, 1.25)) continue
+    if (offRoad(x, z) < 1.2 || !free(x, z, 1.25)) continue
     placed.push({ x, z, r: 1.25 })
     trees.push({ sprite: pickTree(), x, z, scale: 0.85 + rand() * 0.3, sway: 0.012 + rand() * 0.01 })
   }
@@ -43,7 +68,7 @@ export function scatterWorld(seed: number): World {
   for (let tries = 0; undergrowth.length < 200 && tries < 30000; tries++) {
     const a = rand() * Math.PI * 2, d = edgeRadius(a) + 0.4 + rand() * 7
     const x = Math.cos(a) * d * sx, z = Math.sin(a) * d
-    if (!free(x, z, 0.6)) continue
+    if (offRoad(x, z) < 0.3 || !free(x, z, 0.6)) continue
     placed.push({ x, z, r: 0.6 })
     undergrowth.push({ sprite: UNDER[(rand() * UNDER.length) | 0], x, z, scale: 0.8 + rand() * 0.5, sway: 0.02 })
   }
@@ -52,13 +77,55 @@ export function scatterWorld(seed: number): World {
   for (let tries = 0; rocks.length < 28 && tries < 5000; tries++) {
     const a = rand() * Math.PI * 2, d = 4 + rand() * (CONFIG.CLEARING.radius + 4)
     const x = Math.cos(a) * d * sx, z = Math.sin(a) * d
-    if (!free(x, z, 0.9)) continue
+    if (offRoad(x, z) < 0.5 || !free(x, z, 0.9)) continue
     placed.push({ x, z, r: 0.9 })
     const scale = 0.6 + rand() * 0.6
     const tufts = rand() >= 0.5
     rocks.push({ sprite: ROCKS[(rand() * ROCKS.length) | 0], x, z, scale, sway: 0, tufts, tuftCount: tufts ? Math.round(150 + rand() * 450) : 0 })
     if (d < CONFIG.CLEARING.radius) obstacles.push({ x, z, r: 0.55 * scale })
   }
+
+  // ---------- the east road: forest on both sides, thinning over the last stretch before the town wall ----------
+  const pointAt = (s: number) => ROAD.points[Math.max(0, Math.min(ROAD.points.length - 1, Math.round(s / ROAD.step)))]
+  /** forest density by distance to the town wall: open ground in front of it, full forest ~45 m back */
+  const thin = (x: number, z: number) => { const k = Math.min(1, Math.max(0, (Math.hypot(x - WALL.x, z - WALL.z) - 4) / 41)); return 0.05 + 0.95 * k * k }
+  const besideRoad = (s: number, off: number) => {
+    const i = Math.max(0, Math.min(ROAD.points.length - 2, Math.round(s / ROAD.step)))
+    const a = ROAD.points[i], b = ROAD.points[i + 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1
+    const p = pointAt(s)
+    return { x: p.x + (-(b.z - a.z) / l) * off, z: p.z + ((b.x - a.x) / l) * off }
+  }
+  const wallZone = (x: number, z: number) => Math.abs(x - WALL.x) < WALL.half + 2.5 && Math.abs(z - WALL.z) < 4
+  for (let tries = 0, made = 0; made < 700 && tries < 40000; tries++) {
+    const s = rand() * (ROAD.length + 6), side = rand() < 0.5 ? -1 : 1
+    const off = ROAD.halfWidth(Math.min(s, ROAD.length)) + 1.1 + Math.pow(rand(), 1.6) * 11   // crowded close to the track, like a jungle road
+    const { x, z } = besideRoad(Math.min(s, ROAD.length), side * off)
+    if (inClearing({ x: x / 1.08, z: z / 1.08 }) || wallZone(x, z)) continue
+    const r = 0.75 / Math.sqrt(thin(x, z))   // jungle-tight; wider gaps near the wall (sampling until full would otherwise refill it)
+    if (offRoad(x, z) < 1.2 || !free(x, z, r)) continue
+    placed.push({ x, z, r }); made++
+    trees.push({ sprite: pickTree(), x, z, scale: 0.85 + rand() * 0.3, sway: 0.012 + rand() * 0.01 })
+  }
+  for (let tries = 0, made = 0; made < 150 && tries < 20000; tries++) {
+    const s = rand() * ROAD.length, side = rand() < 0.5 ? -1 : 1
+    const { x, z } = besideRoad(s, side * (ROAD.halfWidth(s) + 0.4 + rand() * 3.2))
+    if (inClearing({ x: x / 1.04, z: z / 1.04 }) || wallZone(x, z)) continue
+    const r = 0.6 / Math.sqrt(thin(x, z))
+    if (offRoad(x, z) < 0.3 || !free(x, z, r)) continue
+    placed.push({ x, z, r }); made++
+    undergrowth.push({ sprite: UNDER[(rand() * UNDER.length) | 0], x, z, scale: 0.7 + rand() * 0.5, sway: 0.02 })
+  }
+  // little stones along the verges (a few out in the track); scenery only, never blocking
+  for (let tries = 0, made = 0; made < 70 && tries < 8000; tries++) {
+    const s = rand() * ROAD.length, middle = rand() < 0.1
+    const off = middle ? (rand() - 0.5) * 2 : (rand() < 0.5 ? -1 : 1) * (ROAD.halfWidth(s) + (rand() - 0.5) * 1.2)
+    const { x, z } = besideRoad(s, off)
+    if (inClearing({ x, z }) || !free(x, z, 0.3)) continue
+    placed.push({ x, z, r: 0.3 }); made++
+    rocks.push({ sprite: ROCKS[(rand() * ROCKS.length) | 0], x, z, scale: 0.16 + rand() * 0.18, sway: 0, tufts: false, tuftCount: 0 })
+  }
+  // the town wall closes the road
+  for (let x = WALL.x - WALL.half; x <= WALL.x + WALL.half + 1e-6; x += 0.9) obstacles.push({ x, z: WALL.z, r: 0.7 })
 
   return { trees, undergrowth, rocks, obstacles }
 }

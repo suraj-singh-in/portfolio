@@ -46,6 +46,7 @@ export const CONFIG = {
     'It nudges your shoulder, then goes back to the grass.',
   ],
   MOUNT_CAPTION: 'You swing up onto its back.',
+  WALL_CAPTION: "This town doesn't allow forest folks yet.",
   /** Linear RGB tunic colours for the hero's red shirt (body mesh only). */
   HERO_SHIRT: { Green: [0.42, 0.05, 0.04], LightGreen: [0.55, 0.1, 0.07] } as Record<string, [number, number, number]>,
   /** Soft medieval palette (linear RGB) applied to the hero by material name. */
