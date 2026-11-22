@@ -231,7 +231,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
         const side = reactionSide(ride.facing, horsePos, player)
         ride = toggleMount(ride, player, clock)
         if (ride.phase !== 'mounting') return
-        mountFrom = { x: player.x, z: player.z }
+        mountFrom = sidePoint(ride, world.obstacles)   // climb on from its left side, never through its body
         horseState = strokeHorse(horseState, clock, side)   // it flinches toward you, then settles under you
         mount()
         hero.play('Ride_Mount', 0.15, true)

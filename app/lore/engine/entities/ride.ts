@@ -54,14 +54,25 @@ export function updateRide(s: RideState, move: { x: number; z: number; run: bool
 
 /** Where the rider stands to mount / lands on dismount: the horse's left side, never inside an obstacle. */
 export function sidePoint(s: RideState, obstacles: readonly Circle[]): Vec2 {
-  const left = { x: Math.cos(s.facing), z: -Math.sin(s.facing) }
-  let p: Vec2 = { x: s.x + left.x * CONFIG.RIDE.sideOffset, z: s.z + left.z * CONFIG.RIDE.sideOffset }
   const r = CONFIG.PLAYER.radius
-  for (const o of obstacles) {
-    const dx = p.x - o.x, dz = p.z - o.z, d = Math.hypot(dx, dz)
-    if (d >= o.r + r) continue
-    const [ux, uz] = d > 1e-6 ? [dx / d, dz / d] : [left.x, left.z]   // dead centre: push further out to the left
-    p = { x: o.x + ux * (o.r + r), z: o.z + uz * (o.r + r) }
+  const clear = (p: Vec2) => obstacles.every((o) => Math.hypot(p.x - o.x, p.z - o.z) >= o.r + r - 1e-9)
+  const settle = (dir: Vec2) => {
+    let p: Vec2 = { x: s.x + dir.x * CONFIG.RIDE.sideOffset, z: s.z + dir.z * CONFIG.RIDE.sideOffset }
+    for (let pass = 0; pass < 4; pass++) {          // repeat: pushing out of one circle can push into another
+      for (const o of obstacles) {
+        const dx = p.x - o.x, dz = p.z - o.z, d = Math.hypot(dx, dz)
+        if (d >= o.r + r) continue
+        const [ux, uz] = d > 1e-6 ? [dx / d, dz / d] : [dir.x, dir.z]   // dead centre: push further out this way
+        p = { x: o.x + ux * (o.r + r), z: o.z + uz * (o.r + r) }
+      }
+      p = clampToClearing(p)
+      if (clear(p)) return p
+    }
+    return null
   }
-  return clampToClearing(p)
+  const f = s.facing
+  // left first (the mounting side), then right, rear, front — the first spot clear of everything inside the clearing
+  const dirs: Vec2[] = [{ x: Math.cos(f), z: -Math.sin(f) }, { x: -Math.cos(f), z: Math.sin(f) }, { x: -Math.sin(f), z: -Math.cos(f) }, { x: Math.sin(f), z: Math.cos(f) }]
+  for (const d of dirs) { const p = settle(d); if (p) return p }
+  return clampToClearing({ x: s.x + dirs[0].x * CONFIG.RIDE.sideOffset, z: s.z + dirs[0].z * CONFIG.RIDE.sideOffset })
 }
