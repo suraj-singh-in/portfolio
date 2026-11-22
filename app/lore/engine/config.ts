@@ -22,7 +22,11 @@ export const CONFIG = {
   PLAYER: { walk: 2.0, run: 4.6, radius: 0.35, start: { x: 0.5, z: 4 }, strokeSecs: 2.6 },
   HORSE: { alert: 5, calm: 6.5, interact: 2.8, strokeSecs: 3.2, lookClamp: 0.9, grazeSwitch: [6, 12] as const },
   CAMERA: { offset: [0, 9, 8.2] as const, followRate: 2.5, zoomRate: 8 },
-  AUDIO: { ambience: 0.5, step: 0.45, stepPool: 4, walkInterval: 0.48, runInterval: 0.3 },
+  AUDIO: {
+    ambience: 0.5, step: 0.45, stepPool: 4, walkInterval: 0.48, runInterval: 0.3,
+    /** horse: snort after a stroke; hoofbeats reuse the step sound, lower and heavier, at its gait cadence */
+    snort: 0.7, snortDelay: 0.45, hoof: 0.6, hoofWalkInterval: 0.3, hoofGallopInterval: 0.16, hoofRate: 0.78,
+  },
   TRAMPLE: { recoverPerSec: 0.085 },
   /** mounted horse: speeds m/s, accel m/s², turn rad/s, collision radius m, mount/dismount s, side offset m */
   /** walking to the horse's side before mounting: give up after this many seconds; turn rate rad/s */

@@ -21,6 +21,7 @@ export const ASSETS = {
   horse: 'models/horse.glb',
   ambience: 'audio/ambience.wav',
   step: 'audio/step.wav',
+  snort: 'audio/horse-snort-05.wav',
 } as const
 
 export const assetUrl = (path: string) => `${ASSETS.base}/${path}`

@@ -18,6 +18,10 @@ export type AudioController = {
   isMuted(): boolean
   /** Advance footstep timing; plays a step at the walk/run interval while moving. */
   step(dt: number, moving: boolean, running: boolean): void
+  /** Horse hoofbeats (the step sound, pitched down) at its walk / gallop cadence while it moves. */
+  hoof(dt: number, moving: boolean, galloping: boolean): void
+  /** The horse snorts (e.g. after you stroke it). */
+  snort(): void
   dispose(): void
 }
 
@@ -26,6 +30,7 @@ const MUTE_KEY = 'lore:muted'
 export function createAudio(opts: {
   ambienceUrl: string
   stepUrl: string
+  snortUrl?: string
   make: (url: string) => AudioLike
   storage: Pick<Storage, 'getItem' | 'setItem'>
   /** 'blocked' when the browser refuses autoplay (needs a click/key), 'on' once ambience plays */
@@ -36,11 +41,20 @@ export function createAudio(opts: {
   ambience.loop = true
   ambience.volume = A.ambience
   const steps = Array.from({ length: A.stepPool }, () => { const s = opts.make(opts.stepUrl); s.volume = A.step; return s })
+  const snortEl = opts.snortUrl ? opts.make(opts.snortUrl) : null
+  if (snortEl) snortEl.volume = A.snort
   let muted = false
   try { muted = opts.storage.getItem(MUTE_KEY) === '1' } catch { /* storage unavailable */ }
-  let unlocked = false, pending = false, stepIdx = 0, timer = 0.1
+  let unlocked = false, pending = false, stepIdx = 0, timer = 0.1, hoofTimer = 0.1
 
-  const applyMute = () => { ambience.muted = muted; steps.forEach((s) => (s.muted = muted)) }
+  const applyMute = () => { ambience.muted = muted; steps.forEach((s) => (s.muted = muted)); if (snortEl) snortEl.muted = muted }
+  const playStep = (rate: number, volume: number) => {
+    const s = steps[stepIdx++ % steps.length]
+    s.currentTime = 0
+    s.playbackRate = rate * (0.9 + Math.random() * 0.2)
+    s.volume = volume
+    s.play().catch(() => {})
+  }
   applyMute()
 
   return {
@@ -64,11 +78,20 @@ export function createAudio(opts: {
       timer -= dt
       if (timer > 1e-9) return
       timer = running ? A.runInterval : A.walkInterval
-      const s = steps[stepIdx++ % steps.length]
-      s.currentTime = 0
-      s.playbackRate = 0.9 + Math.random() * 0.2
-      s.play().catch(() => {})
+      playStep(1, A.step)
     },
-    dispose() { ambience.pause(); steps.forEach((s) => s.pause()) },
+    hoof(dt, moving, galloping) {
+      if (!moving || !unlocked) { hoofTimer = 0.1; return }
+      hoofTimer -= dt
+      if (hoofTimer > 1e-9) return
+      hoofTimer = galloping ? A.hoofGallopInterval : A.hoofWalkInterval
+      playStep(A.hoofRate, A.hoof)
+    },
+    snort() {
+      if (!snortEl || !unlocked) return
+      snortEl.currentTime = 0
+      snortEl.play().catch(() => {})
+    },
+    dispose() { ambience.pause(); steps.forEach((s) => s.pause()); snortEl?.pause() },
   }
 }

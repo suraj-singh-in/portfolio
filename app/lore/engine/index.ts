@@ -88,7 +88,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
 
     // ---------- audio first: the forest should be heard during the loading screen ----------
     const audio: AudioController = createAudio({
-      ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), make: (u) => new Audio(u),
+      ambienceUrl: assetUrl(ASSETS.ambience), stepUrl: assetUrl(ASSETS.step), snortUrl: assetUrl(ASSETS.snort), make: (u) => new Audio(u),
       storage: safeStorage(() => window.localStorage), onState: (st) => events.emit('sound', st),
     })
     cleanups.push(() => audio.dispose())
@@ -204,6 +204,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const seat = new THREE.Vector3(), ground = new THREE.Vector3(), hipRot = new THREE.Vector3(), riderEuler = new THREE.Euler()
     let mountFrom: Vec2 = { x: 0, z: 0 }, lean = 0, prevFacing = ride.facing
     let approach: { side: 'left' | 'right'; until: number } | null = null
+    let snortAt = 0   // the horse answers a stroke with a snort, a beat after the touch
     /** hero.root position in horse space that puts the hip on the saddle, this frame; lean pivots about the hip */
     const seatPos = (roll: number) => {
       horse.root.updateMatrixWorld(true)
@@ -239,6 +240,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       if (ride.phase !== 'onFoot' || approach || player.mode !== 'free' || !inStrokeRange(player, horsePos)) return
       player = faceToward(player, neckPoint(horsePos, ride.facing), clock)
       horseState = strokeHorse(horseState, clock, reactionSide(ride.facing, horsePos, player))
+      snortAt = clock + CONFIG.AUDIO.snortDelay
       events.emit('caption', captions.next())
     })
     // Space: walk to the horse's nearer side, turn along it, climb on — or, riding, get down
@@ -354,6 +356,8 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       }
       trample.update(dt)
       audio.step(dt, player.moving, player.running)
+      audio.hoof(dt, ride.phase === 'riding' && ride.speed > 0.3, ride.galloping)
+      if (snortAt && t >= snortAt) { snortAt = 0; audio.snort() }
 
       // horse: its own life when free, the rider's gait when ridden
       let gaitScale = 1

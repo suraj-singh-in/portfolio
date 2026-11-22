@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { createAudio, type AudioLike } from './audio'
 
 const fakeAudio = (rejectFirst = false) => {
-  const made: (AudioLike & { plays: number; paused: boolean })[] = []
-  const make = () => {
+  const made: (AudioLike & { plays: number; paused: boolean; url: string })[] = []
+  const make = (url: string) => {
     let first = rejectFirst
     const a = {
-      loop: false, volume: 1, muted: false, currentTime: 0, playbackRate: 1, plays: 0, paused: true,
+      url, loop: false, volume: 1, muted: false, currentTime: 0, playbackRate: 1, plays: 0, paused: true,
       play() { a.plays++; if (first) { first = false; return Promise.reject(new Error('blocked')) } a.paused = false; return Promise.resolve() },
       pause() { a.paused = true },
     }
@@ -50,6 +50,33 @@ describe('audio', () => {
     const idle = steps()
     for (let i = 0; i < 100; i++) a.step(0.01, false, false)
     expect(steps()).toBe(idle)
+  })
+
+  it('snorts once when asked, and the snort follows mute', async () => {
+    const f = fakeAudio()
+    const a = createAudio({ ambienceUrl: 'a', stepUrl: 's', snortUrl: 'n', make: f.make, storage: memStorage() })
+    a.unlock(); await flush()
+    a.snort()
+    const snort = f.made.find((x) => x.url === 'n')!
+    expect(snort.plays).toBe(1)
+    a.toggleMute()
+    expect(snort.muted).toBe(true)
+  })
+
+  it('horse hoofbeats reuse the step sound at the horse walk and gallop cadence', async () => {
+    const f = fakeAudio()
+    const a = createAudio({ ambienceUrl: 'a', stepUrl: 's', snortUrl: 'n', make: f.make, storage: memStorage() })
+    a.unlock(); await flush()
+    const beats = () => f.made.filter((x) => x.url === 's').reduce((n, x) => n + x.plays, 0)
+    for (let i = 0; i < 100; i++) a.hoof(0.01, true, false)
+    expect(beats()).toBeGreaterThanOrEqual(3)
+    expect(beats()).toBeLessThanOrEqual(4)
+    const before = beats()
+    for (let i = 0; i < 100; i++) a.hoof(0.01, true, true)
+    expect(beats() - before).toBeGreaterThanOrEqual(5)
+    const still = beats()
+    for (let i = 0; i < 100; i++) a.hoof(0.01, false, false)
+    expect(beats()).toBe(still)
   })
 
   it('dispose pauses ambience', async () => {
