@@ -340,15 +340,37 @@
   ],
   "foot": 0.58
  },
- "town_wall": {
-  "file": "town_wall.webp",
-  "w": 1549,
-  "h": 582,
+ "town_wall_side": {
+  "file": "town_wall_side.webp",
+  "w": 261,
+  "h": 1534,
   "ppu": 100,
   "anchor": [
-   768.9,
-   468
+   140.3,
+   940.9
   ],
   "foot": 6.91
+ },
+ "stone_wall": {
+  "file": "stone_wall.webp",
+  "w": 1223,
+  "h": 378,
+  "ppu": 100,
+  "anchor": [
+   615.9,
+   290.6
+  ],
+  "foot": 5.46
+ },
+ "gate_path": {
+  "file": "gate_path.webp",
+  "w": 767,
+  "h": 311,
+  "ppu": 100,
+  "anchor": [
+   382.4,
+   165.6
+  ],
+  "foot": 3.42
  }
 }

@@ -3,12 +3,12 @@ import type { Vec2 } from '../core/types'
 import { clampToClearing, edgeRadius } from './clearing'
 
 /**
- * The east road: leaves the clearing to the right, winds east through the forest, then turns
- * north (up the screen) for the last stretch so the town wall at its end faces the camera.
+ * The east road: leaves the clearing to the right, winds east through the forest, turns left (north),
+ * then makes one final right turn (east) into the town wall, which stands side-on across the way.
  */
 const CONTROL: readonly Vec2[] = [
-  { x: 8, z: -1 }, { x: 18, z: -1.5 }, { x: 34, z: 1.2 }, { x: 50, z: -1.5 }, { x: 66, z: 0.8 },
-  { x: 80, z: -2 }, { x: 89, z: -8.5 }, { x: 92.5, z: -17 }, { x: 93, z: -25 },
+  { x: 8, z: -1 }, { x: 18, z: -1.5 }, { x: 34, z: 1.2 }, { x: 50, z: -1.5 }, { x: 64, z: 0.5 },
+  { x: 74, z: -3 }, { x: 80, z: -10 }, { x: 83, z: -17 }, { x: 88, z: -21.5 }, { x: 96, z: -22.4 }, { x: 104, z: -22.3 },
 ]
 const STEP = 1   // metres between resampled centreline points
 
@@ -49,8 +49,13 @@ export const ROAD = {
   halfWidth: (s: number) => 2.6 + 0.35 * Math.sin(s * 0.21) + 0.2 * Math.sin(s * 0.53 + 1),
 } as const
 
-/** The town wall closing the road: centre of its footing, and half its span along x. */
-export const WALL = { x: 93, z: -26.8, half: 7.2 } as const
+/** The town wall closing the road, turned side-on: centre of its footing and half its span along z. */
+export const WALL = { x: 106.5, z: -22.3, half: 7.2 } as const
+/** A long stone wall north of the last turn, closing the way the road used to go on: three segments along x. */
+export const STONE_WALL = { z: -27, x0: 74, x1: 106.7, segment: 10.9 } as const
+export const STONE_WALL_SEGMENTS: readonly Vec2[] = [0, 1, 2].map((i) => ({ x: STONE_WALL.x0 + STONE_WALL.segment * (i + 0.5), z: STONE_WALL.z }))
+/** Paved path continuing east behind the gate — scenery only, never walkable. */
+export const GATE_PATH: readonly Vec2[] = [0, 1, 2].map((i) => ({ x: WALL.x + 5 + i * 7.7, z: WALL.z }))
 
 export type RoadHit = { d: number; s: number; at: Vec2; normal: Vec2 }
 
@@ -88,8 +93,8 @@ export function createWallCaption(near = 3.5, reset = 7) {
   let shown = false
   return {
     update(p: Vec2): boolean {
-      const ahead = Math.abs(p.x - WALL.x) < WALL.half + 1.5
-      const d = Math.abs(p.z - WALL.z)
+      const ahead = Math.abs(p.z - WALL.z) < WALL.half + 1.5
+      const d = Math.abs(p.x - WALL.x)
       if (shown && (!ahead || d > reset)) shown = false
       if (!shown && ahead && d < near) { shown = true; return true }
       return false

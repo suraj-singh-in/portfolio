@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { scatterWorld } from './scatter'
 import { clampToClearing, edgeRadius } from './clearing'
-import { ROAD, WALL, clampToWorld, createWallCaption, roadQuery } from './road'
+import { GATE_PATH, ROAD, STONE_WALL, WALL, clampToWorld, createWallCaption, roadQuery } from './road'
 
 const inClearing = (p: { x: number; z: number }) => {
   const sx = p.x / CONFIG.CLEARING.stretchX
@@ -22,6 +22,24 @@ describe('east road', () => {
     const end = ROAD.points[ROAD.points.length - 1]
     expect(end.x).toBeGreaterThan(60)
     expect(Math.hypot(end.x - WALL.x, end.z - WALL.z)).toBeLessThan(3)
+  })
+
+  it('turns left (north), then makes one final right turn (east) into the wall', () => {
+    const P = ROAD.points, n = P.length
+    const heading = (i: number) => ({ x: P[i + 1].x - P[i].x, z: P[i + 1].z - P[i].z })
+    const north = P.slice(0, n - 1).map((_, i) => heading(i)).filter((h) => -h.z > Math.abs(h.x)).length
+    expect(north).toBeGreaterThan(8)
+    for (let i = n - 8; i < n - 1; i++) { const h = heading(i); expect(h.x).toBeGreaterThan(Math.abs(h.z)) }
+  })
+
+  it('closes the way north past the turn with a long stone wall, and shows a paved path behind the gate', () => {
+    const northMost = Math.min(...ROAD.points.map((p) => p.z))
+    expect(STONE_WALL.z).toBeLessThan(northMost - 2)
+    const cornerX = ROAD.points.find((p) => p.z < -12)!.x
+    expect(STONE_WALL.x0).toBeLessThan(cornerX - 3)
+    expect(STONE_WALL.x1).toBeGreaterThanOrEqual(WALL.x - 1)
+    expect(GATE_PATH.length).toBeGreaterThanOrEqual(2)
+    for (const t of GATE_PATH) expect(t.x).toBeGreaterThan(WALL.x)
   })
 
   it('keeps points on the road and inside the clearing as they are', () => {
@@ -62,13 +80,13 @@ describe('east road', () => {
   it('blocks the way at the wall', () => {
     const w = scatterWorld(CONFIG.SEED)
     const end = ROAD.points[ROAD.points.length - 1]
-    const blockers = w.obstacles.filter((o) => Math.abs(o.z - WALL.z) < 0.01 && Math.abs(o.x - end.x) < 3)
+    const blockers = w.obstacles.filter((o) => Math.abs(o.x - WALL.x) < 0.01 && Math.abs(o.z - end.z) < 3)
     expect(blockers.length).toBeGreaterThan(0)
   })
 
   it('wall caption fires once on arrival and again only after walking away', () => {
     const c = createWallCaption()
-    const at = { x: WALL.x, z: WALL.z + 2 }, away = { x: WALL.x, z: WALL.z + 12 }
+    const at = { x: WALL.x - 2, z: WALL.z }, away = { x: WALL.x - 12, z: WALL.z }
     expect(c.update(away)).toBe(false)
     expect(c.update(at)).toBe(true)
     expect(c.update(at)).toBe(false)

@@ -31,7 +31,7 @@ import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
-import { WALL, createWallCaption } from './world/road'
+import { GATE_PATH, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
 import { scatterWorld } from './world/scatter'
 
 export type EngineEvents = {
@@ -162,7 +162,10 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     addScenery('hut', LAYOUT.hut, 1, [3.5, 5.25], { solid: true, tint: 0.62, wash: 0.3 }, 3.0, false)
     addScenery('firepit', LAYOUT.fire, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.12, contrast: 3.2, mid: 0.52 }, 0, false)
     addScenery('gnarled', LAYOUT.gnarled, 1, [4, 6], { ...TREE_LOOK, sway: 0.01 }, 2.2, true)
-    addScenery('town_wall', WALL, 1, [3.5, 5.25], { solid: true, tint: 0.6, wash: 0.28 }, 0, false)
+    const STONE: Partial<GlyphOpts> = { solid: true, tint: 0.6, wash: 0.28 }
+    addScenery('town_wall_side', WALL, 1, [3.5, 5.25], STONE, 0, false)
+    for (const p of STONE_WALL_SEGMENTS) addScenery('stone_wall', p, 1, [3.5, 5.25], STONE, 0, false)
+    for (const p of GATE_PATH) addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false)
     addScenery('log', LAYOUT.log, 1, [4, 6], { solid: true, tint: 0.45 }, 0.8, false)
     for (const t of world.trees) addScenery(t.sprite, t, t.scale, [4, 6], { ...TREE_LOOK, sway: t.sway }, 1.6, true)
     for (const u of world.undergrowth) addScenery(u.sprite, u, u.scale, [3, 4.5], { ...UNDER_LOOK, sway: u.sway }, 0.4, false)
@@ -429,7 +432,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       if (!readySent) { readySent = true; events.emit('ready', true) }
       if (opts.debug) {
         fpsN++; fpsT += dt
-        if (fpsT > 0.5) { events.emit('stats', `${Math.round(fpsN / fpsT)} fps · ${grass.count.toLocaleString()} grass (${tier.name}) · hero ${heroSrc.grid.join('×')} · zoom ${camera.zoom.toFixed(2)} · scenery ${sceneScale}× · ${gpu}`); fpsN = 0; fpsT = 0 }
+        if (fpsT > 0.5) { events.emit('stats', `${Math.round(fpsN / fpsT)} fps · @ ${player.x.toFixed(1)},${player.z.toFixed(1)} · ${grass.count.toLocaleString()} grass (${tier.name}) · hero ${heroSrc.grid.join('×')} · zoom ${camera.zoom.toFixed(2)} · scenery ${sceneScale}× · ${gpu}`); fpsN = 0; fpsT = 0 }
       }
     }
     const loop = createLoop(step, { raf: (cb) => window.requestAnimationFrame(cb), caf: (id) => window.cancelAnimationFrame(id), doc: document })
