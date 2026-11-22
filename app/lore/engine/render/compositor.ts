@@ -18,6 +18,8 @@ export type DrawItem = {
   flat?: boolean
   /** extra transparency (reflections) */
   alpha?: number
+  /** sort by this ground point instead of `world` (a long diagonal sprite sorts by its far end) */
+  depthAt?: Vec2
   /** set by the compositor each frame */
   vis: boolean
   fade: number
@@ -56,7 +58,8 @@ export function createCompositor(renderer: THREE.WebGLRenderer): Compositor {
         if (!it.vis) continue
         it.mesh.scale.set(w, h, 1)
         it.mesh.position.set(left + w / 2, H - (top + h / 2), 0)
-        it.mesh.renderOrder = it.flat ? gy - 1e5 : gy
+        const sortY = it.depthAt ? camera.worldToScreen(it.depthAt.x, 0, it.depthAt.z)[1] : gy
+        it.mesh.renderOrder = it.flat ? sortY - 1e5 : sortY
         // trees standing between the player and the camera turn see-through
         const behind = (it.isTree || it.seeThrough) && gy > pgy + 4 && psx > left + w * 0.15 && psx < left + w * 0.85 && psy > top && psy < gy
         it.fade += ((behind ? 0.22 : 1) - it.fade) * Math.min(1, dt * 6)

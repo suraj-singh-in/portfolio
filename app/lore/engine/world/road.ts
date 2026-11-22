@@ -7,7 +7,7 @@ import { makeTrack, type TrackHit } from './track'
  */
 const CONTROL: readonly Vec2[] = [
   { x: 8, z: -1 }, { x: 18, z: -1.5 }, { x: 34, z: 1.2 }, { x: 50, z: -1.5 }, { x: 64, z: 0.5 },
-  { x: 74, z: -3 }, { x: 80, z: -10 }, { x: 83, z: -17 }, { x: 88, z: -21.5 }, { x: 96, z: -22.4 }, { x: 104, z: -22.3 },
+  { x: 74, z: -3 }, { x: 80, z: -10 }, { x: 83, z: -17 }, { x: 88, z: -21.5 }, { x: 94, z: -22.4 }, { x: 99.8, z: -22.3 },   // ends a horse-length short of the wall
 ]
 /** walkable half-width (m) at arc length s; gently uneven like a worn forest track */
 export const ROAD = makeTrack(CONTROL, (s) => 2.6 + 0.35 * Math.sin(s * 0.21) + 0.2 * Math.sin(s * 0.53 + 1))
@@ -31,7 +31,9 @@ export function wallLine(step: number): Vec2[] {
 /** A long stone wall north of the last turn, closing the way the road used to go on: three segments along x, meeting the town wall. */
 // it runs level with the town wall's north tower and stops at the tower's side, so the tower stands in front of the joint
 const NORTH_TOWER = { x: WALL.x - Math.sin(WALL.tilt) * WALL.half, z: WALL.z - Math.cos(WALL.tilt) * WALL.half }
-const STONE_SEG = 10.9, STONE_X1 = NORTH_TOWER.x - 1.3
+const STONE_SEG = 10.9, STONE_X1 = NORTH_TOWER.x - 0.6   // tucked under the tower so the two read as one wall
+/** the diagonal town wall is one sprite: sort it by its far (north) tower so anyone on the road draws in front */
+export const WALL_DEPTH_AT: Vec2 = NORTH_TOWER
 export const STONE_WALL = { z: NORTH_TOWER.z, x0: STONE_X1 - 3 * STONE_SEG, x1: STONE_X1, segment: STONE_SEG } as const
 export const STONE_WALL_SEGMENTS: readonly Vec2[] = [0, 1, 2].map((i) => ({ x: STONE_WALL.x0 + STONE_WALL.segment * (i + 0.5), z: STONE_WALL.z }))
 /** Paved path continuing east behind the gate — scenery only, never walkable. Tiles butt up to the wall's back face. */
@@ -46,7 +48,7 @@ export const PEOPLE: readonly (Vec2 & { sprite: string })[] = [
 ]
 
 /** "This town doesn't allow forest folks yet." — once per arrival at the wall. */
-export function createWallCaption(near = 3.5, reset = 7) {
+export function createWallCaption(near = 5, reset = 9) {
   let shown = false
   return {
     update(p: Vec2): boolean {

@@ -32,7 +32,7 @@ import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
-import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
+import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, WALL_DEPTH_AT, createWallCaption } from './world/road'
 import { LAKE, MOUNTAINS, createLakeCaption, lookAhead, shoreZ } from './world/north'
 import { createWater } from './render/water'
 import { scatterWorld } from './world/scatter'
@@ -197,7 +197,8 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     addScenery('firepit', LAYOUT.fire, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.12, contrast: 3.2, mid: 0.52 }, 0, false)
     addScenery('gnarled', LAYOUT.gnarled, 1, [4, 6], { ...TREE_LOOK, sway: 0.01 }, 2.2, true)
     const STONE: Partial<GlyphOpts> = { solid: true, tint: 0.6, wash: 0.28 }
-    addScenery('town_wall_side', WALL, 1, [3.5, 5.25], STONE, 0, false)
+    const townWall = addScenery('town_wall_side', WALL, 1, [3.5, 5.25], STONE, 0, false)
+    if (townWall) townWall.depthAt = WALL_DEPTH_AT
     for (const p of STONE_WALL_SEGMENTS) addScenery('stone_wall', p, 1, [3.5, 5.25], STONE, 0, false)
     for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
     for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)

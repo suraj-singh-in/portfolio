@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { scatterWorld } from './scatter'
 import { clampToClearing, edgeRadius } from './clearing'
-import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, createWallCaption, roadQuery, wallLine, wallXAt } from './road'
+import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, WALL_DEPTH_AT, createWallCaption, roadQuery, wallLine, wallXAt } from './road'
 import { clampToWorld } from './bounds'
 
 const inClearing = (p: { x: number; z: number }) => {
@@ -22,7 +22,10 @@ describe('east road', () => {
   it('heads east (right) and ends at the wall', () => {
     const end = ROAD.points[ROAD.points.length - 1]
     expect(end.x).toBeGreaterThan(60)
-    expect(Math.hypot(end.x - WALL.x, end.z - WALL.z)).toBeLessThan(3)
+    expect(Math.hypot(end.x - WALL.x, end.z - WALL.z)).toBeLessThan(7)
+    // the road stops a horse-length short of the wall face: you halt in front of it, never inside its footing
+    const face = wallXAt(end.z) - WALL.depth / 2 / Math.cos(WALL.tilt)
+    expect(face - (end.x + ROAD.halfWidth(ROAD.length))).toBeGreaterThanOrEqual(2)
   })
 
   it('turns left (north), then makes one final right turn (east) into the wall', () => {
@@ -41,8 +44,8 @@ describe('east road', () => {
     // runs straight into the north tower: level with it, ending at its side (the tower stands in front of the joint)
     const tower = wallLine(0.1).reduce((a, b) => (b.z < a.z ? b : a))
     expect(Math.abs(STONE_WALL.z - tower.z)).toBeLessThan(0.3)
-    expect(tower.x - STONE_WALL.x1).toBeGreaterThan(0.6)
-    expect(tower.x - STONE_WALL.x1).toBeLessThan(2)
+    expect(tower.x - STONE_WALL.x1).toBeGreaterThan(0.3)   // tucked a little under the tower: no gap
+    expect(tower.x - STONE_WALL.x1).toBeLessThan(1)
     expect(GATE_PATH.length).toBeGreaterThanOrEqual(2)
     for (const t of GATE_PATH) expect(t.x).toBeGreaterThan(WALL.x)
   })
@@ -103,6 +106,12 @@ describe('east road', () => {
     for (const s of stones) expect(w.obstacles.some((o) => o.x === s.x && o.z === s.z)).toBe(false)
   })
 
+  it('sorts the diagonal town wall by its far (north) tower, so anyone on the road draws in front of it', () => {
+    expect(WALL_DEPTH_AT.z).toBeLessThan(WALL.z - 6)
+    const end = ROAD.points[ROAD.points.length - 1]
+    expect(end.z - ROAD.halfWidth(ROAD.length)).toBeGreaterThan(WALL_DEPTH_AT.z)   // the whole road end is in front of it
+  })
+
   it('keeps the whole horse clear of the walls', () => {
     const w = scatterWorld(CONFIG.SEED)
     const townBlockers = w.obstacles.filter((o) => Math.abs(o.x - wallXAt(o.z)) < 0.01)
@@ -121,7 +130,7 @@ describe('east road', () => {
 
   it('wall caption fires once on arrival and again only after walking away', () => {
     const c = createWallCaption()
-    const at = { x: WALL.x - 2, z: WALL.z }, away = { x: WALL.x - 12, z: WALL.z }
+    const at = { x: ROAD.points[ROAD.points.length - 1].x + ROAD.halfWidth(ROAD.length), z: WALL.z }, away = { x: WALL.x - 12, z: WALL.z }
     expect(c.update(away)).toBe(false)
     expect(c.update(at)).toBe(true)
     expect(c.update(at)).toBe(false)
