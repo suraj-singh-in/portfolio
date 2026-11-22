@@ -42,7 +42,7 @@ describe('scatterWorld', () => {
   })
 
   it('gives about half the clearing rocks grass tufts (road stones have none)', () => {
-    const big = w.rocks.filter((r) => r.scale >= 0.4)
+    const big = w.rocks.filter((r) => /^rock_/.test(r.sprite) && r.scale >= 0.4)
     const share = big.filter((r) => r.tufts).length / big.length
     expect(share).toBeGreaterThan(0.3)
     expect(share).toBeLessThan(0.7)

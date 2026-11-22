@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CONFIG } from '../config'
 import { createCamera } from './camera'
 
 describe('camera', () => {
@@ -45,5 +46,15 @@ describe('camera', () => {
     c.setViewport(1600, 800)
     expect(c.ppu).toBe(100)
     expect(c.pz).toBeCloseTo(90)
+  })
+
+  it('a vista eases the view back past the normal zoom limit, then returns to your own zoom', () => {
+    const c = createCamera()
+    c.setViewport(1600, 800)
+    for (let i = 0; i < 200; i++) c.update(0.05, { x: 0, z: 0 }, 0, 0, 1)
+    expect(c.zoom).toBeLessThan(0.8)
+    expect(c.zoom).toBeCloseTo(CONFIG.VISTA_ZOOM, 2)
+    for (let i = 0; i < 200; i++) c.update(0.05, { x: 0, z: 0 }, 0, 0, 0)
+    expect(c.zoom).toBeCloseTo(0.9, 3)
   })
 })

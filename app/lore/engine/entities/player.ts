@@ -1,7 +1,7 @@
 import { CONFIG } from '../config'
 import type { Circle, Vec2 } from '../core/types'
 import { resolveCollisions } from '../world/clearing'
-import { clampToWorld } from '../world/road'
+import { clampToWorld } from '../world/bounds'
 
 export type PlayerState = {
   x: number; z: number

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { describe, expect, it } from 'vitest'
 import { createTrample } from './trample'
 
@@ -29,9 +30,22 @@ describe('trample', () => {
     expect(Math.abs(d.z)).toBeLessThan(0.3)
   })
 
-  it('ignores stamps outside its bounds', () => {
+  it('works anywhere in the world with a fixed-size wrapping map', () => {
     const tr = createTrample()
-    expect(() => tr.stamp(500, 500, 1, 0, 2, 0.4)).not.toThrow()
-    expect(tr.amountAt(500, 500)).toBe(0)
+    const size = [tr.texture.image.width, tr.texture.image.height]
+    tr.stamp(500, -340, 1, 0, 2, 0.4); tr.stamp(-61.3, 12.2, 1, 0, 2, 0.4)
+    tr.update(0)
+    expect(tr.amountAt(500, -340)).toBeGreaterThan(0.8)
+    expect(tr.amountAt(-61.3, 12.2)).toBeGreaterThan(0.8)
+    expect([tr.texture.image.width, tr.texture.image.height]).toEqual(size)
+    expect(tr.texture.wrapS).toBe(THREE.RepeatWrapping)
+  })
+
+  it('does not re-upload the map while nothing is pressed', () => {
+    const tr = createTrample()
+    tr.update(0.1)
+    const v = tr.texture.version
+    for (let i = 0; i < 20; i++) tr.update(0.1)
+    expect(tr.texture.version).toBe(v)
   })
 })

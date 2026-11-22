@@ -2,10 +2,13 @@ import type { Vec2 } from '../core/types'
 import type { Camera } from './camera'
 import type { DrawItem } from './compositor'
 
+/** a lake band: water from the waterline (z = shoreZ(x)) out to farZ, across |x| <= half (world metres) */
+export type Water = { shoreZ: (x: number) => number; farZ: number; half: number }
+
 export type Paper = {
   resize(w: number, h: number, dpr: number): void
-  /** paper + grain, worn ground patches, soft ground shadows, firelight pool */
-  draw(camera: Camera, items: readonly DrawItem[], worn: readonly [Vec2, number, number][], fire: Vec2, t: number): void
+  /** paper + grain, worn ground patches, still water, soft ground shadows, firelight pool */
+  draw(camera: Camera, items: readonly DrawItem[], worn: readonly [Vec2, number, number][], fire: Vec2, t: number, water?: Water): void
 }
 
 export function createPaper(canvas: HTMLCanvasElement, rand: () => number): Paper {
@@ -21,10 +24,23 @@ export function createPaper(canvas: HTMLCanvasElement, rand: () => number): Pape
   gr.addColorStop(0, 'rgba(70,58,44,.28)'); gr.addColorStop(1, 'rgba(70,58,44,0)')
   s.fillStyle = gr; s.fillRect(0, 0, 128, 128)
   let W = 1, H = 1
+  /** a pale, cool paper wash under the lake band — the waves themselves are ASCII (render/water.ts) */
+  const drawWater = (camera: Camera, w: Water) => {
+    const pts: [number, number][] = []
+    for (let x = -w.half; x <= w.half; x += 1.5) pts.push(camera.worldToScreen(x, 0, w.shoreZ(x)))
+    const [, top] = camera.worldToScreen(0, 0, w.farZ - 1)
+    if (pts.every(([, y]) => y < 0) || top > H) return
+    const g = ctx.createLinearGradient(0, top, 0, Math.max(...pts.map(([, y]) => y)))   // colder toward the mountains
+    g.addColorStop(0, 'rgba(178,194,198,.9)'); g.addColorStop(1, 'rgba(216,226,226,.9)')
+    ctx.fillStyle = g
+    ctx.beginPath(); ctx.moveTo(pts[0][0], top)
+    for (const [x, y] of pts) ctx.lineTo(x, y)
+    ctx.lineTo(pts[pts.length - 1][0], top); ctx.closePath(); ctx.fill()
+  }
 
   return {
     resize(w, h, dpr) { W = w; H = h; canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0) },
-    draw(camera, items, worn, fire, t) {
+    draw(camera, items, worn, fire, t, water) {
       const PZ = camera.pz
       ctx.fillStyle = '#fbfaf6'; ctx.fillRect(0, 0, W, H)
       const [ox, oy] = camera.worldToScreen(0, 0, 0)
@@ -36,6 +52,7 @@ export function createPaper(canvas: HTMLCanvasElement, rand: () => number): Pape
         eg.addColorStop(0, `rgba(140,118,88,${a})`); eg.addColorStop(1, 'rgba(140,118,88,0)')
         ctx.fillStyle = eg; ctx.fillRect(cx - PZ * r, cy - PZ * r, PZ * r * 2, PZ * r * 2)
       }
+      if (water) drawWater(camera, water)
       for (const it of items) {
         if (!it.vis || !it.shadow) continue
         const [sx, sy] = camera.worldToScreen(it.world.x + 0.4 * it.shadow, 0, it.world.z + 0.3 * it.shadow)

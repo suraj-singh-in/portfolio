@@ -405,5 +405,170 @@
    157.5
   ],
   "foot": 0.38
+ },
+ "cliff_a": {
+  "file": "cliff_a.webp",
+  "w": 777,
+  "h": 820,
+  "ppu": 100,
+  "anchor": [
+   340.5,
+   735.4
+  ],
+  "foot": 3.47
+ },
+ "cliff_b": {
+  "file": "cliff_b.webp",
+  "w": 770,
+  "h": 917,
+  "ppu": 100,
+  "anchor": [
+   548.6,
+   545.8
+  ],
+  "foot": 3.44
+ },
+ "cliff_c": {
+  "file": "cliff_c.webp",
+  "w": 927,
+  "h": 738,
+  "ppu": 100,
+  "anchor": [
+   436.8,
+   612.4
+  ],
+  "foot": 4.14
+ },
+ "cliff_long": {
+  "file": "cliff_long.webp",
+  "w": 2048,
+  "h": 984,
+  "ppu": 90.41942604856513,
+  "anchor": [
+   984.8483885209713,
+   774.5328035320089
+  ],
+  "foot": 10.11
+ },
+ "cliff_long2": {
+  "file": "cliff_long2.webp",
+  "w": 2048,
+  "h": 984,
+  "ppu": 90.41942604856513,
+  "anchor": [
+   1063.1516114790286,
+   627.1491390728477
+  ],
+  "foot": 10.11
+ },
+ "boulder_a": {
+  "file": "boulder_a.webp",
+  "w": 142,
+  "h": 227,
+  "ppu": 100,
+  "anchor": [
+   82.2,
+   144.8
+  ],
+  "foot": 0.92
+ },
+ "boulder_b": {
+  "file": "boulder_b.webp",
+  "w": 297,
+  "h": 288,
+  "ppu": 100,
+  "anchor": [
+   142.2,
+   173.7
+  ],
+  "foot": 1.34
+ },
+ "boulder_c": {
+  "file": "boulder_c.webp",
+  "w": 282,
+  "h": 350,
+  "ppu": 100,
+  "anchor": [
+   148.9,
+   221
+  ],
+  "foot": 1.26
+ },
+ "boulder_d": {
+  "file": "boulder_d.webp",
+  "w": 123,
+  "h": 193,
+  "ppu": 100,
+  "anchor": [
+   65.1,
+   121.4
+  ],
+  "foot": 0.87
+ },
+ "scree_a": {
+  "file": "scree_a.webp",
+  "w": 178,
+  "h": 100,
+  "ppu": 100,
+  "anchor": [
+   135.8,
+   61
+  ],
+  "foot": 0.79
+ },
+ "pebbles_a": {
+  "file": "pebbles_a.webp",
+  "w": 164,
+  "h": 69,
+  "ppu": 100,
+  "anchor": [
+   140.9,
+   20.9
+  ],
+  "foot": 0.73
+ },
+ "shore_a": {
+  "file": "shore_a.webp",
+  "w": 518,
+  "h": 362,
+  "ppu": 100,
+  "anchor": [
+   275.2,
+   190.1
+  ],
+  "foot": 2.31
+ },
+ "skyline_a": {
+  "file": "skyline_a.webp",
+  "w": 2048,
+  "h": 1442,
+  "ppu": 99.56246961594555,
+  "anchor": [
+   1085.927856101118,
+   1191.5636363636363
+  ],
+  "foot": 9.18
+ },
+ "skyline_b": {
+  "file": "skyline_b.webp",
+  "w": 2048,
+  "h": 1330,
+  "ppu": 92.7116342236306,
+  "anchor": [
+   1055.892802172929,
+   1018.8081484834768
+  ],
+  "foot": 10.33
+ },
+ "skyline_c": {
+  "file": "skyline_c.webp",
+  "w": 2048,
+  "h": 1337,
+  "ppu": 72.54693588381154,
+  "anchor": [
+   940.7886645412681,
+   1042.862203329791
+  ],
+  "foot": 13.24
  }
 }
