@@ -34,6 +34,15 @@ function animated(root: THREE.Object3D, clips: THREE.AnimationClip[]): Animated 
   }
 }
 
+/**
+ * The rider clips were authored in Blender, whose glTF import gives the Root bone a different rest
+ * (rotated 180° and offset 5.26 m down / 0.79 m back) than the hero GLB. Root never moves in our clips,
+ * so drop its tracks and let the hero's own Root stand; every other bone matches the hero exactly.
+ */
+export function stripRootTracks(clips: THREE.AnimationClip[]): THREE.AnimationClip[] {
+  return clips.map((c) => new THREE.AnimationClip(c.name, c.duration, c.tracks.filter((t) => !t.name.startsWith('Root.'))))
+}
+
 const setColor = (m: THREE.Material, rgb: readonly [number, number, number]) => {
   const s = m as THREE.MeshStandardMaterial
   s.color.setRGB(rgb[0], rgb[1], rgb[2]); s.roughness = 0.85; s.metalness = 0

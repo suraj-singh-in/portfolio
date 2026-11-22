@@ -30,6 +30,7 @@ export function createInput(target: InputTarget, opts: { bindings?: Record<Actio
   const onKeyDown = (e: Event) => {
     const { code, repeat } = e as KeyEventLike
     if (!code) return
+    if (codeToActions.has(code)) e.preventDefault()   // game keys (Space!) must not scroll or click the page
     down.add(code)
     if (repeat) return
     for (const a of codeToActions.get(code) ?? []) listeners.get(a)?.forEach((fn) => fn())

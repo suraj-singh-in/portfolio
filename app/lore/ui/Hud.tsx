@@ -15,7 +15,7 @@ export type HudState = {
 const ink = "font-mono text-[12px] leading-[1.35] text-[#2b2722] whitespace-pre"
 const paper = "bg-[#fbfaf6]/85 backdrop-blur-[1px]"
 
-const PROMPTS = { ride: "[ E ]  ride", dismount: "[ E ]  dismount" } as const
+const PROMPTS = { ride: "[ space ]  ride    [ E ]  stroke", dismount: "[ space ]  dismount" } as const
 
 export default function Hud({ s, playerName, nameRef }: { s: HudState; playerName: string; nameRef: RefObject<HTMLDivElement | null> }) {
   const [lastPrompt, setLastPrompt] = useState<keyof typeof PROMPTS>("ride")

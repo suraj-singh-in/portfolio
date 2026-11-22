@@ -9,6 +9,7 @@ export const KEYBINDINGS = {
   moveRight: ['KeyD', 'ArrowRight'],
   run: ['ShiftLeft', 'ShiftRight'],
   interact: ['KeyE'],
+  ride: ['Space'],
   mute: ['KeyM'],
   zoomIn: ['Equal', 'NumpadAdd'],
   zoomOut: ['Minus', 'NumpadSubtract'],

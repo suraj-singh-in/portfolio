@@ -53,7 +53,7 @@ export function updateRide(s: RideState, move: { x: number; z: number; run: bool
 }
 
 /** Where the rider stands to mount / lands on dismount: the horse's left side, never inside an obstacle. */
-export function sidePoint(s: RideState, obstacles: readonly Circle[]): Vec2 {
+export function sidePoint(s: RideState, obstacles: readonly Circle[], side: 'left' | 'right' = 'left'): Vec2 {
   const r = CONFIG.PLAYER.radius
   const clear = (p: Vec2) => obstacles.every((o) => Math.hypot(p.x - o.x, p.z - o.z) >= o.r + r - 1e-9)
   const settle = (dir: Vec2) => {
@@ -71,8 +71,9 @@ export function sidePoint(s: RideState, obstacles: readonly Circle[]): Vec2 {
     return null
   }
   const f = s.facing
-  // left first (the mounting side), then right, rear, front — the first spot clear of everything inside the clearing
-  const dirs: Vec2[] = [{ x: Math.cos(f), z: -Math.sin(f) }, { x: -Math.cos(f), z: Math.sin(f) }, { x: -Math.sin(f), z: -Math.cos(f) }, { x: Math.sin(f), z: Math.cos(f) }]
+  // the asked side first, then the other side, rear, front — the first spot clear of everything inside the clearing
+  const left = { x: Math.cos(f), z: -Math.sin(f) }, right = { x: -left.x, z: -left.z }
+  const dirs: Vec2[] = [side === 'left' ? left : right, side === 'left' ? right : left, { x: -Math.sin(f), z: -Math.cos(f) }, { x: Math.sin(f), z: Math.cos(f) }]
   for (const d of dirs) { const p = settle(d); if (p) return p }
   return clampToClearing({ x: s.x + dirs[0].x * CONFIG.RIDE.sideOffset, z: s.z + dirs[0].z * CONFIG.RIDE.sideOffset })
 }

@@ -13,7 +13,7 @@ Source assets live outside this repo in `side-quest/text-draw/spike-ascii-3d/` (
 `npx @gltf-transform/cli@4 meshopt <in.glb> public/lore/models/<name>.glb`
 - hero ← `spike-ascii-3d/models/hero_original.glb` (Quaternius "Adventurer", original Poly Pizza file; recoloured in code — the Blender re-export broke skinning)
 - horse ← `spike-ascii-3d/models/horse.glb` (Quaternius "Horse", exported from Blender with only the needed clips)
-- hero_ride ← `tools/lore/ride_clips.py` run in Blender on the imported hero_original.glb (glTF import, Bone Dir **Temperance**). Animation-only (no mesh/skin), clips `Ride_Mount`, `Ride_Idle`, `Ride_Walk`, `Ride_Gallop`, `Ride_Dismount`, merged into the hero by bone name. Walk/Gallop lengths equal the horse's Walk (1.208 s) / Gallop (0.625 s). Not meshopt-compressed (nothing to compress).
+- hero_ride ← `tools/lore/ride_clips.py` run in Blender on the imported hero_original.glb (glTF import, Bone Dir **Temperance**). Animation-only (no mesh/skin), clips `Ride_Mount`, `Ride_Idle`, `Ride_Walk`, `Ride_Gallop`, `Ride_Dismount`, merged into the hero by bone name; the engine drops their Root tracks (the Blender import flips/offsets that one bone). Walk/Gallop lengths equal the horse's Walk (1.208 s) / Gallop (0.625 s). Not meshopt-compressed (nothing to compress).
 
 ## Audio
 `public/lore/audio/ambience.wav` ← sfxmint "growth … part 1" (10 s loop, saved manually by Suraj — sfxmint rate-limits scripted downloads)

@@ -85,6 +85,12 @@ describe('ride', () => {
     expect(Math.hypot(sx, p.z)).toBeLessThanOrEqual(edgeRadius(Math.atan2(p.z, sx)) + 1e-6)
   })
 
+  it('side point can be asked for on the right', () => {
+    const p = sidePoint(riding(0, 0, 0), [], 'right')
+    expect(p.x).toBeCloseTo(-CONFIG.RIDE.sideOffset)
+    expect(p.z).toBeCloseTo(0)
+  })
+
   it('dismount point is pushed out of obstacles and clamped', () => {
     const rock = { x: 1.2, z: 0, r: 0.6 }
     const p = sidePoint(riding(0, 0, 0), [rock])

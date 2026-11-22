@@ -10,7 +10,9 @@ Run inside Blender (Text Editor or the MCP bridge) on an empty scene:
 Facts this relies on (checked 2026-11-22):
   - Importing with bone_heuristic='TEMPERANCE' and exporting armature-only round-trips
     the original Idle with max quaternion deviation 4e-8.
-  - The hero faces -Y in Blender; ".L" bones are on -X; armature scale is 100.
+  - Imported this way, the hero's body faces +Y in Blender (its Root bone rest is flipped 180° relative
+    to the GLB) and ".L" bones are on -X; armature scale is 100. The engine therefore drops every Root
+    track (see stripRootTracks) and the poses here bend limbs toward +Y = the body's front.
   - The hero's Idle does NOT key every bone, so each pose starts from the rest pose
     (otherwise bones keep whatever the previously evaluated action left behind).
   - Horse Walk = 29 frames, Gallop = 15 frames at 24 fps; rider loops match exactly.
@@ -20,7 +22,8 @@ import bpy
 from mathutils import Matrix, Quaternion, Vector
 
 OUT = r"C:\Users\Suraj Singh\Desktop\preparation\portfolio\public\lore\models\hero_ride.glb"
-WX, WY = Vector((1, 0, 0)), Vector((0, 1, 0))
+# WX is the pitch axis: a positive angle swings a limb toward the body's front (+Y), i.e. forward.
+WX, WY = Vector((-1, 0, 0)), Vector((0, 1, 0))
 
 arm = bpy.data.objects["CharacterArmature"]
 P = arm.pose.bones
@@ -58,8 +61,8 @@ def seated(lean=8.0, bob=0.0, rock=0.0, legs=1.0, arms=1.0, flex=75, knee=90, sp
         foot.matrix = m
         vl.update()
         rot("Foot." + s, WX, -15 * legs)
-        rot("UpperArm." + s, WX, -28 * arms)
-        rot("LowerArm." + s, WX, -50 * arms)
+        rot("UpperArm." + s, WX, -22 * arms)
+        rot("LowerArm." + s, WX, -30 * arms)   # hands low and forward, at rein height
         rot("LowerArm." + s, WY, -20 * sg * arms)
     rot("Abdomen", WX, (lean + rock) * 0.5)
     rot("Chest", WX, (lean + rock) * 0.5)
