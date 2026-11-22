@@ -2,10 +2,11 @@ import { CONFIG } from '../config'
 import { fbm, valueNoise } from '../core/rng'
 import { LAYOUT, edgeRadius } from '../world/clearing'
 import type { World } from '../world/scatter'
-import { SHORE, inEllipse, inLake } from '../world/north'
+import { NORTH, inLake, inMeadow } from '../world/north'
+import { inClearing } from '../world/bounds'
 
 /** Ground the field map covers (world metres; clearing, east road, north track and lake) at 6 cells per metre — finer than any grass pattern. */
-export const FIELD = { minX: -32, minZ: -110, sx: 144, sz: 138, w: 864, h: 828 } as const
+export const FIELD = { minX: -32, minZ: -125, sx: 144, sz: 153, w: 864, h: 918 } as const
 /** The blades live in a window this size that follows the camera; each blade stays pinned to the world. */
 export const GRASS_WINDOW = { sx: 64, sz: 56 } as const
 
@@ -112,16 +113,25 @@ function fieldJob(world: World) {
     const worn = Math.max(0, 1 - Math.hypot(x - fire.x, z - fire.z) / 3.2) + Math.max(0, 1 - Math.hypot(x - (hut.x + 0.5), z - (hut.z + 2.6)) / 2.2)
     d = blocked ? 0 : Math.max(0, Math.min(1, d - worn * 0.55))
     // the lakeside meadow: thick, knee-high grass right down to the water (sheltered, so no altitude thinning)
-    const meadow = !blocked && inEllipse({ x, z }, { ...SHORE, rx: SHORE.rx + 3, rz: SHORE.rz + 2 })
-    const alt = meadow ? 0 : altitude(x, z)
+    const meadow = !blocked && inMeadow({ x, z }, 1.12)
+    // the climb: a grassy lane between bare, stony shoulders; the lane's grass grows longer the higher it goes
+    let lane = -1, shoulder = false
+    if (!meadow && !blocked && x > -20 && x < 22 && z < -6 && z > -92 && !inClearing({ x, z })) {
+      const q = NORTH.query({ x, z }), hw = NORTH.halfWidth(q.s)
+      if (q.d <= hw + 0.3) lane = q.s / NORTH.length
+      else if (q.d < hw + 3.5) shoulder = true
+    }
+    const alt = meadow || lane >= 0 ? 0 : altitude(x, z)
     d *= 1 - 0.65 * alt
     if (meadow) d = Math.max(d, 0.7 + big * 0.25)
+    if (lane >= 0) d = Math.max(d, 0.62 + big * 0.25)
+    if (shoulder) d *= 0.3
     const edge = Math.hypot(x / sx, z) / edgeRadius(Math.atan2(z, x / sx))
     const flower = alt < 0.3 && fbm(x * 0.5 + 20, z * 0.5 - 13) > 0.66
     const dry = fbm(x * 0.11 + 50, z * 0.11 + 31) > 0.6 - alt * 0.45     // the higher, the more straw
-    const tall = meadow ? 0.85 + small * 0.15 : Math.min(1, 0.1 + Math.max(0, edge - 0.6) * 0.9 + (fbm(x * 0.25 + 90, z * 0.25) > 0.62 ? 0.35 : 0)) * (1 - 0.7 * alt)
+    const tall = meadow ? 0.85 + small * 0.15 : lane >= 0 ? 0.15 + 0.6 * lane : Math.min(1, 0.1 + Math.max(0, edge - 0.6) * 0.9 + (fbm(x * 0.25 + 90, z * 0.25) > 0.62 ? 0.35 : 0)) * (1 - 0.7 * alt)
     data[o] = Math.round(d * 255)
-    data[o + 1] = Math.round((meadow ? Math.max(mid, 0.8) : mid * (1 - 0.5 * alt)) * 255)
+    data[o + 1] = Math.round((meadow ? Math.max(mid, 0.92) : lane >= 0 ? 0.35 + 0.5 * lane : mid * (1 - 0.5 * alt)) * 255)
     data[o + 2] = (flower ? 128 : 0) + (dry ? 64 : 0)
     data[o + 3] = Math.round(tall * 255)
     acc += Math.min(1, Math.pow(d, 1.4) * 1.15)

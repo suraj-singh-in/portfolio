@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { clampToWorld, inClearing } from './bounds'
-import { LAKE, MOUNTAINS, NORTH, SHORE, createLakeCaption, inEllipse, inLake, lookAhead, shoreZ } from './north'
+import { LAKE, MOUNTAINS, NORTH, SHORE, createLakeCaption, inEllipse, inLake, inMeadow, lookAhead, meadowRadius, shoreZ } from './north'
 import { scatterWorld } from './scatter'
 import { offTrack } from './track'
 import { FIELD, buildGrassField } from '../render/grassField'
@@ -9,27 +9,28 @@ import { FIELD, buildGrassField } from '../render/grassField'
 const beyondEdge = () => { let s = 0; for (const p of NORTH.points) { if (!inClearing(p)) break; s += NORTH.step } return NORTH.length - s }
 
 describe('north mountain track', () => {
-  it('leaves the clearing to the north and takes about 20 s at a run', () => {
+  it('leaves the clearing to the north on a long climb (about half a minute at a run)', () => {
     expect(inClearing(NORTH.points[0])).toBe(true)
     expect(NORTH.points[NORTH.points.length - 1].z).toBeLessThan(-65)
     const secs = beyondEdge() / CONFIG.PLAYER.run
-    expect(secs).toBeGreaterThanOrEqual(19.5)
-    expect(secs).toBeLessThanOrEqual(24)
+    expect(secs).toBeGreaterThanOrEqual(28)
+    expect(secs).toBeLessThanOrEqual(38)
   })
 
-  it('climbs in switchbacks: at least three legs crossing left and right', () => {
+  it('climbs in switchbacks: at least two S-turns (five legs crossing left and right)', () => {
     const P = NORTH.points, dirs: number[] = []
     for (let i = 0; i < P.length - 1; i++) {
       const dx = P[i + 1].x - P[i].x, dz = P[i + 1].z - P[i].z
       if (Math.abs(dx) > Math.abs(dz) * 1.2) { const d = Math.sign(dx); if (dirs[dirs.length - 1] !== d) dirs.push(d) }
     }
-    expect(dirs.length).toBeGreaterThanOrEqual(3)
+    expect(dirs.length).toBeGreaterThanOrEqual(5)
   })
 
   it('is wide in the foothills, tight in the switchbacks and tightest in the pass', () => {
     expect(NORTH.halfWidth(10)).toBeGreaterThan(3.5)
-    expect(NORTH.halfWidth(55)).toBeLessThanOrEqual(2.2)
-    expect(NORTH.halfWidth(NORTH.length - 3)).toBeLessThanOrEqual(1.8)
+    expect(NORTH.halfWidth(60)).toBeGreaterThanOrEqual(2.2)   // a comfortable lane…
+    expect(NORTH.halfWidth(60)).toBeLessThanOrEqual(2.8)
+    expect(NORTH.halfWidth(NORTH.length - 3)).toBeLessThan(NORTH.halfWidth(60))   // …that narrows into the pass
   })
 
   it('keeps rock between the switchback legs (no shortcut across)', () => {
@@ -42,13 +43,28 @@ describe('north mountain track', () => {
 
   it('opens onto a shore at the water; the lake itself is not walkable', () => {
     const end = NORTH.points[NORTH.points.length - 1]
-    expect(inEllipse(end, SHORE)).toBe(true)
-    expect(Math.abs(SHORE.z - SHORE.rz - shoreZ(SHORE.x))).toBeLessThan(0.6)   // shore reaches the water's edge
-    for (let x = -SHORE.rx; x <= SHORE.rx; x += 0.5) expect(inLake({ x, z: SHORE.z - SHORE.rz * Math.sqrt(Math.max(0, 1 - (x / SHORE.rx) ** 2)) + 0.05 })).toBe(false)   // no wet feet on the shore
+    expect(inMeadow(end)).toBe(true)
+    for (let x = -10; x <= 10; x += 0.5) expect(inMeadow({ x, z: shoreZ(x) + 0.3 })).toBe(true)   // the meadow runs right down to the water
+    for (let x = -10; x <= 10; x += 0.5) expect(inLake(clampToWorld({ x, z: shoreZ(x) - 0.3 }))).toBe(false)   // no wet feet
     const lakeMid = { x: 0, z: (shoreZ(0) + LAKE.farZ) / 2 }
     expect(clampToWorld(lakeMid)).not.toEqual(lakeMid)
-    const waterline = { x: SHORE.x, z: SHORE.z - SHORE.rz + 0.3 }
+    const waterline = { x: SHORE.x, z: shoreZ(SHORE.x) + 0.3 }
     expect(clampToWorld(waterline)).toEqual(waterline)
+  })
+
+  it('pushing into the water stops you at the waterline without sliding sideways', () => {
+    for (const x of [-12, -6.3, -0.5, 0.02, 3.7, 11]) {
+      const c = clampToWorld({ x, z: shoreZ(x) - 0.25 })
+      expect(Math.abs(c.x - x)).toBeLessThan(0.05)
+      expect(inLake(c)).toBe(false)
+    }
+  })
+
+  it('pulls a point just outside the meadow onto its nearest edge, not across it', () => {
+    for (const p of [{ x: -24, z: -80 }, { x: 25, z: -78 }, { x: -12, z: -73 }]) {
+      const c = clampToWorld(p)
+      expect(Math.hypot(c.x - p.x, c.z - p.z)).toBeLessThan(4)
+    }
   })
 
   it('keeps track points and pulls a point between two legs back onto a leg', () => {
@@ -80,14 +96,17 @@ describe('north mountain track', () => {
     expect(LAKE.farZ).toBeLessThan(z(rows[0]) - 6)
   })
 
-  it('opens into a wide lakeside meadow', () => {
-    expect(SHORE.rx).toBeGreaterThanOrEqual(14)
-    expect(SHORE.rz).toBeGreaterThanOrEqual(4.5)
+  it('opens into a long, wide lakeside meadow with an uneven edge', () => {
+    expect(SHORE.rx).toBeGreaterThanOrEqual(20)
+    expect(SHORE.rz).toBeGreaterThanOrEqual(6)
+    const radii = Array.from({ length: 72 }, (_, i) => meadowRadius((i / 72) * Math.PI * 2))
+    expect(Math.max(...radii) / Math.min(...radii)).toBeGreaterThan(1.25)   // not an oval
+    expect(inMeadow({ x: SHORE.x, z: SHORE.z })).toBe(true)
   })
 
   it('lake caption fires once on reaching the water and again only after walking back down', () => {
     const c = createLakeCaption()
-    const water = { x: SHORE.x, z: SHORE.z - SHORE.rz + 0.6 }, pass = NORTH.points[NORTH.points.length - 8]
+    const water = { x: SHORE.x, z: shoreZ(SHORE.x) + 0.6 }, pass = NORTH.points[NORTH.points.length - 8]
     expect(c.update(pass)).toBe(false)
     expect(c.update(water)).toBe(true)
     expect(c.update(water)).toBe(false)
@@ -97,7 +116,7 @@ describe('north mountain track', () => {
 
   it('eases the camera forward only near the shore', () => {
     expect(lookAhead(NORTH.points[20])).toBe(0)
-    expect(lookAhead({ x: SHORE.x, z: SHORE.z - SHORE.rz + 0.5 })).toBeGreaterThan(5)
+    expect(lookAhead({ x: SHORE.x, z: shoreZ(SHORE.x) + 0.5 })).toBeGreaterThan(5)
   })
 
   describe('scenery', () => {
@@ -123,18 +142,19 @@ describe('north mountain track', () => {
 
     it('lines both edges of the climb with boulders, so the way shows itself', () => {
       const edge = w.rocks.filter((r) => /^boulder_/.test(r.sprite)).filter((r) => { const q = NORTH.query(r); return q.s > startS && Math.abs(q.d - NORTH.halfWidth(q.s)) < 1.2 })
-      expect(edge.length).toBeGreaterThan(((NORTH.length - startS) * 2) / 3.5)
+      expect(edge.length).toBeGreaterThan(((NORTH.length - startS) * 2) / 2)   // about one per metre each side
     })
 
-    it('puts blocking boulders in the foothills that never close the way', () => {
+    it('keeps the middle of the lane nearly clear: only a few small stones block, never the way', () => {
       const inside = w.obstacles.filter((o) => onTrack(o) && NORTH.query(o).s > startS && NORTH.query(o).s < 30)
-      expect(inside.length).toBeGreaterThanOrEqual(4)
+      expect(inside.length).toBeLessThanOrEqual(3)
       for (const o of inside) { const q = NORTH.query(o); expect(NORTH.halfWidth(q.s) - (o.r - q.d)).toBeGreaterThan(2); expect(o.r).toBeLessThanOrEqual(0.35) }   // small stones, not walls
     })
 
-    it('scatters scree over the track that does not block', () => {
+    it('keeps loose scree to the sides of the lane, never blocking', () => {
       const scree = w.rocks.filter((r) => onTrack(r) && /scree|pebbles/.test(r.sprite))
-      expect(scree.length).toBeGreaterThanOrEqual(40)
+      const middle = scree.filter((r) => { const q = NORTH.query(r); return q.d < NORTH.halfWidth(q.s) * 0.45 })
+      expect(middle.length).toBeLessThanOrEqual(4)
       for (const r of scree) expect(w.obstacles.some((o) => o.x === r.x && o.z === r.z)).toBe(false)
     })
 
@@ -149,8 +169,17 @@ describe('north mountain track', () => {
       let tall = 0, n = 0
       for (let x = -10; x <= 10; x += 2) for (const z of [SHORE.z - 1, SHORE.z + 1]) { tall += ch({ x, z }, 3); n++ }
       expect(tall / n).toBeGreaterThan(0.6)
-      const mean = (s0: number, s1: number) => { let a = 0, n = 0; for (let s = s0; s < s1; s += 1) { a += at(NORTH.points[Math.round(s / NORTH.step)]); n++ } return a / n }
-      expect(mean(60, 90)).toBeLessThan(mean(startS, startS + 20) * 0.7)
+      // the lane is grassy between rocky shoulders, and its grass grows longer the higher you climb
+      const lane = (s0: number, s1: number, k: number) => { let a = 0, n = 0; for (let s = s0; s < s1; s += 1) { a += ch(NORTH.points[Math.round(s / NORTH.step)], k); n++ } return a / n }
+      const L = NORTH.length
+      expect(lane(startS + 5, startS + 25, 0)).toBeGreaterThan(0.5)
+      expect(lane(L - 25, L - 5, 0)).toBeGreaterThan(0.5)
+      expect(lane(L - 25, L - 5, 1)).toBeGreaterThan(lane(startS + 5, startS + 25, 1) + 0.2)
+      const shoulder = (s: number) => { const q = NORTH.points[Math.round(s / NORTH.step)], i = Math.round(s / NORTH.step), n = NORTH.points[i + 1], l = Math.hypot(n.x - q.x, n.z - q.z), off = NORTH.halfWidth(s) + 1.6; return at({ x: q.x - ((n.z - q.z) / l) * off, z: q.z + ((n.x - q.x) / l) * off }) }
+      let sh = 0, cnt = 0; for (let s = 50; s < L - 30; s += 3) { sh += shoulder(s); cnt++ }
+      expect(sh / cnt).toBeLessThan(lane(50, L - 30, 0) * 0.8)
+      let meadowG = 0, mn = 0; for (let x = -10; x <= 10; x += 2) { meadowG += ch({ x, z: SHORE.z }, 1); mn++ }
+      expect(meadowG / mn).toBeGreaterThanOrEqual(lane(L - 25, L - 5, 1) - 0.02)   // longest by the lake
     })
   })
 })

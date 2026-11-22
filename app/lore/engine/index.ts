@@ -202,15 +202,14 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
     for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)
     // the north climb: cliff walls, stony shore patches, and the mountain skyline mirrored in the lake
-    // mountain scenery: solid, crisp ASCII on clean paper — dense ink in shade, light symbols on pale stone and snow
-    const ROCK_LOOK: Partial<GlyphOpts> = { solid: true, paper: 0.95, tint: 0.26, ink: '#2b251f', contrast: 2.3, mid: 0.4, wash: 0 }
-    const PEAK_LOOK: Partial<GlyphOpts> = { solid: true, paper: 0.96, tint: 0.22, ink: '#28323a', contrast: 2.2, mid: 0.42, wash: 0 }
-    const NORTH_ROCK = /^(boulder|scree|pebbles)_/
-    for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [4, 6], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
+    // mountain scenery uses the same look as the rocks by the hut: their own colours under the ASCII
+    const ROCK_LOOK: Partial<GlyphOpts> = { solid: true, tint: 0.4 }
+    const PEAK_LOOK: Partial<GlyphOpts> = { solid: true, tint: 0.4 }
+    for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [3, 4.5], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
     for (const f of world.flats) { const it = addScenery(f.sprite, f, f.scale, [4, 6], ROCK_LOOK, 0, false); if (it) it.flat = true }
     const reflections: { src: SceneryItem; mesh: THREE.Mesh }[] = []
     for (const m of MOUNTAINS) {
-      const src = addScenery(m.sprite, m, m.scale, [4, 6], PEAK_LOOK, 0, false)
+      const src = addScenery(m.sprite, m, m.scale, [3, 4.5], PEAK_LOOK, 0, false)
       if (!src || m.row > 0) continue   // only the front row is close enough to mirror in the water
       const geo = new THREE.PlaneGeometry(1, 1), uv = geo.attributes.uv
       for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i))   // upside down
@@ -229,8 +228,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const water = createWater(atlas)   // the lake: ASCII waves on a pale wash
     compositor.add(water.item); cleanups.push(() => water.dispose())
     for (const r of world.rocks) {
-      if (NORTH_ROCK.test(r.sprite)) addScenery(r.sprite, r, r.scale, [4, 6], ROCK_LOOK, 0.7 * r.scale, false)
-      else addScenery(r.sprite, r, r.scale, [3, 4.5], { solid: true, tint: 0.4 }, 0.7 * r.scale, false)
+      addScenery(r.sprite, r, r.scale, [3, 4.5], ROCK_LOOK, 0.7 * r.scale, false)
     }
 
     // characters

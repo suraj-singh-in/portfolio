@@ -2,7 +2,7 @@ import { CONFIG } from '../config'
 import { mulberry32 } from '../core/rng'
 import type { Circle } from '../core/types'
 import { LAYOUT, edgeRadius } from './clearing'
-import { ROAD, STONE_WALL, WALL, roadQuery, wallLine, wallXAt } from './road'
+import { ROAD, STONE_WALL, WALL, wallLine, wallXAt } from './road'
 import { inClearing } from './bounds'
 import { NORTH, SHORE, inEllipse, inLake as lakeAt } from './north'
 import { offTrack } from './track'
@@ -49,7 +49,7 @@ export function scatterWorld(seed: number): World {
   /** distance outside the shore ellipse, roughly in metres (negative = on it) */
   const offShore = (x: number, z: number) => (Math.hypot((x - SHORE.x) / SHORE.rx, (z - SHORE.z) / SHORE.rz) - 1) * Math.min(SHORE.rx, SHORE.rz)
   /** distance outside the nearest track or shore edge (negative = on walkable ground beyond the clearing) */
-  const offRoad = (x: number, z: number) => { const q = roadQuery({ x, z }); return Math.min(q.d - ROAD.halfWidth(q.s), offTrack(NORTH, { x, z }), offShore(x, z)) }
+  const offRoad = (x: number, z: number) => Math.min(offTrack(ROAD, { x, z }), offTrack(NORTH, { x, z }), offShore(x, z))
   const inLake = (x: number, z: number, pad = 0) => lakeAt({ x, z }, pad)
   const free = placed.free
   const pickTree = () => {
@@ -172,7 +172,7 @@ export function scatterWorld(seed: number): World {
     placed.push({ x, z, r: 4 }); cliffs.push({ sprite: side < 0 ? 'cliff_long' : 'cliff_long2', x, z, scale: 0.6, sway: 0 })
   }
   // boulders that stand in the broad foothills (you walk around them) — never more than a third of the width
-  for (let tries = 0, made = 0; made < 7 && tries < 400; tries++) {
+  for (let tries = 0, made = 0; made < 2 && tries < 400; tries++) {
     const s = sStart + 2 + rand() * (sFoot - sStart - 4), hw = NORTH.halfWidth(s)
     const { x, z } = beside(s, (rand() < 0.5 ? -1 : 1) * (hw * (0.3 + rand() * 0.45)))
     const scale = 0.35 + rand() * 0.2, r = 0.55 * scale   // knee-high stones, not walls
@@ -182,9 +182,9 @@ export function scatterWorld(seed: number): World {
     obstacles.push({ x, z, r })
   }
   // loose scree and pebbles on the track itself: underfoot, never blocking
-  for (let tries = 0, made = 0; made < 80 && tries < 3000; tries++) {
+  for (let tries = 0, made = 0; made < 60 && tries < 3000; tries++) {
     const s = sStart + rand() * (NORTH.length - sStart)
-    const { x, z } = beside(s, (rand() * 2 - 1) * NORTH.halfWidth(s) * 0.9)
+    const { x, z } = beside(s, (rand() < 0.5 ? -1 : 1) * NORTH.halfWidth(s) * (0.72 + rand() * 0.24))   // on the lane's shoulders, not its middle
     if (offTrack(NORTH, { x, z }) > 0 || !free(x, z, 0.25)) continue
     placed.push({ x, z, r: 0.25 }); made++
     rocks.push({ sprite: rand() < 0.5 ? 'scree_a' : 'pebbles_a', x, z, scale: 0.45 + rand() * 0.3, sway: 0, tufts: false, tuftCount: 0 })

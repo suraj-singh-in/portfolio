@@ -10,6 +10,9 @@ export type Track = {
   halfWidth: (s: number) => number
   /** nearest point on the centre line: distance d, arc length s, the point and the left-hand normal there */
   query(p: Vec2): TrackHit
+  /** bounding box of the centre line, and the widest half-width (for quick far-away answers) */
+  box: { x0: number; x1: number; z0: number; z1: number }
+  maxHw: number
 }
 export type TrackHit = { d: number; s: number; at: Vec2; normal: Vec2 }
 
@@ -42,8 +45,12 @@ function centreline(control: readonly Vec2[], step: number): Vec2[] {
 
 export function makeTrack(control: readonly Vec2[], halfWidth: (s: number) => number, step = 1): Track {
   const points = centreline(control, step)
+  const length = (points.length - 1) * step
+  let maxHw = 0
+  for (let s = 0; s <= length; s += step) maxHw = Math.max(maxHw, halfWidth(s))
+  const box = { x0: Math.min(...points.map((p) => p.x)), x1: Math.max(...points.map((p) => p.x)), z0: Math.min(...points.map((p) => p.z)), z1: Math.max(...points.map((p) => p.z)) }
   return {
-    points, step, length: (points.length - 1) * step, halfWidth,
+    points, step, length, halfWidth, box, maxHw,
     query(p) {
       let best: TrackHit = { d: Infinity, s: 0, at: points[0], normal: { x: 0, z: 1 } }
       for (let i = 0; i < points.length - 1; i++) {
@@ -58,8 +65,12 @@ export function makeTrack(control: readonly Vec2[], halfWidth: (s: number) => nu
   }
 }
 
-/** Distance outside the track's edge (negative = on the track). */
-export const offTrack = (t: Track, p: Vec2) => { const q = t.query(p); return q.d - t.halfWidth(q.s) }
+/** Distance outside the track's edge (negative = on the track). Far from the track it returns a lower bound, cheaply. */
+export const offTrack = (t: Track, p: Vec2) => {
+  const bx = Math.max(t.box.x0 - p.x, 0, p.x - t.box.x1), bz = Math.max(t.box.z0 - p.z, 0, p.z - t.box.z1), far = Math.hypot(bx, bz) - t.maxHw
+  if (far > 6) return far
+  const q = t.query(p); return q.d - t.halfWidth(q.s)
+}
 
 /** Pull a point outside the track onto its nearest edge. */
 export function toTrackEdge(t: Track, p: Vec2): Vec2 {
