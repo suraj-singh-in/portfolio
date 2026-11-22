@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { scatterWorld } from './scatter'
 import { clampToClearing, edgeRadius } from './clearing'
-import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, createWallCaption, roadQuery, wallXAt } from './road'
+import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, createWallCaption, roadQuery, wallLine, wallXAt } from './road'
 import { clampToWorld } from './bounds'
 
 const inClearing = (p: { x: number; z: number }) => {
@@ -38,7 +38,11 @@ describe('east road', () => {
     expect(STONE_WALL.z).toBeLessThan(northMost - 2)
     const cornerX = ROAD.points.find((p) => p.z < -12)!.x
     expect(STONE_WALL.x0).toBeLessThan(cornerX - 3)
-    expect(STONE_WALL.x1).toBeGreaterThanOrEqual(wallXAt(STONE_WALL.z) - 0.5)   // meets the town wall
+    // runs straight into the north tower: level with it, ending at its side (the tower stands in front of the joint)
+    const tower = wallLine(0.1).reduce((a, b) => (b.z < a.z ? b : a))
+    expect(Math.abs(STONE_WALL.z - tower.z)).toBeLessThan(0.3)
+    expect(tower.x - STONE_WALL.x1).toBeGreaterThan(0.6)
+    expect(tower.x - STONE_WALL.x1).toBeLessThan(2)
     expect(GATE_PATH.length).toBeGreaterThanOrEqual(2)
     for (const t of GATE_PATH) expect(t.x).toBeGreaterThan(WALL.x)
   })
@@ -97,6 +101,15 @@ describe('east road', () => {
     expect(stones.length).toBeGreaterThanOrEqual(20)
     for (const s of stones) expect(s.scale).toBeLessThan(0.4)
     for (const s of stones) expect(w.obstacles.some((o) => o.x === s.x && o.z === s.z)).toBe(false)
+  })
+
+  it('keeps the whole horse clear of the walls', () => {
+    const w = scatterWorld(CONFIG.SEED)
+    const townBlockers = w.obstacles.filter((o) => Math.abs(o.x - wallXAt(o.z)) < 0.01)
+    expect(townBlockers.length).toBeGreaterThan(10)
+    for (const o of townBlockers) expect(o.r + CONFIG.RIDE.radius).toBeGreaterThanOrEqual(WALL.depth / 2 + 1.4)   // centre stays a head-length off the face
+    const stoneBlockers = w.obstacles.filter((o) => Math.abs(o.z - STONE_WALL.z) < 0.01 && o.x >= STONE_WALL.x0 - 0.01 && o.x <= STONE_WALL.x1 + 0.01)
+    expect(stoneBlockers.length).toBeGreaterThan(10)
   })
 
   it('blocks the way at the wall', () => {

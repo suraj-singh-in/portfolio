@@ -29,8 +29,10 @@ export function wallLine(step: number): Vec2[] {
   return out
 }
 /** A long stone wall north of the last turn, closing the way the road used to go on: three segments along x, meeting the town wall. */
-const STONE_Z = -27, STONE_SEG = 10.9
-export const STONE_WALL = { z: STONE_Z, x0: wallXAt(STONE_Z) - 3 * STONE_SEG, x1: wallXAt(STONE_Z), segment: STONE_SEG } as const
+// it runs level with the town wall's north tower and stops at the tower's side, so the tower stands in front of the joint
+const NORTH_TOWER = { x: WALL.x - Math.sin(WALL.tilt) * WALL.half, z: WALL.z - Math.cos(WALL.tilt) * WALL.half }
+const STONE_SEG = 10.9, STONE_X1 = NORTH_TOWER.x - 1.3
+export const STONE_WALL = { z: NORTH_TOWER.z, x0: STONE_X1 - 3 * STONE_SEG, x1: STONE_X1, segment: STONE_SEG } as const
 export const STONE_WALL_SEGMENTS: readonly Vec2[] = [0, 1, 2].map((i) => ({ x: STONE_WALL.x0 + STONE_WALL.segment * (i + 0.5), z: STONE_WALL.z }))
 /** Paved path continuing east behind the gate — scenery only, never walkable. Tiles butt up to the wall's back face. */
 export const GATE_TILE = { half: 3.43 } as const

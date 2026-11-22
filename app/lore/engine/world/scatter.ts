@@ -134,7 +134,9 @@ export function scatterWorld(seed: number): World {
     rocks.push({ sprite: ROCKS[(rand() * ROCKS.length) | 0], x, z, scale: 0.16 + rand() * 0.18, sway: 0, tufts: false, tuftCount: 0 })
   }
   // the town wall closes the road
-  for (const p of wallLine(0.9)) obstacles.push({ x: p.x, z: p.z, r: 0.7 })
+  // wide enough that a horse's head and body (not just its centre) stay off the wall faces
+  for (const p of wallLine(0.9)) obstacles.push({ x: p.x, z: p.z, r: 1.45 })
+  for (let x = STONE_WALL.x0; x <= STONE_WALL.x1 + 1e-6; x += 1.2) obstacles.push({ x, z: STONE_WALL.z, r: 1.3 })
 
   // ---------- the north mountain track: cliffs up the climb, boulders and scree, a few pines low down ----------
   const cliffs: Placed[] = [], flats: Placed[] = []
@@ -185,7 +187,8 @@ export function scatterWorld(seed: number): World {
   for (let tries = 0, made = 0; made < 60 && tries < 3000; tries++) {
     const s = sStart + rand() * (NORTH.length - sStart)
     const { x, z } = beside(s, (rand() < 0.5 ? -1 : 1) * NORTH.halfWidth(s) * (0.72 + rand() * 0.24))   // on the lane's shoulders, not its middle
-    if (offTrack(NORTH, { x, z }) > 0 || !free(x, z, 0.25)) continue
+    const sq = NORTH.query({ x, z })   // check the real distance: at bends an offset from one point can land mid-lane
+    if (sq.d > NORTH.halfWidth(sq.s) || sq.d < NORTH.halfWidth(sq.s) * 0.55 || !free(x, z, 0.25)) continue
     placed.push({ x, z, r: 0.25 }); made++
     rocks.push({ sprite: rand() < 0.5 ? 'scree_a' : 'pebbles_a', x, z, scale: 0.45 + rand() * 0.3, sway: 0, tufts: false, tuftCount: 0 })
   }
