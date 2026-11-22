@@ -42,3 +42,8 @@ next-env.d.ts
 
 # future blog drafts — not ready to publish
 /future_blogs
+
+# brainstorm / plan workspaces
+.superpowers/
+docs/
+.wip/
