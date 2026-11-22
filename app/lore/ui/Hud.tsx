@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import type { RefObject } from "react"
+import { useState, type RefObject } from "react"
 import { asciiBox } from "./scroll"
 
 export type HudState = {
   caption: string | null
-  prompt: boolean
+  prompt: "ride" | "dismount" | null
   muted: boolean | null
   stats: string | null
 }
@@ -15,7 +15,11 @@ export type HudState = {
 const ink = "font-mono text-[12px] leading-[1.35] text-[#2b2722] whitespace-pre"
 const paper = "bg-[#fbfaf6]/85 backdrop-blur-[1px]"
 
+const PROMPTS = { ride: "[ E ]  ride", dismount: "[ E ]  dismount" } as const
+
 export default function Hud({ s, playerName, nameRef }: { s: HudState; playerName: string; nameRef: RefObject<HTMLDivElement | null> }) {
+  const [lastPrompt, setLastPrompt] = useState<keyof typeof PROMPTS>("ride")
+  if (s.prompt && s.prompt !== lastPrompt) setLastPrompt(s.prompt)   // keep the text while the prompt fades out
   const controls = asciiBox("controls", [
     ["W A S D", "walk"],
     ["shift", "run"],
@@ -43,7 +47,7 @@ export default function Hud({ s, playerName, nameRef }: { s: HudState; playerNam
         {s.caption ? `~  ${s.caption}  ~` : ""}
       </div>
       <div className={`${ink} ${paper} pointer-events-none fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 px-1 transition-opacity duration-200`} style={{ opacity: s.prompt ? 1 : 0 }}>
-        {"[ E ]  stroke the horse"}
+        {PROMPTS[s.prompt ?? lastPrompt]}
       </div>
 
       <div ref={nameRef} className={`${ink} pointer-events-none fixed left-0 top-0 z-[60] text-[11px] font-semibold tracking-[0.2em]`} style={{ opacity: 0 }}>

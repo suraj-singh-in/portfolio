@@ -26,13 +26,18 @@ export const CONFIG = {
   TRAMPLE: { recoverPerSec: 0.085 },
   /** mounted horse: speeds m/s, accel m/s², turn rad/s, collision radius m, mount/dismount s, side offset m */
   RIDE: { walk: 2.6, gallop: 6, accel: 6, turnRate: 3, radius: 1.1, mountSecs: 1.0, dismountSecs: 1.0, sideOffset: 1.2 },
+  /** ground speed (m/s) at which the horse's Walk / Gallop clips play at 1× — feet stay planted */
+  RIDE_CLIP_SPEED: { walk: 2.6, gallop: 6 },
+  /** saddle point relative to the horse's Torso2 bone (horse space, metres; measured in Blender) */
+  SADDLE: [0, 0.314, 0.081] as const,
+  DISMOUNT_CAPTION: 'You slide down. It stays close.',
   MAX_DPR: 2,
   LORE_LOADING_TEXT: 'Before the paths had names, a fire was kept burning at the edge of the forest.',
+  /** shown when you mount, in turn */
   CAPTIONS: [
-    'You run a hand down its neck. It leans into you.',
+    'You swing up onto its back.',
+    'You run a hand down its neck. It leans into you, and lets you up.',
     'It snorts softly. Warm breath, cold night.',
-    'It nudges your shoulder, then goes back to the grass.',
-    'It will not let you ride. Not yet.',
   ],
   /** Linear RGB tunic colours for the hero's red shirt (body mesh only). */
   HERO_SHIRT: { Green: [0.42, 0.05, 0.04], LightGreen: [0.55, 0.1, 0.07] } as Record<string, [number, number, number]>,

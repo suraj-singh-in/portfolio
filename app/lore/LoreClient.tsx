@@ -19,7 +19,7 @@ export default function LoreClient() {
   const [progress, setProgress] = useState(0)
   const [ready, setReady] = useState(false)
   const [sound, setSound] = useState<"on" | "blocked" | null>(null)
-  const [hud, setHud] = useState<HudState>({ caption: null, prompt: false, muted: null, stats: null })
+  const [hud, setHud] = useState<HudState>({ caption: null, prompt: null, muted: null, stats: null })
   const nameRef = useRef<HTMLDivElement>(null)
   const glRef = useRef<HTMLCanvasElement>(null)
   const paperRef = useRef<HTMLCanvasElement>(null)
@@ -48,7 +48,7 @@ export default function LoreClient() {
     let alive = true
     let captionTimer = 0
     setReady(false); setProgress(0); setSound(null)
-    setHud({ caption: null, prompt: false, muted: null, stats: null })
+    setHud({ caption: null, prompt: null, muted: null, stats: null })
     const params = new URLSearchParams(window.location.search)
     import("./engine").then(({ createEngine }) => {
       if (!alive || !glRef.current || !paperRef.current) return

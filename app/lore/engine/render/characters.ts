@@ -7,16 +7,19 @@ export type Animated = {
   mixer: THREE.AnimationMixer
   /** cross-fade to a clip; once = play a single time and hold the last pose */
   play(name: string, fade?: number, once?: boolean): void
+  /** merge extra clips (e.g. an animation-only GLB authored on the same skeleton) */
+  addClips(clips: THREE.AnimationClip[]): void
   readonly current: string | null
 }
 
 function animated(root: THREE.Object3D, clips: THREE.AnimationClip[]): Animated {
   const mixer = new THREE.AnimationMixer(root)
   const actions = new Map<string, THREE.AnimationAction>()
-  for (const c of clips) actions.set(c.name.split('|').pop()!, mixer.clipAction(c))
+  const addClips = (list: THREE.AnimationClip[]) => { for (const c of list) actions.set(c.name.split('|').pop()!, mixer.clipAction(c)) }
+  addClips(clips)
   let current: string | null = null
   return {
-    root, mixer,
+    root, mixer, addClips,
     play(name, fade = 0.3, once = false) {
       if (current === name) return
       const a = actions.get(name)

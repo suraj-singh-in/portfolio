@@ -16,6 +16,8 @@ export const ASSETS = {
   base: '/lore',
   sprites: 'sprites/manifest.json',
   hero: 'models/hero.glb',
+  /** animation-only rider clips authored on the hero's skeleton (tools/lore/ride_clips.py) */
+  heroRide: 'models/hero_ride.glb',
   horse: 'models/horse.glb',
   ambience: 'audio/ambience.wav',
   step: 'audio/step.wav',

@@ -14,8 +14,9 @@ import { pickTier } from './core/quality'
 import { mulberry32 } from './core/rng'
 import type { Vec2 } from './core/types'
 import { createHorse, horseLookAngle, reactionSide, strokeHorse, updateHorse } from './entities/horse'
-import { createCaptions, inStrokeRange, neckPoint } from './entities/interaction'
-import { createPlayer, faceToward, updatePlayer } from './entities/player'
+import { createCaptions, inStrokeRange } from './entities/interaction'
+import { createPlayer, updatePlayer } from './entities/player'
+import { createRide, sidePoint, toggleMount, updateRide } from './entities/ride'
 import { createInput } from './input/input'
 import { createCamera } from './render/camera'
 import { prepareHero, prepareHorse } from './render/characters'
@@ -38,8 +39,8 @@ export type EngineEvents = {
   /** first frame rendered */
   ready: true
   caption: string
-  /** interact prompt visible */
-  prompt: boolean
+  /** interact prompt: mount, dismount, or hidden */
+  prompt: 'ride' | 'dismount' | null
   mute: boolean
   /** hero name label position (CSS px) and opacity */
   name: { x: number; y: number; opacity: number }
@@ -108,6 +109,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       sprites: async () => Object.fromEntries(await Promise.all(Object.entries(manifest).map(async ([k, m]) => [k, await loadTex(m.file)] as const))),
       hero: () => gltf.loadAsync(assetUrl(ASSETS.hero)),
       horse: () => gltf.loadAsync(assetUrl(ASSETS.horse)),
+      heroRide: () => gltf.loadAsync(assetUrl(ASSETS.heroRide)),
     }, [], (p) => events.emit('progress', p * 0.7))   // downloads are the first 70 %, baking the rest
     if (teardown.done) return
     const sprites = loaded.sprites!
@@ -164,6 +166,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     // characters
     const heroGltf = loaded.hero!, horseGltf = loaded.horse!
     const hero = prepareHero(heroGltf.scene, heroGltf.animations)
+    hero.addClips(loaded.heroRide!.animations)
     const heroPivot = new THREE.Group(); heroPivot.add(hero.root)
     const heroSrc = createLiveSource(renderer, camera, atlas, heroPivot, {
       box: new THREE.Box3(new THREE.Vector3(-0.55, 0, -0.55), new THREE.Vector3(0.55, 1.85, 0.55)), margin: 1.25,
@@ -171,21 +174,46 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     })
     cleanups.push(() => heroSrc.dispose())
     const horse = prepareHorse(horseGltf.scene, horseGltf.animations)
-    const horseFacing = Math.atan2(-1, -0.35)
-    horse.root.rotation.y = horseFacing - horse.forward0
+    let ride = createRide(LAYOUT.horse, Math.atan2(-1, -0.35))
+    const horsePos: Vec2 = { x: ride.x, z: ride.z }
+    horse.root.rotation.y = ride.facing - horse.forward0
+    // the horse's own collision circle follows it; riding collides with everything else
+    const horseObstacle = world.obstacles.find((o) => o.x === LAYOUT.horse.x && o.z === LAYOUT.horse.z)!
+    const rideObstacles = world.obstacles.filter((o) => o !== horseObstacle)
     const horsePivot = new THREE.Group(); horsePivot.add(horse.root)
     const horseSrc = createLiveSource(renderer, camera, atlas, horsePivot, {
-      box: new THREE.Box3(new THREE.Vector3(-1.3, 0, -1.3), new THREE.Vector3(1.3, 2.1, 1.3)), margin: 1.1,
+      box: new THREE.Box3(new THREE.Vector3(-1.3, 0, -1.3), new THREE.Vector3(1.3, 2.8, 1.3)), margin: 1.1,   // tall enough for a rider
       cell: [3, 4.5], glyph: { tint: 0.36, solid: true },
     })
     cleanups.push(() => horseSrc.dispose())
     let player = createPlayer()
     let horseState = createHorse()
     let look = 0
-    const playerItem: DrawItem = { mesh: heroSrc.quad, world: { x: player.x, z: player.z }, isTree: false, shadow: 0.55, vis: false, fade: 1, rect: (c) => heroSrc.rect(c, playerItem.world) }
-    const horseItem: DrawItem = { mesh: horseSrc.quad, world: LAYOUT.horse, isTree: false, shadow: 1.4, vis: false, fade: 1, rect: (c) => horseSrc.rect(c, LAYOUT.horse) }
+    const playerItem: DrawItem = { mesh: heroSrc.quad, world: { x: player.x, z: player.z }, isTree: false, shadow: 0.55, vis: false, fade: 1, rect: (c) => ride.phase === 'onFoot' ? heroSrc.rect(c, playerItem.world) : { left: -1e5, top: -1e5, w: 1, h: 1 } }   // drawn by the horse while mounted
+    const horseItem: DrawItem = { mesh: horseSrc.quad, world: horsePos, isTree: false, shadow: 1.4, vis: false, fade: 1, rect: (c) => horseSrc.rect(c, horsePos) }
     compositor.add(playerItem); compositor.add(horseItem)
+
+    // ---------- saddle: measured once in three, so it holds whatever offsets the import carries ----------
+    const torso2 = horse.root.getObjectByName('Torso2')!
+    const heroHip = hero.root.getObjectByName('Body')!
+    hero.play('Ride_Idle', 0); hero.mixer.update(0); hero.root.updateMatrixWorld(true)
+    const hipLocal = hero.root.worldToLocal(heroHip.getWorldPosition(new THREE.Vector3()))   // seated hip, hero space
     hero.play('Idle', 0); horse.play('Eating', 0)
+    const yAxis = new THREE.Vector3(0, 1, 0)
+    const saddleOff = new THREE.Vector3(...CONFIG.SADDLE).applyAxisAngle(yAxis, horse.forward0)
+    const hipOff = hipLocal.clone().applyAxisAngle(yAxis, horse.forward0)
+    const seat = new THREE.Vector3(), ground = new THREE.Vector3()
+    let mountFrom: Vec2 = { x: 0, z: 0 }, lean = 0, prevFacing = ride.facing
+    /** hero.root position in horse space when seated, this frame (follows the back as the horse moves) */
+    const seatPos = () => {
+      horse.root.updateMatrixWorld(true)
+      return horse.root.worldToLocal(torso2.getWorldPosition(seat)).add(saddleOff).sub(hipOff)
+    }
+    /** a ground point (world) in horse space; the horse's pivot sits at horsePos */
+    const groundPos = (p: Vec2) => horse.root.worldToLocal(ground.set(p.x - horsePos.x, 0, p.z - horsePos.z))
+    const mount = () => { horse.root.add(hero.root); hero.root.rotation.set(0, horse.forward0, 0); playerItem.shadow = 0 }
+    const unmount = () => { heroPivot.add(hero.root); hero.root.position.set(0, 0, 0); hero.root.rotation.set(0, player.facing, 0); playerItem.shadow = 0.55 }
+    const ease = (u: number) => u * u * (3 - 2 * u)
 
     // ---------- audio + input ----------
     const input = createInput(window, { debug: opts.debug })
@@ -198,10 +226,22 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     input.onPress('mute', () => events.emit('mute', audio.toggleMute()))
     let clock = 0
     input.onPress('interact', () => {
-      if (player.mode !== 'free' || !inStrokeRange(player, LAYOUT.horse)) return
-      player = faceToward(player, neckPoint(LAYOUT.horse, horseFacing), clock)
-      horseState = strokeHorse(horseState, clock, reactionSide(horseFacing, LAYOUT.horse, player))
-      events.emit('caption', captions.next())
+      if (ride.phase === 'onFoot') {
+        if (player.mode !== 'free' || !inStrokeRange(player, horsePos)) return
+        const side = reactionSide(ride.facing, horsePos, player)
+        ride = toggleMount(ride, player, clock)
+        if (ride.phase !== 'mounting') return
+        mountFrom = { x: player.x, z: player.z }
+        horseState = strokeHorse(horseState, clock, side)   // it flinches toward you, then settles under you
+        mount()
+        hero.play('Ride_Mount', 0.15, true)
+        events.emit('caption', captions.next())
+      } else if (ride.phase === 'riding') {
+        ride = toggleMount(ride, player, clock)
+        mountFrom = sidePoint(ride, world.obstacles)   // includes the horse's own circle: land clear of it, no pop at the end
+        hero.play('Ride_Dismount', 0.15, true)
+        events.emit('caption', CONFIG.DISMOUNT_CAPTION)
+      }
     })
 
     // ---------- layout ----------
@@ -260,7 +300,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     }
 
     // ---------- frame ----------
-    let prompt = false, readySent = false, nameOpacity = -1, frames = 0, probeMs = 0, lastNow = performance.now(), fpsT = 0, fpsN = 0
+    let prompt: 'ride' | 'dismount' | null = null, readySent = false, nameOpacity = -1, frames = 0, probeMs = 0, lastNow = performance.now(), fpsT = 0, fpsN = 0
     const step = (dt: number, t: number) => {
       clock = t
       const now = performance.now(), frameMs = now - lastNow; lastNow = now
@@ -273,41 +313,83 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       }
 
       const move = input.moveVector()
-      player = updatePlayer(player, move, dt, t, world.obstacles)
+      const wasPhase = ride.phase
+      ride = updateRide(ride, move, dt, t, rideObstacles)
+      horsePos.x = horseObstacle.x = ride.x; horsePos.z = horseObstacle.z = ride.z
+      horse.root.rotation.y = ride.facing - horse.forward0
+      if (wasPhase === 'dismounting' && ride.phase === 'onFoot') {
+        player = { ...player, x: mountFrom.x, z: mountFrom.z, facing: ride.facing, mode: 'free', moving: false, running: false }
+        unmount()
+      }
+      const mounted = ride.phase !== 'onFoot'
+      if (mounted) player = { ...player, x: ride.x, z: ride.z, moving: false, running: false }
+      else player = updatePlayer(player, move, dt, t, world.obstacles)
       playerItem.world.x = player.x; playerItem.world.z = player.z
-      trample.stamp(player.x, player.z, Math.sin(player.facing), Math.cos(player.facing), player.moving ? (player.running ? 1.1 : 0.8) * dt * 9 : dt * 1.5, player.moving ? 0.42 : 0.32)
+      if (mounted) {
+        const going = ride.phase === 'riding' && ride.speed > 0.3
+        trample.stamp(ride.x, ride.z, Math.sin(ride.facing), Math.cos(ride.facing), going ? (ride.galloping ? 1.3 : 0.9) * dt * 9 : dt * 1.5, 0.6)
+      } else {
+        trample.stamp(player.x, player.z, Math.sin(player.facing), Math.cos(player.facing), player.moving ? (player.running ? 1.1 : 0.8) * dt * 9 : dt * 1.5, player.moving ? 0.42 : 0.32)
+      }
       trample.update(dt)
       audio.step(dt, player.moving, player.running)
-      hero.play(player.mode === 'stroke' ? 'Interact' : player.moving ? (player.running ? 'Run' : 'Walk') : 'Idle', player.moving ? 0.2 : 0.3)
-      hero.root.rotation.y = player.facing
+
+      // horse: its own life when free, the rider's gait when ridden
+      let gaitScale = 1
+      if (ride.phase === 'riding') {
+        const R = CONFIG.RIDE_CLIP_SPEED
+        const gait = ride.speed < 0.3 ? 'Idle' : ride.galloping ? 'Gallop' : 'Walk'
+        if (gait !== 'Idle') gaitScale = Math.min(1.3, Math.max(0.55, ride.speed / (gait === 'Gallop' ? R.gallop : R.walk)))
+        horse.play(gait, 0.35)
+        hero.play(gait === 'Idle' ? 'Ride_Idle' : gait === 'Walk' ? 'Ride_Walk' : 'Ride_Gallop', 0.3)
+      } else {
+        if (!mounted) horseState = updateHorse(horseState, Math.hypot(player.x - horsePos.x, player.z - horsePos.z), t, rand)
+        const reacting = horseState.clip.startsWith('Idle_HitReact') && t < horseState.reactUntil
+        horse.play(mounted && !reacting ? 'Idle' : horseState.clip, reacting ? 0.12 : horseState.mode === 'graze' ? 0.8 : 0.6, reacting)
+        if (!mounted) hero.play(player.mode === 'stroke' ? 'Interact' : player.moving ? (player.running ? 'Run' : 'Walk') : 'Idle', player.moving ? 0.2 : 0.3)
+      }
+      horse.mixer.timeScale = hero.mixer.timeScale = gaitScale   // rider and horse share one gait clock
+      horse.mixer.update(dt)
       hero.mixer.update(dt)
+      look += ((mounted ? 0 : horseLookAngle(ride.facing, horsePos, player, horseState.mode)) - look) * Math.min(1, dt * 2.5)
+      horse.applyLook(look)
+
+      // rider: seated on the saddle; slides up from / down to the horse's side while mounting / dismounting
+      const turn = Math.atan2(Math.sin(ride.facing - prevFacing), Math.cos(ride.facing - prevFacing)) / Math.max(dt, 1e-3)
+      prevFacing = ride.facing
+      if (mounted) {
+        const target = seatPos()
+        if (ride.phase === 'riding') hero.root.position.copy(target)
+        else {
+          const secs = ride.phase === 'mounting' ? CONFIG.RIDE.mountSecs : CONFIG.RIDE.dismountSecs
+          const u = Math.min(1, Math.max(0, 1 - (ride.until - t) / secs))
+          hero.root.position.copy(groundPos(mountFrom)).lerp(target, ease(ride.phase === 'mounting' ? u : 1 - u))
+        }
+        lean += ((ride.phase === 'riding' ? Math.max(-0.25, Math.min(0.25, -turn * 0.15)) : 0) - lean) * Math.min(1, dt * 6)
+        hero.root.rotation.set(0, horse.forward0, lean)
+      } else {
+        lean = 0
+        hero.root.rotation.y = player.facing
+      }
       heroSrc.fireLight.position.set(LAYOUT.fire.x - player.x, 0.9, LAYOUT.fire.z - player.z)
       heroSrc.fireLight.intensity = 5 + Math.sin(t * 17) * 0.9 + Math.sin(t * 7.3) * 0.7
-
-      const dh = Math.hypot(player.x - LAYOUT.horse.x, player.z - LAYOUT.horse.z)
-      horseState = updateHorse(horseState, dh, t, rand)
-      const reacting = horseState.clip.startsWith('Idle_HitReact')
-      horse.play(horseState.clip, reacting ? 0.12 : horseState.mode === 'graze' ? 0.8 : 0.6, reacting)
-      horse.mixer.update(dt)
-      look += (horseLookAngle(horseFacing, LAYOUT.horse, player, horseState.mode) - look) * Math.min(1, dt * 2.5)
-      horse.applyLook(look)
-      horseSrc.fireLight.position.set(LAYOUT.fire.x - LAYOUT.horse.x, 0.9, LAYOUT.fire.z - LAYOUT.horse.z)
+      horseSrc.fireLight.position.set(LAYOUT.fire.x - horsePos.x, 0.9, LAYOUT.fire.z - horsePos.z)
       horseSrc.fireLight.intensity = 3 + Math.sin(t * 15) * 0.6
 
-      const p = player.mode === 'free' && inStrokeRange(player, LAYOUT.horse)
+      const p = ride.phase === 'riding' ? 'dismount' : ride.phase === 'onFoot' && player.mode === 'free' && inStrokeRange(player, horsePos) ? 'ride' : null
       if (p !== prompt) { prompt = p; events.emit('prompt', p) }
 
       camera.update(dt, player, input.takeWheel(), zoomStep); zoomStep = 0
       paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t)
       heroSrc.render(); horseSrc.render()
       fire.update(dt, t, camera, LAYOUT.fire)
-      grass.update(camera, t, player, LAYOUT.horse)
+      grass.update(camera, t, player, horsePos)
       compositor.draw(camera, player, t, dt)
 
       const op = Math.min(1, Math.max(0, (camera.zoom - 1.45) / 0.2))
       if (op > 0 || Math.abs(op - nameOpacity) > 0.01) {
         nameOpacity = op
-        const [nx, ny] = camera.worldToScreen(player.x, 2.05, player.z)
+        const [nx, ny] = camera.worldToScreen(player.x, ride.phase === 'onFoot' ? 2.05 : 2.85, player.z)
         events.emit('name', { x: nx, y: ny, opacity: op })
       }
       if (!readySent) { readySent = true; events.emit('ready', true) }
