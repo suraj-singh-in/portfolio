@@ -7,6 +7,8 @@ export const CONFIG = {
   PLAYER_NAME: 'kafka',
   GRASS_COUNT: 6_000_000,
   ZOOM: { min: 0.8, max: 1.7, default: 0.9 },
+  /** zoom the camera eases back to at a scenic view (the lake), past ZOOM.min */
+  VISTA_ZOOM: 0.6,
   /** Hero symbol grid (columns × rows); fixed regardless of screen or zoom. */
   HERO_GRID: [199, 133] as const,
   SCENERY_SYMBOL_SCALE: 0.5,
@@ -46,6 +48,7 @@ export const CONFIG = {
     'It nudges your shoulder, then goes back to the grass.',
   ],
   MOUNT_CAPTION: 'You swing up onto its back.',
+  LAKE_CAPTION: 'The water is too cold to cross. The mountains wait.',
   WALL_CAPTION: "This town doesn't allow forest folks yet.",
   /** Linear RGB tunic colours for the hero's red shirt (body mesh only). */
   HERO_SHIRT: { Green: [0.42, 0.05, 0.04], LightGreen: [0.55, 0.1, 0.07] } as Record<string, [number, number, number]>,

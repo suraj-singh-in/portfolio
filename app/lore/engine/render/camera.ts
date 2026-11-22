@@ -4,8 +4,8 @@ import type { Vec2 } from '../core/types'
 
 export type Camera = {
   setViewport(w: number, h: number): void
-  /** follow: point to centre on; wheel: accumulated deltaY; zoomStep: +1 in, -1 out, 0 none */
-  update(dt: number, follow: Vec2, wheel: number, zoomStep: -1 | 0 | 1): void
+  /** follow: point to centre on; wheel: accumulated deltaY; zoomStep: +1 in, -1 out, 0 none; vista 0..1 eases out to the scenic zoom */
+  update(dt: number, follow: Vec2, wheel: number, zoomStep: -1 | 0 | 1, vista?: number): void
   worldToScreen(x: number, y: number, z: number): [number, number]
   /** Snap the follow target (no easing), e.g. on spawn. */
   snap(follow: Vec2): void
@@ -39,11 +39,13 @@ export function createCamera(): Camera {
 
   return {
     setViewport(nw, nh) { w = nw; h = nh; ppu = Math.max(56, Math.min(120, nh / 8)) },
-    update(dt, follow, wheel, zoomStep) {
+    update(dt, follow, wheel, zoomStep, vista = 0) {
       // wheel is the deltaY accumulated since last frame; the target is clamped, so no per-frame cap is needed
       if (wheel) zoomT = clampZ(zoomT * Math.exp(-wheel * 0.0016))
       if (zoomStep) zoomT = clampZ(zoomStep > 0 ? zoomT * 1.1 : zoomT / 1.1)
-      zoom += (zoomT - zoom) * Math.min(1, dt * CONFIG.CAMERA.zoomRate)
+      // a vista (the lake view) borrows the camera past the normal limit; your own zoom is kept for after
+      const goal = zoomT + (Math.min(zoomT, CONFIG.VISTA_ZOOM) - zoomT) * Math.min(1, Math.max(0, vista))
+      zoom += (goal - zoom) * Math.min(1, dt * CONFIG.CAMERA.zoomRate * (vista > 0 ? 0.35 : 1))
       const k = Math.min(1, dt * CONFIG.CAMERA.followRate)
       target.x += (follow.x - target.x) * k
       target.z += (follow.z - target.z) * k

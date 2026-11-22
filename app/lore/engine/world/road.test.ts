@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { scatterWorld } from './scatter'
 import { clampToClearing, edgeRadius } from './clearing'
-import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, clampToWorld, createWallCaption, roadQuery, wallXAt } from './road'
+import { GATE_PATH, GATE_TILE, PEOPLE, ROAD, STONE_WALL, WALL, createWallCaption, roadQuery, wallXAt } from './road'
+import { clampToWorld } from './bounds'
 
 const inClearing = (p: { x: number; z: number }) => {
   const sx = p.x / CONFIG.CLEARING.stretchX

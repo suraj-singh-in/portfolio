@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { LAYOUT } from '../world/clearing'
 import { scatterWorld } from '../world/scatter'
-import { FIELD, buildGrassField, buildGrassFieldAsync } from './grassField'
+import { FIELD, buildGrassField, buildGrassFieldAsync, startGrassField } from './grassField'
 
 // the field covers the clearing and the east road: a full build takes a few seconds in Node
 describe('grass field', { timeout: 15000 }, () => {
@@ -32,6 +32,18 @@ describe('grass field', { timeout: 15000 }, () => {
 
   it('is deterministic', () => {
     expect(buildGrassField(world).data).toEqual(f.data)
+  })
+
+  it('progressive build fills the rows nearest the spawn first and ends equal to the full build', () => {
+    const b = startGrassField(world)
+    const rowAt = (z: number) => Math.floor(((z - FIELD.minZ) / FIELD.sz) * FIELD.h)
+    const rowFilled = (j: number) => { for (let i = 0; i < FIELD.w; i++) if (b.field.data[(j * FIELD.w + i) * 4 + 1] > 0) return true; return false }
+    b.stepRows(b.rowsWithin(-20, 20))
+    expect(rowFilled(rowAt(0))).toBe(true)
+    expect(rowFilled(rowAt(FIELD.minZ + 2))).toBe(false)   // far rows wait for the background
+    expect(b.done).toBe(false)
+    while (!b.done) b.stepRows(64)
+    expect(b.field.data).toEqual(f.data)
   })
 
   it('async build yields to the browser between chunks and matches the sync result', async () => {

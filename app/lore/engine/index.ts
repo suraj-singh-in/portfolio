@@ -26,12 +26,14 @@ import { createGlyphAtlas } from './render/glyphAtlas'
 import { cachedMaterial, type GlyphOpts } from './render/glyphMaterial'
 import { createGrass } from './render/grass'
 import { FIELD, buildGrassFieldAsync, type GrassField } from './render/grassField'
+import type { FieldWorkerIn, FieldWorkerOut } from './render/fieldWorker'
 import { createLiveSource } from './render/liveSource'
 import { createPaper } from './render/paper'
 import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
 import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
+import { LAKE, MOUNTAINS, createLakeCaption, lookAhead } from './world/north'
 import { scatterWorld } from './world/scatter'
 
 export type EngineEvents = {
@@ -99,6 +101,32 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     events.emit('mute', audio.isMuted())
     audio.unlock()   // works when the visitor arrived by clicking (e.g. the nav link); otherwise waits for a gesture
 
+    // ---------- grass field: built in a worker while the assets download ----------
+    // loading waits only for the rows around the spawn; the far rows arrive while you play
+    let fieldDone: Promise<void> = Promise.resolve()
+    let fieldNear: Promise<GrassField | null> = Promise.resolve(null)
+    if (fieldCache?.seed === CONFIG.SEED) fieldNear = Promise.resolve(fieldCache.field)
+    else {
+      let worker: Worker | null = null
+      try { worker = new Worker(new URL('./render/fieldWorker.ts', import.meta.url), { type: 'module' }) } catch { worker = null }
+      if (worker) {
+        const w = worker
+        cleanups.push(() => w.terminate())
+        const built: GrassField = { data: new Uint8Array(FIELD.w * FIELD.h * 4), meanAcceptance: 0 }
+        let resolveAll: () => void = () => {}
+        fieldDone = new Promise<void>((r) => { resolveAll = r })
+        fieldNear = new Promise<GrassField | null>((near) => {
+          w.onerror = (err) => { err.preventDefault(); near(null) }   // fall back to building on the main thread
+          w.onmessage = (e: MessageEvent<FieldWorkerOut>) => {
+            built.data.set(e.data.data)
+            if (e.data.phase === 'near') { built.meanAcceptance = e.data.meanAcceptance; near(built) }
+            else { fieldCache = { seed: CONFIG.SEED, field: built }; resolveAll(); w.terminate() }   // cache only a complete field
+          }
+          w.postMessage({ seed: CONFIG.SEED, nearZ: [-30, 28] } satisfies FieldWorkerIn)
+        })
+      }
+    }
+
     // ---------- assets ----------
     const gltf = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
     const texLoader = new THREE.TextureLoader()
@@ -119,12 +147,15 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     // ---------- world ----------
     const rand = mulberry32(CONFIG.SEED)
     const world = scatterWorld(CONFIG.SEED)
-    if (fieldCache?.seed !== CONFIG.SEED) {
-      let chunk = 0; const chunks = Math.ceil(FIELD.h / 16)   // field build: 70 → 85 % of the bar
-      fieldCache = { seed: CONFIG.SEED, field: await buildGrassFieldAsync(world, () => { events.emit('progress', 0.7 + 0.15 * (++chunk / chunks)); return nextTick() }) }
-    }
+    let field = await fieldNear
     if (teardown.done) return
-    const field = fieldCache.field
+    if (!field) {   // no worker (or it failed): build it all here, 70 → 85 % of the bar
+      let chunk = 0; const chunks = Math.ceil(FIELD.h / 16)
+      field = await buildGrassFieldAsync(world, () => { events.emit('progress', 0.7 + 0.15 * (++chunk / chunks)); return nextTick() })
+      if (teardown.done) return
+      fieldCache = { seed: CONFIG.SEED, field }
+    }
+    events.emit('progress', 0.85)
     const camera = createCamera()
     const atlas = createGlyphAtlas()
     cleanups.push(() => atlas.texture.dispose())
@@ -141,6 +172,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const gpu = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : ''
     let tier = pickTier({ renderer: gpu, frameMs: 0 }, opts.quality)
     const grass = createGrass({ count: tier.grass, world, field, trample })
+    fieldDone.then(() => { if (!teardown.done) grass.fieldChanged() })   // the far rows arrived
     cleanups.push(() => grass.dispose())
     compositor.scene.add(grass.mesh)
     const fire = createFire(rand)
@@ -168,6 +200,25 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     for (const p of STONE_WALL_SEGMENTS) addScenery('stone_wall', p, 1, [3.5, 5.25], STONE, 0, false)
     for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
     for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)
+    // the north climb: cliff walls, stony shore patches, and the mountain skyline mirrored in the lake
+    const ROCK_LOOK: Partial<GlyphOpts> = { solid: true, tint: 0.48, wash: 0.24 }
+    for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [3.5, 5.25], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
+    for (const f of world.flats) { const it = addScenery(f.sprite, f, f.scale, [3, 4.5], { solid: true, tint: 0.45, wash: 0.2 }, 0, false); if (it) it.flat = true }
+    const reflections: { src: SceneryItem; mesh: THREE.Mesh }[] = []
+    for (const m of MOUNTAINS) {
+      const src = addScenery(m.sprite, m, 0.7, [4, 6], { solid: true, tint: 0.55, wash: 0.3 }, 0, false)
+      if (!src) continue
+      const geo = new THREE.PlaneGeometry(1, 1), uv = geo.attributes.uv
+      for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i))   // upside down
+      const mesh = new THREE.Mesh(geo, cachedMaterial(0.008, rand() * 6.28))   // a little sway: the water moves
+      const item: DrawItem = {
+        mesh, world: m, isTree: false, shadow: 0, vis: false, fade: 1, flat: true, alpha: 0.3,
+        // hangs down from the mountain's foot over the water, squashed like a real reflection seen from above
+        rect(c) { const [gx, gy] = c.worldToScreen(m.x, 0, m.z), z = c.zoom; return { left: Math.round(gx - src.ax * z), top: Math.round(gy), w: src.pxW * z, h: src.pxH * z * 0.5 } },
+      }
+      compositor.add(item); reflections.push({ src, mesh })
+      cleanups.push(() => { geo.dispose(); (mesh.material as THREE.Material).dispose() })
+    }
     addScenery('log', LAYOUT.log, 1, [4, 6], { solid: true, tint: 0.45 }, 0.8, false)
     for (const t of world.trees) addScenery(t.sprite, t, t.scale, [4, 6], { ...TREE_LOOK, sway: t.sway }, 1.6, true)
     for (const u of world.undergrowth) addScenery(u.sprite, u, u.scale, [3, 4.5], { ...UNDER_LOOK, sway: u.sway }, 0.4, false)
@@ -214,7 +265,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     const seat = new THREE.Vector3(), ground = new THREE.Vector3(), hipRot = new THREE.Vector3(), riderEuler = new THREE.Euler()
     let mountFrom: Vec2 = { x: 0, z: 0 }, lean = 0, prevFacing = ride.facing
     let approach: { side: 'left' | 'right'; until: number } | null = null
-    const wallCaption = createWallCaption()
+    const wallCaption = createWallCaption(), lakeCaption = createLakeCaption()
     let snortAt = 0   // the horse answers a stroke with a snort, a beat after the touch
     /** hero.root position in horse space that puts the hip on the saddle, this frame; lean pivots about the hip */
     const seatPos = (roll: number) => {
@@ -280,6 +331,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
         s.pxW = b.pxW * k; s.pxH = b.pxH * k; s.ax = b.ax * k; s.ay = b.ay * k
         ;(s.mesh.material as THREE.ShaderMaterial).uniforms.map.value = b.texture
       }
+      for (const r of reflections) (r.mesh.material as THREE.ShaderMaterial).uniforms.map.value = (r.src.mesh.material as THREE.ShaderMaterial).uniforms.map.value
       heroSrc.layout(camera.ppu, 1)
       horseSrc.layout(camera.ppu, CONFIG.HORSE_SYMBOL_SCALE)
       heroSrc.material.uniforms.mode.value = horseSrc.material.uniforms.mode.value = raw ? 1 : 0
@@ -370,6 +422,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       audio.hoof(dt, ride.phase === 'riding' && ride.speed > 0.3, ride.galloping)
       if (snortAt && t >= snortAt) { snortAt = 0; audio.snort() }
       if (wallCaption.update(player)) events.emit('caption', CONFIG.WALL_CAPTION)
+      if (lakeCaption.update(player)) events.emit('caption', CONFIG.LAKE_CAPTION)
 
       // horse: its own life when free, the rider's gait when ridden
       let gaitScale = 1
@@ -418,8 +471,10 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       const p = ride.phase === 'riding' ? 'dismount' : ride.phase === 'onFoot' && !approach && player.mode === 'free' && inStrokeRange(player, horsePos) ? 'ride' : null
       if (p !== prompt) { prompt = p; events.emit('prompt', p) }
 
-      camera.update(dt, player, input.takeWheel(), zoomStep); zoomStep = 0
-      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t)
+      // at the lake the camera leans forward and eases back to take in the water and the mountains
+      const ahead = lookAhead(player)
+      camera.update(dt, { x: player.x, z: player.z - ahead }, input.takeWheel(), zoomStep, ahead / 7); zoomStep = 0
+      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t, LAKE)
       heroSrc.render(); horseSrc.render()
       fire.update(dt, t, camera, LAYOUT.fire)
       grass.update(camera, t, player, horsePos)

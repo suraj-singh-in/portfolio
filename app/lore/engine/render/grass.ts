@@ -12,6 +12,8 @@ const CLUMP = 8
 export type Grass = {
   mesh: THREE.LineSegments
   update(camera: Camera, t: number, player: Vec2, horse: Vec2): void
+  /** the field data changed (more rows built): re-upload it */
+  fieldChanged(): void
   /** change the target number of visible blades (debug: window.setGrass) */
   setCount(n: number): void
   readonly count: number
@@ -184,6 +186,7 @@ export function createGrass(opts: { count: number; world: World; field: GrassFie
       u.ppu.value = camera.pz; u.view.value.set(camera.width, camera.height)
       u.time.value = t; u.player.value.set(player.x, player.z); u.horse.value.set(horse.x, horse.z)
     },
+    fieldChanged() { fieldTex.needsUpdate = true },
     dispose() { g.dispose(); material.dispose(); fieldTex.dispose() },
   }
 }

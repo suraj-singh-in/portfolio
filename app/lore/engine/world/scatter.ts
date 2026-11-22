@@ -2,11 +2,15 @@ import { CONFIG } from '../config'
 import { mulberry32 } from '../core/rng'
 import type { Circle } from '../core/types'
 import { LAYOUT, edgeRadius } from './clearing'
-import { ROAD, STONE_WALL, WALL, inClearing, roadQuery, wallLine, wallXAt } from './road'
+import { ROAD, STONE_WALL, WALL, roadQuery, wallLine, wallXAt } from './road'
+import { inClearing } from './bounds'
+import { NORTH, SHORE, LAKE, inEllipse } from './north'
+import { offTrack } from './track'
 
 export type Placed = { sprite: string; x: number; z: number; scale: number; sway: number }
 export type Rock = Placed & { tufts: boolean; tuftCount: number }
-export type World = { trees: Placed[]; undergrowth: Placed[]; rocks: Rock[]; obstacles: Circle[] }
+/** cliffs: rock walls standing beside the mountain track; flats: ground patches drawn beneath everything */
+export type World = { trees: Placed[]; undergrowth: Placed[]; rocks: Rock[]; cliffs: Placed[]; flats: Placed[]; obstacles: Circle[] }
 
 const TREE_KINDS: readonly [string, number][] = [['fir_a', 3], ['fir_b', 3], ['fir_c', 3], ['pine_a', 2], ['pine_b', 2], ['pine_c', 1], ['oak', 2], ['oak_b', 2]]
 const UNDER = ['fern_a', 'fern_b', 'fern_c', 'fern_d', 'shrub_a', 'shrub_b', 'shrub_c', 'shrub_d']
@@ -42,8 +46,11 @@ export function scatterWorld(seed: number): World {
     { ...LAYOUT.hut, r: 3.4 }, { ...LAYOUT.fire, r: 1.2 }, { ...LAYOUT.horse, r: 2 },
     { ...LAYOUT.gnarled, r: 2.2 }, { ...LAYOUT.log, r: 1.3 },
   ])
-  /** distance outside the road edge (negative = on the road) */
-  const offRoad = (x: number, z: number) => { const q = roadQuery({ x, z }); return q.d - ROAD.halfWidth(q.s) }
+  /** distance outside the shore ellipse, roughly in metres (negative = on it) */
+  const offShore = (x: number, z: number) => (Math.hypot((x - SHORE.x) / SHORE.rx, (z - SHORE.z) / SHORE.rz) - 1) * Math.min(SHORE.rx, SHORE.rz)
+  /** distance outside the nearest track or shore edge (negative = on walkable ground beyond the clearing) */
+  const offRoad = (x: number, z: number) => { const q = roadQuery({ x, z }); return Math.min(q.d - ROAD.halfWidth(q.s), offTrack(NORTH, { x, z }), offShore(x, z)) }
+  const inLake = (x: number, z: number, pad = 0) => inEllipse({ x, z }, { ...LAKE, rx: LAKE.rx + pad, rz: LAKE.rz + pad })
   const free = placed.free
   const pickTree = () => {
     let r = rand() * TREE_KINDS.reduce((s, [, w]) => s + w, 0)
@@ -129,5 +136,70 @@ export function scatterWorld(seed: number): World {
   // the town wall closes the road
   for (const p of wallLine(0.9)) obstacles.push({ x: p.x, z: p.z, r: 0.7 })
 
-  return { trees, undergrowth, rocks, obstacles }
+  // ---------- the north mountain track: cliffs up the climb, boulders and scree, a few pines low down ----------
+  const cliffs: Placed[] = [], flats: Placed[] = []
+  const nq = (s: number) => {
+    const i = Math.max(0, Math.min(NORTH.points.length - 2, Math.round(s / NORTH.step)))
+    const a = NORTH.points[i], b = NORTH.points[i + 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1
+    return { p: NORTH.points[i], n: { x: -(b.z - a.z) / l, z: (b.x - a.x) / l } }
+  }
+  const beside = (s: number, off: number) => { const { p, n } = nq(s); return { x: p.x + n.x * off, z: p.z + n.z * off } }
+  const sStart = NORTH.points.findIndex((p) => !inClearing(p)) * NORTH.step
+  const sFoot = NORTH.points.findIndex((p) => p.z < -33) * NORTH.step
+  const CLIFFS = ['cliff_a', 'cliff_b', 'cliff_c']
+  // cliff walls rise on the uphill (north, far) side of each leg; the downhill side — between you and the
+  // camera — gets only low boulders, so the rock frames the climb without hiding the track below it
+  for (let s = sStart; s < NORTH.length; s += 0.8) for (const side of [-1, 1]) {
+    const uphill = nq(s).n.z * side < 0
+    if (rand() > (s < sFoot ? 0.08 : uphill ? 0.6 : 0.25)) continue
+    const { x, z } = beside(s, side * (NORTH.halfWidth(s) + (uphill ? 2 : 1) + rand() * 1.2))
+    if (inClearing({ x, z }) || offRoad(x, z) < (uphill ? 1.0 : 0.4) || inLake(x, z, 1) || !free(x, z, uphill ? 1.3 : 0.8)) continue
+    placed.push({ x, z, r: uphill ? 1.3 : 0.8 })
+    if (uphill) cliffs.push({ sprite: CLIFFS[(rand() * CLIFFS.length) | 0], x, z, scale: 0.5 + rand() * 0.25, sway: 0 })
+    else rocks.push({ sprite: ['boulder_b', 'boulder_d', 'scree_a'][(rand() * 3) | 0], x, z, scale: 0.6 + rand() * 0.4, sway: 0, tufts: false, tuftCount: 0 })
+  }
+  // long cliffs framing the shore, running along the waterline
+  for (const side of [-1, 1]) {
+    const x = SHORE.x + side * (SHORE.rx + 7.5), z = SHORE.z - 1
+    placed.push({ x, z, r: 4 }); cliffs.push({ sprite: side < 0 ? 'cliff_long' : 'cliff_long2', x, z, scale: 0.6, sway: 0 })
+  }
+  // boulders that stand in the broad foothills (you walk around them) — never more than a third of the width
+  for (let tries = 0, made = 0; made < 7 && tries < 400; tries++) {
+    const s = sStart + 2 + rand() * (sFoot - sStart - 4), hw = NORTH.halfWidth(s)
+    const { x, z } = beside(s, (rand() < 0.5 ? -1 : 1) * (hw * (0.3 + rand() * 0.45)))
+    const scale = 0.7 + rand() * 0.35, r = 0.55 * scale
+    if (!free(x, z, 1.4)) continue
+    placed.push({ x, z, r: 1.4 }); made++
+    rocks.push({ sprite: ['boulder_a', 'boulder_c', 'boulder_d'][(rand() * 3) | 0], x, z, scale, sway: 0, tufts: false, tuftCount: 0 })
+    obstacles.push({ x, z, r })
+  }
+  // boulders strewn beside the track all the way up
+  for (let tries = 0, made = 0; made < 50 && tries < 3000; tries++) {
+    const s = sStart + rand() * (NORTH.length - sStart), side = rand() < 0.5 ? -1 : 1
+    const { x, z } = beside(s, side * (NORTH.halfWidth(s) + 0.4 + rand() * 4))
+    if (inClearing({ x, z }) || offRoad(x, z) < 0.3 || inLake(x, z, 0.5) || !free(x, z, 0.8)) continue
+    placed.push({ x, z, r: 0.8 }); made++
+    rocks.push({ sprite: ['boulder_a', 'boulder_b', 'boulder_c', 'boulder_d'][(rand() * 4) | 0], x, z, scale: 0.6 + rand() * 0.6, sway: 0, tufts: false, tuftCount: 0 })
+  }
+  // loose scree and pebbles on the track itself: underfoot, never blocking
+  for (let tries = 0, made = 0; made < 80 && tries < 3000; tries++) {
+    const s = sStart + rand() * (NORTH.length - sStart)
+    const { x, z } = beside(s, (rand() * 2 - 1) * NORTH.halfWidth(s) * 0.9)
+    if (offTrack(NORTH, { x, z }) > 0 || !free(x, z, 0.25)) continue
+    placed.push({ x, z, r: 0.25 }); made++
+    rocks.push({ sprite: rand() < 0.5 ? 'scree_a' : 'pebbles_a', x, z, scale: 0.7 + rand() * 0.5, sway: 0, tufts: false, tuftCount: 0 })
+  }
+  // a few pines low on the climb, thinning out as it rises
+  for (let tries = 0, made = 0; made < 40 && tries < 4000; tries++) {
+    const s = sStart + rand() * (sFoot + 15 - sStart), side = rand() < 0.5 ? -1 : 1
+    if (rand() > 1 - (s - sStart) / (sFoot + 20 - sStart)) continue
+    const { x, z } = beside(s, side * (NORTH.halfWidth(s) + 1.6 + rand() * 12))
+    if (inClearing({ x: x / 1.08, z: z / 1.08 }) || offRoad(x, z) < 1.2 || !free(x, z, 1.1)) continue
+    placed.push({ x, z, r: 1.1 }); made++
+    trees.push({ sprite: rand() < 0.5 ? 'pine_a' : rand() < 0.5 ? 'fir_c' : 'pine_b', x, z, scale: 0.7 + rand() * 0.3, sway: 0.012 })
+  }
+  // sandy, stony patches along the waterline
+  for (let i = 0; i < 3; i++) flats.push({ sprite: 'shore_a', x: SHORE.x + (i - 1) * 5.5 + (rand() - 0.5) * 2, z: SHORE.z - SHORE.rz + 0.9 + rand() * 1.2, scale: 0.45 + rand() * 0.2, sway: 0 })
+
+  return { trees, undergrowth, rocks, cliffs, flats, obstacles }
 }
