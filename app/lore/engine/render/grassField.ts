@@ -2,7 +2,7 @@ import { CONFIG } from '../config'
 import { fbm, valueNoise } from '../core/rng'
 import { LAYOUT, edgeRadius } from '../world/clearing'
 import type { World } from '../world/scatter'
-import { LAKE, SHORE, inEllipse } from '../world/north'
+import { SHORE, inEllipse, inLake } from '../world/north'
 
 /** Ground the field map covers (world metres; clearing, east road, north track and lake) at 6 cells per metre — finer than any grass pattern. */
 export const FIELD = { minX: -32, minZ: -110, sx: 144, sz: 138, w: 864, h: 828 } as const
@@ -105,7 +105,7 @@ function fieldJob(world: World) {
     const x = FIELD.minX + ((i + 0.5) / w) * FIELD.sx, z = FIELD.minZ + ((j + 0.5) / h) * FIELD.sz
     const o = (j * w + i) * 4
     const blocked = (Math.abs(x - hut.x) < 2.3 && Math.abs(z - hut.z) < 2.0) || Math.hypot(x - fire.x, z - fire.z) < 0.95
-      || onRock(x, z) || inEllipse({ x, z }, LAKE)
+      || onRock(x, z) || inLake({ x, z })   // no grass in the water, nor anywhere beyond it
     const big = fbm(x * 0.09 + 7, z * 0.09 - 3), mid = fbm(x * 0.32, z * 0.32), small = valueNoise(x * 1.3 + 4, z * 1.3 + 8)
     let d = 0.5 + big * 0.4 + (mid - 0.5) * 0.6 + (small - 0.5) * 0.25
     if (mid < 0.24) d *= 0.12                                             // small bare patches

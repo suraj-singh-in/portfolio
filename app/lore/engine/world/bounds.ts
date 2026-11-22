@@ -1,7 +1,7 @@
 import { CONFIG } from '../config'
 import type { Vec2 } from '../core/types'
 import { clampToClearing, edgeRadius } from './clearing'
-import { NORTH, SHORE, inEllipse, toEllipseEdge } from './north'
+import { NORTH, SHORE, inEllipse, inLake, toEllipseEdge } from './north'
 import { ROAD } from './road'
 import { offTrack, toTrackEdge } from './track'
 
@@ -11,7 +11,7 @@ export const inClearing = (p: Vec2) => {
 }
 
 /** Is this ground walkable: the clearing, the east road, the north track or the lake shore. */
-export const walkable = (p: Vec2) => inClearing(p) || offTrack(ROAD, p) <= 0 || offTrack(NORTH, p) <= 0 || inEllipse(p, SHORE)
+export const walkable = (p: Vec2) => inClearing(p) || offTrack(ROAD, p) <= 0 || offTrack(NORTH, p) <= 0 || (inEllipse(p, SHORE) && !inLake(p))
 
 /** Keep a point on walkable ground: anything outside is pulled to the nearest edge of any area. */
 export function clampToWorld(p: Vec2): Vec2 {

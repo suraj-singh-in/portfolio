@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CONFIG } from '../config'
 import { clampToWorld, inClearing } from './bounds'
-import { LAKE, MOUNTAINS, NORTH, SHORE, createLakeCaption, inEllipse, lookAhead } from './north'
+import { LAKE, MOUNTAINS, NORTH, SHORE, createLakeCaption, inEllipse, inLake, lookAhead, shoreZ } from './north'
 import { scatterWorld } from './scatter'
 import { offTrack } from './track'
 import { FIELD, buildGrassField } from '../render/grassField'
@@ -43,8 +43,9 @@ describe('north mountain track', () => {
   it('opens onto a shore at the water; the lake itself is not walkable', () => {
     const end = NORTH.points[NORTH.points.length - 1]
     expect(inEllipse(end, SHORE)).toBe(true)
-    expect(SHORE.z - SHORE.rz).toBeGreaterThan(LAKE.z + LAKE.rz - 1)   // shore reaches the water's edge
-    const lakeMid = { x: LAKE.x, z: LAKE.z }
+    expect(Math.abs(SHORE.z - SHORE.rz - shoreZ(SHORE.x))).toBeLessThan(0.6)   // shore reaches the water's edge
+    for (let x = -SHORE.rx; x <= SHORE.rx; x += 0.5) expect(inLake({ x, z: SHORE.z - SHORE.rz * Math.sqrt(Math.max(0, 1 - (x / SHORE.rx) ** 2)) + 0.05 })).toBe(false)   // no wet feet on the shore
+    const lakeMid = { x: 0, z: (shoreZ(0) + LAKE.farZ) / 2 }
     expect(clampToWorld(lakeMid)).not.toEqual(lakeMid)
     const waterline = { x: SHORE.x, z: SHORE.z - SHORE.rz + 0.3 }
     expect(clampToWorld(waterline)).toEqual(waterline)
@@ -60,11 +61,19 @@ describe('north mountain track', () => {
     expect(q.d).toBeLessThanOrEqual(NORTH.halfWidth(q.s) + 1e-6)
   })
 
+  it('stretches the lake to the horizon: across the whole view, from the shore to the mountains', () => {
+    expect(LAKE.half).toBeGreaterThanOrEqual(50)
+    for (let x = -LAKE.half; x <= LAKE.half; x += 5) { expect(inLake({ x, z: shoreZ(x) - 0.1 })).toBe(true); expect(inLake({ x, z: LAKE.farZ - 20 })).toBe(true) }
+    expect(LAKE.farZ).toBeLessThan(shoreZ(0) - 6)
+  })
+
   it('stands the mountains right behind the lake', () => {
-    expect(MOUNTAINS.length).toBeGreaterThanOrEqual(3)
+    // a whole range along the far shore, wider than the widest view
+    expect(Math.min(...MOUNTAINS.map((m) => m.x))).toBeLessThan(-30)
+    expect(Math.max(...MOUNTAINS.map((m) => m.x))).toBeGreaterThan(30)
     for (const m of MOUNTAINS) {
-      expect(m.z).toBeLessThan(LAKE.z - LAKE.rz + 1)
-      expect(m.z).toBeGreaterThan(LAKE.z - LAKE.rz - 6)
+      expect(m.z).toBeLessThan(LAKE.farZ + 0.5)
+      expect(m.z).toBeGreaterThan(LAKE.farZ - 3)
     }
   })
 
@@ -104,7 +113,7 @@ describe('north mountain track', () => {
     it('puts blocking boulders in the foothills that never close the way', () => {
       const inside = w.obstacles.filter((o) => onTrack(o) && NORTH.query(o).s > startS && NORTH.query(o).s < 30)
       expect(inside.length).toBeGreaterThanOrEqual(4)
-      for (const o of inside) { const q = NORTH.query(o); expect(NORTH.halfWidth(q.s) - (o.r - q.d)).toBeGreaterThan(2) }
+      for (const o of inside) { const q = NORTH.query(o); expect(NORTH.halfWidth(q.s) - (o.r - q.d)).toBeGreaterThan(2); expect(o.r).toBeLessThanOrEqual(0.35) }   // small stones, not walls
     })
 
     it('scatters scree over the track that does not block', () => {
@@ -116,7 +125,9 @@ describe('north mountain track', () => {
     it('grows no grass in the lake and thinner grass high on the climb', { timeout: 20000 }, () => {
       const f = buildGrassField(w)
       const at = (p: { x: number; z: number }) => { const i = Math.floor(((p.x - FIELD.minX) / FIELD.sx) * FIELD.w), j = Math.floor(((p.z - FIELD.minZ) / FIELD.sz) * FIELD.h); return f.data[(j * FIELD.w + i) * 4] / 255 }
-      expect(at({ x: LAKE.x, z: LAKE.z })).toBe(0)
+      expect(at({ x: 0, z: (shoreZ(0) + LAKE.farZ) / 2 })).toBe(0)
+      expect(at({ x: 20, z: shoreZ(20) - 0.5 })).toBe(0)
+      expect(at({ x: 0, z: LAKE.farZ - 10 })).toBe(0)   // nothing grows beyond the water
       const mean = (s0: number, s1: number) => { let a = 0, n = 0; for (let s = s0; s < s1; s += 1) { a += at(NORTH.points[Math.round(s / NORTH.step)]); n++ } return a / n }
       expect(mean(60, 90)).toBeLessThan(mean(startS, startS + 20) * 0.7)
     })

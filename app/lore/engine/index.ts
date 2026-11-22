@@ -33,7 +33,8 @@ import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
 import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
-import { LAKE, MOUNTAINS, createLakeCaption, lookAhead } from './world/north'
+import { LAKE, MOUNTAINS, NORTH, createLakeCaption, lookAhead, shoreZ } from './world/north'
+import { createWater } from './render/water'
 import { scatterWorld } from './world/scatter'
 
 export type EngineEvents = {
@@ -201,12 +202,15 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
     for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)
     // the north climb: cliff walls, stony shore patches, and the mountain skyline mirrored in the lake
-    const ROCK_LOOK: Partial<GlyphOpts> = { solid: true, tint: 0.48, wash: 0.24 }
-    for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [3.5, 5.25], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
-    for (const f of world.flats) { const it = addScenery(f.sprite, f, f.scale, [3, 4.5], { solid: true, tint: 0.45, wash: 0.2 }, 0, false); if (it) it.flat = true }
+    // the mountain scenery is inked like the trees (symbols over a faint wash), not filled like the hut
+    const ROCK_LOOK: Partial<GlyphOpts> = { tint: 0.5, ink: '#2b251f', contrast: 2.1, mid: 0.34, wash: 0.36 }   // pale stone → firm ink
+    const PEAK_LOOK: Partial<GlyphOpts> = { tint: 0.55, ink: '#2f3a40', contrast: 1.6, mid: 0.48, wash: 0.36 }
+    const NORTH_ROCK = /^(boulder|scree|pebbles)_/
+    for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [4, 6], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
+    for (const f of world.flats) { const it = addScenery(f.sprite, f, f.scale, [4, 6], ROCK_LOOK, 0, false); if (it) it.flat = true }
     const reflections: { src: SceneryItem; mesh: THREE.Mesh }[] = []
     for (const m of MOUNTAINS) {
-      const src = addScenery(m.sprite, m, 0.7, [4, 6], { solid: true, tint: 0.55, wash: 0.3 }, 0, false)
+      const src = addScenery(m.sprite, m, m.scale, [4, 6], PEAK_LOOK, 0, false)
       if (!src) continue
       const geo = new THREE.PlaneGeometry(1, 1), uv = geo.attributes.uv
       for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i))   // upside down
@@ -222,7 +226,12 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     addScenery('log', LAYOUT.log, 1, [4, 6], { solid: true, tint: 0.45 }, 0.8, false)
     for (const t of world.trees) addScenery(t.sprite, t, t.scale, [4, 6], { ...TREE_LOOK, sway: t.sway }, 1.6, true)
     for (const u of world.undergrowth) addScenery(u.sprite, u, u.scale, [3, 4.5], { ...UNDER_LOOK, sway: u.sway }, 0.4, false)
-    for (const r of world.rocks) addScenery(r.sprite, r, r.scale, [3, 4.5], { solid: true, tint: 0.4 }, 0.7 * r.scale, false)
+    const water = createWater(atlas)   // the lake: ASCII waves on a pale wash
+    compositor.add(water.item); cleanups.push(() => water.dispose())
+    for (const r of world.rocks) {
+      if (NORTH_ROCK.test(r.sprite)) addScenery(r.sprite, r, r.scale, [4, 6], ROCK_LOOK, 0.7 * r.scale, false)
+      else addScenery(r.sprite, r, r.scale, [3, 4.5], { solid: true, tint: 0.4 }, 0.7 * r.scale, false)
+    }
 
     // characters
     const heroGltf = loaded.hero!, horseGltf = loaded.horse!
@@ -474,10 +483,11 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       // at the lake the camera leans forward and eases back to take in the water and the mountains
       const ahead = lookAhead(player)
       camera.update(dt, { x: player.x, z: player.z - ahead }, input.takeWheel(), zoomStep, ahead / 7); zoomStep = 0
-      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t, LAKE)
+      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t, { shoreZ, farZ: LAKE.farZ, half: LAKE.half }, NORTH)
       heroSrc.render(); horseSrc.render()
       fire.update(dt, t, camera, LAYOUT.fire)
       grass.update(camera, t, player, horsePos)
+      water.update(camera, Math.min(window.devicePixelRatio || 1, CONFIG.MAX_DPR))
       compositor.draw(camera, player, t, dt)
 
       const op = Math.min(1, Math.max(0, (camera.zoom - 1.45) / 0.2))
