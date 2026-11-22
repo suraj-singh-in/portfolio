@@ -33,29 +33,29 @@ export const toEllipseEdge = (p: Vec2, e: Ellipse): Vec2 => {
   return { x: e.x + (ux / l) * e.rx, z: e.z + (uz / l) * e.rz }
 }
 
-/** the open shore where the pass comes out; its north edge is the waterline */
-export const SHORE: Ellipse = { x: 0, z: -74.5, rx: 9, rz: 3.5 }
+/** the lakeside meadow where the pass comes out: wide open ground, long grass; its north edge is the waterline */
+export const SHORE: Ellipse = { x: 0, z: -73, rx: 16, rz: 5 }
 /**
- * The lake: a band of water from an uneven shoreline out to the mountains, wider than any view, so the
- * horizon is water and peaks with nothing beyond. Its shoreline curves toward you at the sides, holding
- * the little shore in a bay. `shoreZ` is also written into the water shader (render/water.ts).
+ * The lake: from an uneven waterline it runs on past the first peaks and between them, out of sight —
+ * wider than any view, so the horizon is only water and mountains. Its shoreline curves toward you
+ * beyond the meadow's ends. `shoreZ` is also written into the water shader (render/water.ts).
  */
-export const LAKE = { shore: -78.3, farZ: -86.5, half: 60, bay: [10, 26, 1.6] as const } as const
+export const LAKE = { shore: -78.3, farZ: -100, half: 60, bay: [17, 30, 1.6] as const } as const
 const smoothstep = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k) }
 /** z of the waterline at x: the lake is everything north of it (smaller z) */
 export const shoreZ = (x: number) => LAKE.shore + 0.25 * Math.sin(x * 0.35) + 0.15 * Math.sin(x * 0.9 + 1) + LAKE.bay[2] * smoothstep(LAKE.bay[0], LAKE.bay[1], Math.abs(x))
 /** in the water, or anywhere beyond it */
 export const inLake = (p: Vec2, pad = 0) => p.z < shoreZ(p.x) + pad && Math.abs(p.x) < LAKE.half + 40
-/** mountain backdrop: skyline sprites (baked from a low angle so the peaks read) along the whole far shore */
-export const MOUNTAINS: readonly (Vec2 & { sprite: string; scale: number })[] = [
-  { sprite: 'skyline_c', x: -46, z: -87.6, scale: 0.75 },
-  { sprite: 'skyline_a', x: -33, z: -86.4, scale: 0.62 },
-  { sprite: 'skyline_b', x: -20, z: -87.2, scale: 0.7 },
-  { sprite: 'skyline_a', x: -7, z: -86.6, scale: 0.68 },
-  { sprite: 'skyline_c', x: 5, z: -88.2, scale: 0.78 },
-  { sprite: 'skyline_b', x: 18, z: -86.5, scale: 0.66 },
-  { sprite: 'skyline_a', x: 31, z: -87.4, scale: 0.72 },
-  { sprite: 'skyline_c', x: 45, z: -86.8, scale: 0.64 },
+/**
+ * Mountains standing in the water, row behind row, each row taller than the one before so the peaks keep
+ * rising out of reach. Skyline sprites (baked from a low angle so the peaks read). Row 0 is mirrored in the lake.
+ */
+const row = (r: number, z: number, xs: number[], scales: number[]) =>
+  xs.map((x, i) => ({ sprite: ['skyline_c', 'skyline_a', 'skyline_b'][(i + r) % 3], x, z: z - ((i * 7) % 3) * 0.6, scale: scales[i % scales.length], row: r }))
+export const MOUNTAINS: readonly (Vec2 & { sprite: string; scale: number; row: number })[] = [
+  ...row(0, -87, [-46, -33, -20, -7, 5, 18, 31, 45], [0.74, 0.62, 0.7, 0.68, 0.78]),
+  ...row(1, -95.5, [-52, -36, -18, -2, 14, 30, 47], [0.92, 1.0, 0.88, 0.96]),
+  ...row(2, -104, [-50, -26, -2, 22, 46], [1.15, 1.25, 1.2]),
 ]
 
 /** "The water is too cold to cross. The mountains wait." — once per arrival at the water. */

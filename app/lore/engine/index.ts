@@ -33,7 +33,7 @@ import { createSceneryBaker } from './render/sceneryBaker'
 import { createTrample } from './render/trample'
 import { LAYOUT } from './world/clearing'
 import { GATE_PATH, PEOPLE, STONE_WALL_SEGMENTS, WALL, createWallCaption } from './world/road'
-import { LAKE, MOUNTAINS, NORTH, createLakeCaption, lookAhead, shoreZ } from './world/north'
+import { LAKE, MOUNTAINS, createLakeCaption, lookAhead, shoreZ } from './world/north'
 import { createWater } from './render/water'
 import { scatterWorld } from './world/scatter'
 
@@ -202,21 +202,21 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
     for (const p of GATE_PATH) { const it = addScenery('gate_path', p, 1, [3, 4.5], { solid: true, tint: 0.5, wash: 0.2 }, 0, false); if (it) it.flat = true }
     for (const p of PEOPLE) addScenery(p.sprite, p, 1, [3, 4.5], { solid: true, tint: 0.4, wash: 0.2 }, 0.45, false)
     // the north climb: cliff walls, stony shore patches, and the mountain skyline mirrored in the lake
-    // the mountain scenery is inked like the trees (symbols over a faint wash), not filled like the hut
-    const ROCK_LOOK: Partial<GlyphOpts> = { tint: 0.5, ink: '#2b251f', contrast: 2.1, mid: 0.34, wash: 0.36 }   // pale stone → firm ink
-    const PEAK_LOOK: Partial<GlyphOpts> = { tint: 0.55, ink: '#2f3a40', contrast: 1.6, mid: 0.48, wash: 0.36 }
+    // mountain scenery: solid, crisp ASCII on clean paper — dense ink in shade, light symbols on pale stone and snow
+    const ROCK_LOOK: Partial<GlyphOpts> = { solid: true, paper: 0.95, tint: 0.26, ink: '#2b251f', contrast: 2.3, mid: 0.4, wash: 0 }
+    const PEAK_LOOK: Partial<GlyphOpts> = { solid: true, paper: 0.96, tint: 0.22, ink: '#28323a', contrast: 2.2, mid: 0.42, wash: 0 }
     const NORTH_ROCK = /^(boulder|scree|pebbles)_/
     for (const c of world.cliffs) { const it = addScenery(c.sprite, c, c.scale, [4, 6], ROCK_LOOK, 1.2 * c.scale, false); if (it) it.seeThrough = true }
     for (const f of world.flats) { const it = addScenery(f.sprite, f, f.scale, [4, 6], ROCK_LOOK, 0, false); if (it) it.flat = true }
     const reflections: { src: SceneryItem; mesh: THREE.Mesh }[] = []
     for (const m of MOUNTAINS) {
       const src = addScenery(m.sprite, m, m.scale, [4, 6], PEAK_LOOK, 0, false)
-      if (!src) continue
+      if (!src || m.row > 0) continue   // only the front row is close enough to mirror in the water
       const geo = new THREE.PlaneGeometry(1, 1), uv = geo.attributes.uv
       for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i))   // upside down
       const mesh = new THREE.Mesh(geo, cachedMaterial(0.008, rand() * 6.28))   // a little sway: the water moves
       const item: DrawItem = {
-        mesh, world: m, isTree: false, shadow: 0, vis: false, fade: 1, flat: true, alpha: 0.3,
+        mesh, world: m, isTree: false, shadow: 0, vis: false, fade: 1, flat: true, alpha: 0.16,
         // hangs down from the mountain's foot over the water, squashed like a real reflection seen from above
         rect(c) { const [gx, gy] = c.worldToScreen(m.x, 0, m.z), z = c.zoom; return { left: Math.round(gx - src.ax * z), top: Math.round(gy), w: src.pxW * z, h: src.pxH * z * 0.5 } },
       }
@@ -483,7 +483,7 @@ export function createEngine(canvases: { gl: HTMLCanvasElement; paper: HTMLCanva
       // at the lake the camera leans forward and eases back to take in the water and the mountains
       const ahead = lookAhead(player)
       camera.update(dt, { x: player.x, z: player.z - ahead }, input.takeWheel(), zoomStep, ahead / 7); zoomStep = 0
-      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t, { shoreZ, farZ: LAKE.farZ, half: LAKE.half }, NORTH)
+      paper.draw(camera, compositor.items, [[LAYOUT.fire, 3.2, 0.09], [{ x: LAYOUT.hut.x + 0.5, z: LAYOUT.hut.z + 2.4 }, 2.6, 0.07], [LAYOUT.horse, 2.2, 0.05]], LAYOUT.fire, t, { shoreZ, farZ: LAKE.farZ, half: LAKE.half })
       heroSrc.render(); horseSrc.render()
       fire.update(dt, t, camera, LAYOUT.fire)
       grass.update(camera, t, player, horsePos)

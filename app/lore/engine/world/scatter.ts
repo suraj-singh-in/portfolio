@@ -4,7 +4,7 @@ import type { Circle } from '../core/types'
 import { LAYOUT, edgeRadius } from './clearing'
 import { ROAD, STONE_WALL, WALL, roadQuery, wallLine, wallXAt } from './road'
 import { inClearing } from './bounds'
-import { NORTH, SHORE, inLake as lakeAt } from './north'
+import { NORTH, SHORE, inEllipse, inLake as lakeAt } from './north'
 import { offTrack } from './track'
 
 export type Placed = { sprite: string; x: number; z: number; scale: number; sway: number }
@@ -147,6 +147,14 @@ export function scatterWorld(seed: number): World {
   const sStart = NORTH.points.findIndex((p) => !inClearing(p)) * NORTH.step
   const sFoot = NORTH.points.findIndex((p) => p.z < -33) * NORTH.step
   const CLIFFS = ['cliff_a', 'cliff_b', 'cliff_c']
+  const BOULDERS = ['boulder_a', 'boulder_b', 'boulder_c', 'boulder_d']
+  // boulders shoulder to shoulder along both edges of the climb: the way shows itself between them
+  for (let s = sStart; s < NORTH.length; s += 1.25) for (const side of [-1, 1]) {
+    const { x, z } = beside(s + (rand() - 0.5) * 0.5, side * (NORTH.halfWidth(s) + 0.25 + rand() * 0.55))
+    if (inClearing({ x, z }) || inEllipse({ x, z }, SHORE) || inLake(x, z, 0.5) || !free(x, z, 0.42)) continue
+    placed.push({ x, z, r: 0.42 })
+    rocks.push({ sprite: BOULDERS[(rand() * 4) | 0], x, z, scale: 0.38 + rand() * 0.32, sway: 0, tufts: false, tuftCount: 0 })
+  }
   // cliff walls rise on the uphill (north, far) side of each leg; the downhill side — between you and the
   // camera — gets only low boulders, so the rock frames the climb without hiding the track below it
   for (let s = sStart; s < NORTH.length; s += 0.8) for (const side of [-1, 1]) {
@@ -173,14 +181,6 @@ export function scatterWorld(seed: number): World {
     rocks.push({ sprite: ['boulder_a', 'boulder_c', 'boulder_d'][(rand() * 3) | 0], x, z, scale, sway: 0, tufts: false, tuftCount: 0 })
     obstacles.push({ x, z, r })
   }
-  // boulders strewn beside the track all the way up
-  for (let tries = 0, made = 0; made < 50 && tries < 3000; tries++) {
-    const s = sStart + rand() * (NORTH.length - sStart), side = rand() < 0.5 ? -1 : 1
-    const { x, z } = beside(s, side * (NORTH.halfWidth(s) + 0.4 + rand() * 4))
-    if (inClearing({ x, z }) || offRoad(x, z) < 0.3 || inLake(x, z, 0.5) || !free(x, z, 0.8)) continue
-    placed.push({ x, z, r: 0.8 }); made++
-    rocks.push({ sprite: ['boulder_a', 'boulder_b', 'boulder_c', 'boulder_d'][(rand() * 4) | 0], x, z, scale: 0.4 + rand() * 0.4, sway: 0, tufts: false, tuftCount: 0 })
-  }
   // loose scree and pebbles on the track itself: underfoot, never blocking
   for (let tries = 0, made = 0; made < 80 && tries < 3000; tries++) {
     const s = sStart + rand() * (NORTH.length - sStart)
@@ -198,8 +198,14 @@ export function scatterWorld(seed: number): World {
     placed.push({ x, z, r: 1.1 }); made++
     trees.push({ sprite: rand() < 0.5 ? 'pine_a' : rand() < 0.5 ? 'fir_c' : 'pine_b', x, z, scale: 0.7 + rand() * 0.3, sway: 0.012 })
   }
-  // sandy, stony patches along the waterline
-  for (let i = 0; i < 3; i++) flats.push({ sprite: 'shore_a', x: SHORE.x + (i - 1) * 5.5 + (rand() - 0.5) * 2, z: SHORE.z - SHORE.rz + 0.9 + rand() * 1.2, scale: 0.45 + rand() * 0.2, sway: 0 })
+  // ferns and shrubs ringing the lakeside meadow (and a few out in it), leaving the middle open
+  for (let tries = 0, made = 0; made < 26 && tries < 2000; tries++) {
+    const a = rand() * Math.PI * 2, k = made < 20 ? 1 + rand() * 0.3 : 0.6 + rand() * 0.35
+    const x = SHORE.x + Math.cos(a) * SHORE.rx * k, z = SHORE.z + Math.sin(a) * SHORE.rz * k
+    if (inLake(x, z, 0.4) || offTrack(NORTH, { x, z }) < 0.3 || !free(x, z, 0.55)) continue
+    placed.push({ x, z, r: 0.55 }); made++
+    undergrowth.push({ sprite: UNDER[(rand() * UNDER.length) | 0], x, z, scale: 0.8 + rand() * 0.5, sway: 0.02 })
+  }
 
   return { trees, undergrowth, rocks, cliffs, flats, obstacles }
 }

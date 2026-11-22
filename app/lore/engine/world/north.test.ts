@@ -67,14 +67,22 @@ describe('north mountain track', () => {
     expect(LAKE.farZ).toBeLessThan(shoreZ(0) - 6)
   })
 
-  it('stands the mountains right behind the lake', () => {
-    // a whole range along the far shore, wider than the widest view
+  it('stands rows of mountains in the water, larger the further back, wider than any view', () => {
     expect(Math.min(...MOUNTAINS.map((m) => m.x))).toBeLessThan(-30)
     expect(Math.max(...MOUNTAINS.map((m) => m.x))).toBeGreaterThan(30)
-    for (const m of MOUNTAINS) {
-      expect(m.z).toBeLessThan(LAKE.farZ + 0.5)
-      expect(m.z).toBeGreaterThan(LAKE.farZ - 3)
-    }
+    for (const m of MOUNTAINS) expect(inLake(m)).toBe(true)                 // their feet are in the lake
+    const rows = [...new Set(MOUNTAINS.map((m) => m.row))].sort()
+    expect(rows.length).toBeGreaterThanOrEqual(3)
+    const z = (r: number) => Math.max(...MOUNTAINS.filter((m) => m.row === r).map((m) => m.z))
+    const sc = (r: number) => Math.min(...MOUNTAINS.filter((m) => m.row === r).map((m) => m.scale))
+    for (let i = 1; i < rows.length; i++) { expect(z(rows[i])).toBeLessThan(z(rows[i - 1]) - 5); expect(sc(rows[i])).toBeGreaterThan(sc(rows[i - 1]) * 0.95) }
+    // the water runs on behind the front row, so the lake wraps around the peaks
+    expect(LAKE.farZ).toBeLessThan(z(rows[0]) - 6)
+  })
+
+  it('opens into a wide lakeside meadow', () => {
+    expect(SHORE.rx).toBeGreaterThanOrEqual(14)
+    expect(SHORE.rz).toBeGreaterThanOrEqual(4.5)
   })
 
   it('lake caption fires once on reaching the water and again only after walking back down', () => {
@@ -106,8 +114,16 @@ describe('north mountain track', () => {
       for (const c of w.cliffs) expect(clampToWorld(c)).not.toEqual(c)
     })
 
-    it('keeps trees and undergrowth off the track and the shore', () => {
-      for (const t of [...w.trees, ...w.undergrowth]) { expect(onTrack(t)).toBe(false); expect(inEllipse(t, SHORE)).toBe(false) }
+    it('keeps trees off the track and the meadow; plants grow around the meadow but not on the track', () => {
+      for (const t of w.trees) { expect(onTrack(t)).toBe(false); expect(inEllipse(t, SHORE)).toBe(false) }
+      for (const u of w.undergrowth) expect(onTrack(u)).toBe(false)
+      const meadow = w.undergrowth.filter((u) => inEllipse(u, { ...SHORE, rx: SHORE.rx + 4, rz: SHORE.rz + 3 }) && !inLake(u))
+      expect(meadow.length).toBeGreaterThanOrEqual(10)
+    })
+
+    it('lines both edges of the climb with boulders, so the way shows itself', () => {
+      const edge = w.rocks.filter((r) => /^boulder_/.test(r.sprite)).filter((r) => { const q = NORTH.query(r); return q.s > startS && Math.abs(q.d - NORTH.halfWidth(q.s)) < 1.2 })
+      expect(edge.length).toBeGreaterThan(((NORTH.length - startS) * 2) / 3.5)
     })
 
     it('puts blocking boulders in the foothills that never close the way', () => {
@@ -128,6 +144,11 @@ describe('north mountain track', () => {
       expect(at({ x: 0, z: (shoreZ(0) + LAKE.farZ) / 2 })).toBe(0)
       expect(at({ x: 20, z: shoreZ(20) - 0.5 })).toBe(0)
       expect(at({ x: 0, z: LAKE.farZ - 10 })).toBe(0)   // nothing grows beyond the water
+      // knee-high grass in the meadow by the water: tall-wisp share (A) and height (G) both high
+      const ch = (p: { x: number; z: number }, k: number) => { const i = Math.floor(((p.x - FIELD.minX) / FIELD.sx) * FIELD.w), j = Math.floor(((p.z - FIELD.minZ) / FIELD.sz) * FIELD.h); return f.data[(j * FIELD.w + i) * 4 + k] / 255 }
+      let tall = 0, n = 0
+      for (let x = -10; x <= 10; x += 2) for (const z of [SHORE.z - 1, SHORE.z + 1]) { tall += ch({ x, z }, 3); n++ }
+      expect(tall / n).toBeGreaterThan(0.6)
       const mean = (s0: number, s1: number) => { let a = 0, n = 0; for (let s = s0; s < s1; s += 1) { a += at(NORTH.points[Math.round(s / NORTH.step)]); n++ } return a / n }
       expect(mean(60, 90)).toBeLessThan(mean(startS, startS + 20) * 0.7)
     })

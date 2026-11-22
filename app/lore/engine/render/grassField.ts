@@ -111,15 +111,17 @@ function fieldJob(world: World) {
     if (mid < 0.24) d *= 0.12                                             // small bare patches
     const worn = Math.max(0, 1 - Math.hypot(x - fire.x, z - fire.z) / 3.2) + Math.max(0, 1 - Math.hypot(x - (hut.x + 0.5), z - (hut.z + 2.6)) / 2.2)
     d = blocked ? 0 : Math.max(0, Math.min(1, d - worn * 0.55))
-    const alt = altitude(x, z)
+    // the lakeside meadow: thick, knee-high grass right down to the water (sheltered, so no altitude thinning)
+    const meadow = !blocked && inEllipse({ x, z }, { ...SHORE, rx: SHORE.rx + 3, rz: SHORE.rz + 2 })
+    const alt = meadow ? 0 : altitude(x, z)
     d *= 1 - 0.65 * alt
-    if (inEllipse({ x, z }, SHORE)) d *= 0.35                              // stony shore: a few tough tufts
+    if (meadow) d = Math.max(d, 0.7 + big * 0.25)
     const edge = Math.hypot(x / sx, z) / edgeRadius(Math.atan2(z, x / sx))
     const flower = alt < 0.3 && fbm(x * 0.5 + 20, z * 0.5 - 13) > 0.66
     const dry = fbm(x * 0.11 + 50, z * 0.11 + 31) > 0.6 - alt * 0.45     // the higher, the more straw
-    const tall = Math.min(1, 0.1 + Math.max(0, edge - 0.6) * 0.9 + (fbm(x * 0.25 + 90, z * 0.25) > 0.62 ? 0.35 : 0)) * (1 - 0.7 * alt)
+    const tall = meadow ? 0.85 + small * 0.15 : Math.min(1, 0.1 + Math.max(0, edge - 0.6) * 0.9 + (fbm(x * 0.25 + 90, z * 0.25) > 0.62 ? 0.35 : 0)) * (1 - 0.7 * alt)
     data[o] = Math.round(d * 255)
-    data[o + 1] = Math.round(mid * (1 - 0.5 * alt) * 255)
+    data[o + 1] = Math.round((meadow ? Math.max(mid, 0.8) : mid * (1 - 0.5 * alt)) * 255)
     data[o + 2] = (flower ? 128 : 0) + (dry ? 64 : 0)
     data[o + 3] = Math.round(tall * 255)
     acc += Math.min(1, Math.pow(d, 1.4) * 1.15)
